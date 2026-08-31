@@ -222,12 +222,44 @@ validador gratis ya cubre — si no, pagarías por los mismos hallazgos dos vece
 > `marketplace` y `backend-pro`), aunque su README diga que hay uno por cada
 > una. El panel te lo dice al elegirlas en vez de dar un prompt a medias.
 
+## Pruebas
+
+```bash
+npm test              # 92 pruebas, ~1 segundo
+npm run test:ver      # con el detalle de cada una
+```
+
+Usan `node:test`, que **viene con Node**: cero dependencias, cero
+configuración. Corren sin red y sin tocar el disco.
+
+| Archivo | Qué protege |
+|---|---|
+| `yaml.test.js` | Que las fichas se lean y escriban sin perder datos |
+| `extraer.test.js` | Los tres bugs reales del brief, y que no vuelvan |
+| `colores.test.js` | El contraste WCAG contra los valores de la norma |
+| `reglas.test.js` | Que el validador detecte, y que no dé falsos positivos |
+| `brief.test.js` | La compuerta: que no se construya con datos inventados |
+| `crear-proyecto.test.js` | Que el proyecto generado arranque y no herede identidad ajena |
+
+**Las pruebas fijan las dos caras.** Un validador con falsos positivos se deja
+de mirar, y entonces no sirve de nada — por eso cada regla se prueba también
+con el caso correcto que NO debe marcar.
+
+Los casos marcados `regresión` son bugs que ya ocurrieron:
+
+- `de parte de X` capturaba "parte de X" como nombre del negocio.
+- `laespiga.com.co` se cortaba en `.com`.
+- `una tienda en línea` anulaba la detección de "3 sedes".
+- `Somos Cafe Raiz` no se reconocía: el patrón no admitía mayúscula inicial.
+  Este último **lo encontró la propia suite**, no una prueba manual.
+
 ## Estructura
 
 ```
 herramientas/
 ├─ panel.js / panel.html   interfaz: acceso, asistente, clientes, calidad
 ├─ brief.html              formulario para el cliente (autocontenido)
+├─ pruebas/                92 pruebas con node:test
 ├─ validar.js              modo gratis · control de calidad
 ├─ crear-proyecto.js       modo gratis · generador
 ├─ auditor-ia.js           modo con costo · criterio UX/UI

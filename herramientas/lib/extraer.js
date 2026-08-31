@@ -76,7 +76,10 @@ export function extraerPorPatrones(texto) {
     // quedarse dentro del nombre capturado.
     /(?:le\s+)?escribo\s+de\s+(?:parte\s+de\s+)?([A-ZÁÉÍÓÚÑ][^\n,.;]{2,45})/i,
     /de\s+parte\s+de\s+([A-ZÁÉÍÓÚÑ][^\n,.;]{2,45})/i,
-    /(?:se llama|nos llamamos|somos)\s+["']?([A-ZÁÉÍÓÚÑ][^\n,.;]{2,45})/,
+    // Sin flag `i`: la fórmula de entrada acepta mayúscula inicial porque suele
+    // empezar la frase ("Somos X"), pero el NOMBRE sigue exigiendo mayúscula.
+    // Con `i` global, "somos una panaderia artesanal" se tomaría como nombre.
+    /(?:[Ss]e llama|[Nn]os llamamos|[Ss]omos)\s+["']?([A-ZÁÉÍÓÚÑ][^\n,.;]{2,45})/,
   ];
   for (const re of formas) {
     const m = t.match(re);

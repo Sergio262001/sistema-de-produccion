@@ -5,6 +5,8 @@
   "type": "module",
   "description": "Fabrica del estudio: validador de calidad y generador de proyectos. Sin dependencias.",
   "scripts": {
+    "test": "node --test \"pruebas/*.test.js\"",
+    "test:ver": "node --test --test-reporter=spec \"pruebas/*.test.js\"",
     "validar": "node validar.js",
     "crear": "node crear-proyecto.js",
     "panel": "node panel.js"
