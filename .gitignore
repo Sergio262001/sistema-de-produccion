@@ -36,3 +36,8 @@ ChangeLog.md
 # ─── Logs ─────────────────────────────────────────────────────
 *.log
 npm-debug.log*
+
+# Proyectos de prueba del generador
+Proyectos-Clientes/casa-tela/
+Proyectos-Clientes/clinica-sur/
+Proyectos-Clientes/cafe-raiz/

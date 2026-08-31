@@ -1,0 +1,12 @@
+{
+  "name": "herramientas-estudio",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Fabrica del estudio: validador de calidad y generador de proyectos. Sin dependencias.",
+  "scripts": {
+    "validar": "node validar.js",
+    "crear": "node crear-proyecto.js",
+    "panel": "node panel.js"
+  }
+}

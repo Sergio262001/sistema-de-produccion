@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Panel del estudio</title>
+<style>
+  :root{
+    --bg:#12160F; --surface:#1A1F16; --surface-2:#222820;
+    --ink:#EDF0E8; --ink-soft:#98A18C; --line:#2E3628;
+    --arcilla:#C96F4A;   /* acción */
+    --jade:#5FA37A;      /* sistema / gratis */
+    --laton:#C9A227;     /* datos / costo */
+    --rojo:#D9584E;
+    --mono:'JetBrains Mono',ui-monospace,'Cascadia Code',Consolas,monospace;
+    --sans:system-ui,-apple-system,'Segoe UI',sans-serif;
+    --radio:10px;
+  }
+  @media (prefers-color-scheme:light){
+    :root:not([data-tema="oscuro"]){
+      --bg:#F4F5F1; --surface:#FFFFFF; --surface-2:#EDEFE8;
+      --ink:#171C12; --ink-soft:#5B6553; --line:#DDE1D6;
+    }
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);
+       font-size:14px;line-height:1.5;-webkit-font-smoothing:antialiased;}
+  a{color:var(--arcilla);}
+  :focus-visible{outline:2px solid var(--arcilla);outline-offset:2px;border-radius:4px;}
+  .salta{position:absolute;left:-9999px;}
+  .salta:focus{left:8px;top:8px;z-index:99;background:var(--arcilla);color:#fff;padding:8px 14px;border-radius:6px;}
+
+  .marco{max-width:1080px;margin:0 auto;padding:0 20px 80px;}
+
+  /* ─ Cabecera ─ */
+  header{border-bottom:1px solid var(--line);padding:26px 0 20px;margin-bottom:26px;}
+  .titulo{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap;}
+  h1{font-size:20px;margin:0;letter-spacing:-.01em;}
+  .meta{font-family:var(--mono);font-size:11.5px;color:var(--ink-soft);}
+
+  /* ─ Conmutador de modo ─ */
+  .modos{display:flex;gap:0;margin-top:20px;border:1px solid var(--line);
+         border-radius:var(--radio);overflow:hidden;max-width:520px;}
+  .modos button{flex:1;background:var(--surface);border:0;padding:13px 16px;
+                font-family:var(--sans);font-size:13px;color:var(--ink-soft);
+                cursor:pointer;text-align:left;transition:background .12s;}
+  .modos button:hover{background:var(--surface-2);}
+  .modos button+button{border-left:1px solid var(--line);}
+  .modos button .n{display:block;font-weight:600;color:var(--ink);margin-bottom:2px;}
+  .modos button .p{display:block;font-family:var(--mono);font-size:11px;}
+  .modos button[aria-pressed="true"]{background:var(--surface-2);
+       box-shadow:inset 0 2px 0 var(--jade);}
+  .modos button[aria-pressed="true"].pago{box-shadow:inset 0 2px 0 var(--laton);}
+  .modos button[aria-pressed="true"] .p{color:var(--jade);}
+  .modos button[aria-pressed="true"].pago .p{color:var(--laton);}
+
+  /* ─ Rejilla ─ */
+  .cols{display:grid;grid-template-columns:300px 1fr;gap:22px;align-items:start;}
+  @media (max-width:820px){.cols{grid-template-columns:1fr;}}
+
+  .tarj{background:var(--surface);border:1px solid var(--line);
+        border-radius:var(--radio);padding:18px;margin-bottom:16px;}
+  .tarj h2{font-size:12px;font-family:var(--mono);text-transform:uppercase;
+           letter-spacing:.07em;color:var(--ink-soft);margin:0 0 14px;font-weight:500;}
+
+  label{display:block;font-size:12px;color:var(--ink-soft);margin:12px 0 5px;}
+  label:first-of-type{margin-top:0;}
+  select,input[type=text]{width:100%;background:var(--bg);color:var(--ink);
+        border:1px solid var(--line);border-radius:7px;padding:9px 11px;
+        font-family:var(--sans);font-size:13px;}
+  input[type=color]{width:100%;height:38px;background:var(--bg);
+        border:1px solid var(--line);border-radius:7px;padding:3px;cursor:pointer;}
+
+  .btn{width:100%;margin-top:16px;padding:12px;border:0;border-radius:8px;
+       background:var(--arcilla);color:#fff;font-family:var(--sans);
+       font-size:13.5px;font-weight:600;cursor:pointer;}
+  .btn:hover{filter:brightness(1.08);}
+  .btn:disabled{opacity:.45;cursor:not-allowed;filter:none;}
+  .btn.sec{background:var(--surface-2);color:var(--ink);border:1px solid var(--line);}
+
+  /* ─ Aviso de costo ─ */
+  .costo{margin-top:14px;border:1px dashed var(--laton);border-radius:8px;
+         padding:13px;font-family:var(--mono);font-size:12px;color:var(--ink-soft);}
+  .costo b{color:var(--laton);font-size:15px;}
+  .costo.gratis{border-color:var(--jade);border-style:solid;}
+  .costo.gratis b{color:var(--jade);}
+
+  /* ─ Resultados ─ */
+  #salida:empty::after{content:'Elige un modo y una acción. Nada corre solo.';
+       color:var(--ink-soft);font-family:var(--mono);font-size:12px;}
+  .arch{border-bottom:1px solid var(--line);padding:13px 0;}
+  .arch:last-child{border-bottom:0;}
+  .arch .r{font-family:var(--mono);font-size:12px;color:var(--ink);
+           word-break:break-all;margin-bottom:7px;}
+  .h{display:flex;gap:9px;padding:5px 0;font-size:12.5px;align-items:baseline;}
+  .h .pt{font-family:var(--mono);font-size:11px;color:var(--ink-soft);
+         min-width:38px;text-align:right;flex-shrink:0;}
+  .h .d{flex:1;}
+  .h .pista{display:block;color:var(--ink-soft);font-size:11.5px;margin-top:3px;}
+  .pin{display:inline-block;width:7px;height:7px;border-radius:50%;flex-shrink:0;
+       margin-top:5px;}
+  .pin.error,.pin.alto{background:var(--rojo);}
+  .pin.aviso,.pin.medio{background:var(--laton);}
+  .pin.bajo{background:var(--ink-soft);}
+  .regla{font-family:var(--mono);font-size:10.5px;color:var(--ink-soft);
+         border:1px solid var(--line);border-radius:4px;padding:1px 5px;}
+
+  .resumen{display:flex;gap:18px;flex-wrap:wrap;font-family:var(--mono);
+           font-size:12px;padding:13px 0 3px;border-top:1px solid var(--line);
+           margin-top:8px;}
+  .ok{color:var(--jade);font-family:var(--mono);font-size:13px;}
+  .err{color:var(--rojo);font-family:var(--mono);font-size:12.5px;
+       border:1px solid var(--rojo);border-radius:8px;padding:12px;}
+  .cargando{font-family:var(--mono);font-size:12px;color:var(--ink-soft);}
+  .oculto{display:none;}
+</style>
+</head>
+<body>
+<a class="salta" href="#trabajo">Saltar al contenido</a>
+
+<div class="marco">
+  <header>
+    <div class="titulo">
+      <h1>Panel del estudio</h1>
+      <span class="meta" id="metaCabecera">cargando…</span>
+    </div>
+
+    <div class="modos" role="group" aria-label="Modo de operación">
+      <button type="button" id="mGratis" aria-pressed="true">
+        <span class="n">Modo gratis</span>
+        <span class="p">reglas deterministas · $0 · 0 tokens</span>
+      </button>
+      <button type="button" id="mPago" class="pago" aria-pressed="false">
+        <span class="n">Modo con IA</span>
+        <span class="p">criterio UX/UI · costo estimado antes</span>
+      </button>
+    </div>
+  </header>
+
+  <div class="cols" id="trabajo">
+    <!-- ── Columna de control ── -->
+    <div>
+      <div class="tarj">
+        <h2>Revisar calidad</h2>
+        <label for="objetivo">Qué revisar</label>
+        <select id="objetivo"></select>
+
+        <div id="zonaModelo" class="oculto">
+          <label for="modelo">Modelo</label>
+          <select id="modelo"></select>
+        </div>
+
+        <div id="avisoCosto" class="costo gratis">
+          <b>$0</b> · sin red, sin tokens<br>
+          Contraste, XSS, RLS, tokens muertos, alt.
+        </div>
+
+        <button class="btn" id="btnRevisar">Revisar</button>
+        <button class="btn sec oculto" id="btnConfirmar">Sí, ejecutar y gastar</button>
+      </div>
+
+      <div class="tarj">
+        <h2>Proyecto nuevo</h2>
+        <label for="cliente">Cliente</label>
+        <input type="text" id="cliente" placeholder="Café Raíz">
+        <label for="base">Base técnica</label>
+        <select id="base"></select>
+        <label for="primario">Color primario</label>
+        <input type="color" id="primario" value="#2F54FF">
+        <label for="inicial">Inicial del logo</label>
+        <input type="text" id="inicial" maxlength="2" placeholder="C">
+        <button class="btn" id="btnCrear">Crear proyecto · $0</button>
+      </div>
+    </div>
+
+    <!-- ── Columna de resultados ── -->
+    <div class="tarj">
+      <h2 id="tituloSalida">Resultados</h2>
+      <div id="salida"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+const $ = (s) => document.querySelector(s);
+let MODO = 'gratis';
+let ESTADO = null;
+let ULTIMA_ESTIMACION = null;
+
+const esc = (v) => String(v ?? '').replace(/[&<>"']/g,
+  (c) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+async function pedir(ruta, cuerpo) {
+  const opciones = cuerpo
+    ? { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(cuerpo) }
+    : {};
+  const r = await fetch(ruta, opciones);
+  return r.json();
+}
+
+// ── Arranque ──────────────────────────────────────────────────
+async function iniciar() {
+  ESTADO = await pedir('/api/estado');
+
+  $('#objetivo').innerHTML = ESTADO.objetivos
+    .map((o) => `<option value="${esc(o.ruta)}">${esc(o.etiqueta)}</option>`).join('');
+  $('#base').innerHTML = ESTADO.bases
+    .map((b) => `<option value="${esc(b)}">${esc(b)}</option>`).join('');
+  $('#modelo').innerHTML = ESTADO.modelos
+    .map((m) => `<option value="${esc(m.clave)}"${m.clave===ESTADO.modeloPorDefecto?' selected':''}>${esc(m.etiqueta)}</option>`).join('');
+
+  $('#metaCabecera').textContent =
+    ESTADO.bases.length + ' bases · ' + ESTADO.proyectos.length + ' proyectos'
+    + (ESTADO.tieneClave ? ' · API conectada' : ' · sin API key');
+}
+
+// ── Conmutador de modo ────────────────────────────────────────
+function ponerModo(nuevo) {
+  MODO = nuevo;
+  ULTIMA_ESTIMACION = null;
+  $('#mGratis').setAttribute('aria-pressed', String(nuevo === 'gratis'));
+  $('#mPago').setAttribute('aria-pressed', String(nuevo === 'ia'));
+  $('#zonaModelo').classList.toggle('oculto', nuevo === 'gratis');
+  $('#btnConfirmar').classList.add('oculto');
+
+  const aviso = $('#avisoCosto');
+  if (nuevo === 'gratis') {
+    aviso.className = 'costo gratis';
+    aviso.innerHTML = '<b>$0</b> · sin red, sin tokens<br>Contraste, XSS, RLS, tokens muertos, alt.';
+    $('#btnRevisar').textContent = 'Revisar';
+  } else {
+    aviso.className = 'costo';
+    aviso.innerHTML = 'Criterio de UX/UI: jerarquía, copy, fricción.<br>'
+      + 'Pulsa <b style="font-size:12px">Estimar</b> para ver el costo sin gastar.';
+    $('#btnRevisar').textContent = 'Estimar costo';
+  }
+}
+
+$('#mGratis').onclick = () => ponerModo('gratis');
+$('#mPago').onclick = () => ponerModo('ia');
+
+// ── Pintado de resultados ─────────────────────────────────────
+function pintarValidacion(r) {
+  if (!r.hallazgos.length) {
+    $('#salida').innerHTML = '<p class="ok">✔ Sin hallazgos. Listo para entregar.</p>'
+      + '<div class="resumen"><span>' + r.archivos + ' archivos</span><span>$0</span></div>';
+    return;
+  }
+  const porArchivo = {};
+  for (const h of r.hallazgos) (porArchivo[h.ruta] ||= []).push(h);
+
+  const errores = r.hallazgos.filter((h) => h.severidad === 'error').length;
+  const avisos = r.hallazgos.length - errores;
+
+  $('#salida').innerHTML = Object.entries(porArchivo).map(([ruta, hs]) => `
+    <div class="arch">
+      <div class="r">${esc(ruta)}</div>
+      ${hs.sort((a,b)=>a.linea-b.linea).map((h) => `
+        <div class="h">
+          <span class="pin ${esc(h.severidad)}"></span>
+          <span class="pt">${esc(h.linea)}</span>
+          <span class="d">${esc(h.mensaje)}
+            <span class="regla">${esc(h.regla)}</span>
+            ${h.pista ? `<span class="pista">↳ ${esc(h.pista)}</span>` : ''}
+          </span>
+        </div>`).join('')}
+    </div>`).join('')
+    + `<div class="resumen">
+         <span>${r.archivos} archivos</span>
+         <span style="color:var(--rojo)">${errores} errores</span>
+         <span style="color:var(--laton)">${avisos} avisos</span>
+         <span style="color:var(--jade)">$0</span>
+       </div>`;
+}
+
+function pintarAuditoria(r) {
+  $('#salida').innerHTML = r.resultados.map((a) => `
+    <div class="arch">
+      <div class="r">${esc(a.ruta)}</div>
+      ${a.hallazgos.map((h) => `
+        <div class="h">
+          <span class="pin ${esc(h.severidad)}"></span>
+          <span class="pt">${esc(h.linea || '·')}</span>
+          <span class="d">${esc(h.mensaje)}
+            ${h.accion ? `<span class="pista">↳ ${esc(h.accion)}</span>` : ''}
+          </span>
+        </div>`).join('')}
+    </div>`).join('')
+    + `<div class="resumen">
+         <span>${r.resultados.length} archivos</span>
+         <span>${esc(r.modelo)}</span>
+         <span style="color:var(--laton)">costo real $${r.costoReal}</span>
+       </div>`;
+}
+
+// ── Acción principal ──────────────────────────────────────────
+$('#btnRevisar').onclick = async () => {
+  const ruta = $('#objetivo').value;
+  const btn = $('#btnRevisar');
+  btn.disabled = true;
+  $('#salida').innerHTML = '<p class="cargando">Trabajando…</p>';
+
+  try {
+    if (MODO === 'gratis') {
+      pintarValidacion(await pedir('/api/validar', { ruta }));
+    } else {
+      const est = await pedir('/api/estimar', { ruta, modelo: $('#modelo').value });
+      ULTIMA_ESTIMACION = est;
+      $('#avisoCosto').innerHTML =
+        `<b>$${est.usd.toFixed(4)} USD</b> <span style="opacity:.7">(~$${est.cop.toLocaleString()} COP)</span><br>`
+        + `${est.archivos} archivos · ~${est.tokensEntrada.toLocaleString()} tokens de entrada`;
+      $('#btnConfirmar').classList.remove('oculto');
+      $('#salida').innerHTML =
+        '<p class="cargando">Estimación lista. Todavía no se ha gastado nada.<br>'
+        + 'Confirma abajo si quieres ejecutar.</p>';
+    }
+  } catch (e) {
+    $('#salida').innerHTML = '<div class="err">' + esc(e.message) + '</div>';
+  }
+  btn.disabled = false;
+};
+
+$('#btnConfirmar').onclick = async () => {
+  const btn = $('#btnConfirmar');
+  btn.disabled = true;
+  $('#salida').innerHTML = '<p class="cargando">Auditando con IA…</p>';
+  try {
+    const r = await pedir('/api/auditar', {
+      ruta: $('#objetivo').value, modelo: $('#modelo').value,
+    });
+    if (r.error) $('#salida').innerHTML = '<div class="err">' + esc(r.error) + '</div>';
+    else { pintarAuditoria(r); $('#btnConfirmar').classList.add('oculto'); }
+  } catch (e) {
+    $('#salida').innerHTML = '<div class="err">' + esc(e.message) + '</div>';
+  }
+  btn.disabled = false;
+};
+
+// ── Crear proyecto ────────────────────────────────────────────
+$('#btnCrear').onclick = async () => {
+  const cliente = $('#cliente').value.trim();
+  if (!cliente) { $('#cliente').focus(); return; }
+  const btn = $('#btnCrear');
+  btn.disabled = true;
+  $('#salida').innerHTML = '<p class="cargando">Generando…</p>';
+
+  const r = await pedir('/api/crear', {
+    cliente,
+    base: $('#base').value,
+    primario: $('#primario').value,
+    inicial: $('#inicial').value.trim(),
+  });
+
+  if (!r.ok) {
+    $('#salida').innerHTML = '<div class="err">' + esc(r.error) + '</div>';
+  } else {
+    $('#salida').innerHTML =
+      '<p class="ok">✔ Proyecto creado · $0</p>'
+      + '<div class="arch"><div class="r">' + esc(r.destino) + '</div>'
+      + r.creados.map((c) => '<div class="h"><span class="pin bajo"></span>'
+          + '<span class="d">' + esc(c) + '</span></div>').join('')
+      + '</div>'
+      + '<div class="resumen"><span>base ' + esc(r.base) + '</span>'
+      + '<span style="color:var(--jade)">sin tokens</span></div>';
+    ESTADO = await pedir('/api/estado');
+    $('#objetivo').innerHTML = ESTADO.objetivos
+      .map((o) => `<option value="${esc(o.ruta)}">${esc(o.etiqueta)}</option>`).join('');
+  }
+  btn.disabled = false;
+};
+
+iniciar();
+</script>
+</body>
+</html>
