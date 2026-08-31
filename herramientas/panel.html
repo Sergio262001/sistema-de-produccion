@@ -216,6 +216,7 @@
     <button data-v="inicio"    aria-current="page">Inicio</button>
     <button data-v="asistente">Cliente nuevo</button>
     <button data-v="clientes">Proyectos</button>
+    <button data-v="prompts">Prompts</button>
     <button data-v="calidad">Control de calidad</button>
     <button data-v="salir" class="fin">Cerrar sesión</button>
   </nav>
@@ -326,6 +327,39 @@
       <h2 class="tit">Proyectos</h2>
       <p class="des">Cada carpeta en <code>Proyectos-Clientes/</code>.</p>
       <div class="tarj"><div id="tablaClientes" class="vacio">cargando…</div></div>
+    </section>
+
+    <!-- ── PROMPTS ── -->
+    <section id="v-prompts" class="oculto">
+      <h2 class="tit">Prompts</h2>
+      <p class="des">Los cuatro de <code>05-prompts-maestros/</code>, leídos de los archivos
+         reales y con la ficha del proyecto ya incrustada. Copias y pegas — no vuelves a
+         buscar dónde empieza la parte copiable.</p>
+
+      <div class="dosc">
+        <div class="tarj">
+          <h3>Qué prompt</h3>
+          <div class="ops" id="listaPrompts"></div>
+
+          <label class="c" for="promptProyecto">Para qué proyecto</label>
+          <select id="promptProyecto"></select>
+          <p class="ayuda">La ficha de ese proyecto se incrusta en el prompt.</p>
+
+          <label class="c" for="promptBase">Base</label>
+          <select id="promptBase"></select>
+
+          <div class="fila">
+            <button class="btn" id="btnPrompt">Componer</button>
+            <button class="btn sec oculto" id="btnCopiarPrompt">Copiar</button>
+          </div>
+        </div>
+
+        <div class="tarj">
+          <h3 id="promptTit">Resultado</h3>
+          <div id="promptAvisos"></div>
+          <div id="promptSalida" class="vacio">Elige un prompt y pulsa componer.</div>
+        </div>
+      </div>
     </section>
 
     <!-- ── CALIDAD ── -->
@@ -448,7 +482,7 @@ async function arrancarApp() {
   $('#modelo').innerHTML = ESTADO.modelos
     .map((m) => '<option value="' + esc(m.clave) + '"' + (m.clave===ESTADO.modeloPorDefecto?' selected':'') + '>' + esc(m.etiqueta) + '</option>').join('');
 
-  pintarInicio(); pintarClientes();
+  pintarInicio(); pintarClientes(); iniciarPrompts();
 }
 
 function pintarInicio() {
@@ -486,7 +520,7 @@ document.querySelectorAll('nav button').forEach((b) => {
     b.setAttribute('aria-current', 'page');
     document.querySelectorAll('main section').forEach((s) => s.classList.add('oculto'));
     $('#v-' + v).classList.remove('oculto');
-    if (v === 'clientes') { ESTADO = await api('/api/estado'); pintarClientes(); }
+    if (v === 'clientes' || v === 'prompts') { ESTADO = await api('/api/estado'); pintarClientes(); refrescarSelectoresPrompt(); }
   };
 });
 
@@ -660,6 +694,78 @@ $('#btnConstruir').onclick = async () => {
     + '</div></div>';
   ESTADO = await api('/api/estado');
   pintarClientes(); pintarInicio();
+};
+
+/* ══════════ PROMPTS ══════════ */
+let PROMPT_ID = 'arranque';
+
+async function iniciarPrompts() {
+  const { catalogo } = await api('/api/prompts');
+  $('#listaPrompts').innerHTML = catalogo.map((c, i) =>
+    '<label class="op' + (i === 0 ? ' sel' : '') + '">'
+    + '<input type="radio" name="prompt" value="' + esc(c.id) + '"' + (i === 0 ? ' checked' : '') + '>'
+    + '<span><b>' + esc(c.nombre) + '</b><span class="pista">' + esc(c.para) + '</span></span>'
+    + '</label>').join('');
+
+  $('#listaPrompts').querySelectorAll('input').forEach((i) => {
+    i.onchange = () => {
+      $('#listaPrompts').querySelectorAll('.op').forEach((o) => o.classList.remove('sel'));
+      i.closest('.op').classList.add('sel');
+      PROMPT_ID = i.value;
+    };
+  });
+
+  refrescarSelectoresPrompt();
+}
+
+function refrescarSelectoresPrompt() {
+  $('#promptProyecto').innerHTML = '<option value="">— sin proyecto —</option>'
+    + ESTADO.proyectos.map((p) => '<option value="' + esc(p.slug) + '">' + esc(p.slug) + '</option>').join('');
+  $('#promptBase').innerHTML = '<option value="">— la del proyecto —</option>'
+    + ESTADO.bases.map((b) => '<option value="' + esc(b) + '">' + esc(b) + '</option>').join('');
+}
+
+$('#btnPrompt').onclick = async () => {
+  const b = $('#btnPrompt');
+  b.disabled = true;
+  $('#promptSalida').className = 'cargando';
+  $('#promptSalida').textContent = 'Componiendo…';
+  $('#promptAvisos').innerHTML = '';
+
+  const r = await api('/api/prompt', {
+    id: PROMPT_ID,
+    slug: $('#promptProyecto').value || null,
+    base: $('#promptBase').value || null,
+  });
+
+  if (!r.ok) {
+    $('#promptSalida').className = '';
+    $('#promptSalida').innerHTML = '<div class="err">' + esc(r.error) + '</div>';
+    $('#btnCopiarPrompt').classList.add('oculto');
+  } else {
+    $('#promptTit').textContent = r.nombre;
+    $('#promptAvisos').innerHTML = (r.avisos || [])
+      .map((a) => '<div class="aviso">' + esc(a) + '</div>').join('');
+    $('#promptSalida').className = 'kv';
+    $('#promptSalida').textContent = r.texto;
+    $('#promptSalida').dataset.texto = r.texto;
+    $('#btnCopiarPrompt').classList.remove('oculto');
+  }
+  b.disabled = false;
+};
+
+$('#btnCopiarPrompt').onclick = async () => {
+  const b = $('#btnCopiarPrompt');
+  try {
+    await navigator.clipboard.writeText($('#promptSalida').dataset.texto || '');
+    b.textContent = '✔ Copiado';
+  } catch {
+    const r = document.createRange();
+    r.selectNodeContents($('#promptSalida'));
+    const s = getSelection(); s.removeAllRanges(); s.addRange(r);
+    b.textContent = 'Ctrl+C para copiar';
+  }
+  setTimeout(() => { b.textContent = 'Copiar'; }, 2200);
 };
 
 /* ══════════ CALIDAD ══════════ */

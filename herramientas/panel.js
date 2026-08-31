@@ -22,6 +22,7 @@ import { PASOS, respuestasAFicha, validarFicha } from './lib/brief.js';
 import { extraerPorPatrones, extraerConIA } from './lib/extraer.js';
 import { crearAcceso, leerCookie } from './lib/acceso.js';
 import { configurarGoogle, urlDeEntrada, canjearCodigo } from './lib/google.js';
+import { CATALOGO, componer, fichaDeProyecto } from './lib/prompts.js';
 
 const AQUI = fileURLToPath(new URL('.', import.meta.url));
 const RAIZ = resolve(AQUI, '..');
@@ -257,6 +258,22 @@ const servidor = createServer(async (req, res) => {
 
     // ─ El cuestionario
     if (ruta === '/api/brief') return json(res, 200, { pasos: PASOS });
+
+    // ─ Prompts maestros
+    if (ruta === '/api/prompts') {
+      return json(res, 200, { catalogo: CATALOGO });
+    }
+    if (req.method === 'POST' && ruta === '/api/prompt') {
+      const { id, slug, base } = await leerCuerpo(req);
+      const ficha = slug ? fichaDeProyecto(CLIENTES, slug) : null;
+      return json(res, 200, componer({
+        dirPrompts: join(SISTEMA, '05-prompts-maestros'),
+        id,
+        ficha,
+        base: base || ficha?.base,
+        proyecto: slug ? 'Proyectos-Clientes/' + slug : null,
+      }));
+    }
 
     // ─ Documento → respuestas
     if (req.method === 'POST' && ruta === '/api/extraer') {

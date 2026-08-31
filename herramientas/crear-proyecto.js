@@ -134,6 +134,103 @@ export function construirFicha(ejemplo, datos) {
   return ficha;
 }
 
+// ── Que el proyecto CORRA, no solo que exista ─────────────────
+//
+// Un HTML suelto no puede leer un .env desde el navegador. Por eso
+// Proyectos-Clientes/prueba-ecommerce usa Vite como servidor de desarrollo:
+// es el patrón que ya probamos que funciona, y esto lo reproduce.
+
+/** Dependencias reales según lo que pida la ficha */
+export function dependenciasDe(ficha) {
+  const deps = {};
+  const motor = ficha?.base_de_datos?.motor;
+  if (motor === 'supabase') deps['@supabase/supabase-js'] = '^2.45.0';
+  if (motor === 'firebase') deps['firebase'] = '^12.15.0';
+  return deps;
+}
+
+export function packageJson(slug, ficha) {
+  return JSON.stringify({
+    name: slug,
+    private: true,
+    type: 'module',
+    scripts: {
+      dev: 'vite',
+      build: 'vite build',
+      preview: 'vite preview',
+      validar: 'node ../../herramientas/validar.js .',
+    },
+    dependencies: dependenciasDe(ficha),
+    devDependencies: { vite: '^5.4.0' },
+  }, null, 2) + '\n';
+}
+
+export function viteConfig() {
+  return [
+    "import { defineConfig } from 'vite';",
+    '',
+    '// Los adaptadores copiados de la base leen import.meta.env.SUPABASE_URL,',
+    '// DB_MOTOR, etc. — sin el prefijo VITE_ que Vite usa por defecto. Se amplía',
+    '// envPrefix para no tener que reescribir esos archivos: la regla del sistema',
+    '// es copiarlos tal cual desde 02-bases/.',
+    'export default defineConfig({',
+    "  envPrefix: ['VITE_', 'SUPABASE_', 'FIREBASE_', 'DB_', 'AUTH_',",
+    "              'WOMPI_', 'WHATSAPP_', 'GA4_'],",
+    '});',
+    '',
+  ].join('\n');
+}
+
+/**
+ * El .env con los valores que la ficha SÍ conoce ya puestos, y los secretos
+ * marcados. Así `npm run dev` arranca sin editar nada, y lo que falta se ve.
+ */
+export function envDelProyecto(ficha, ejemplo = '') {
+  const motor = ficha?.base_de_datos?.motor || 'local';
+  const wa = ficha?.apis?.whatsapp_num;
+  const lineas = [
+    '# Claves reales de ' + (ficha.cliente || 'este proyecto') + '.',
+    '# NUNCA se commitea: está en .gitignore.',
+    '#',
+    '# Lo que la ficha ya sabía viene puesto. Lo que dice FALTA lo tienes que',
+    '# pedir tú — el proyecto arranca igual, pero esa parte no funcionará.',
+    '',
+    'DB_MOTOR=' + motor,
+    'AUTH_MOTOR=' + (ficha?.auth?.motor || 'local'),
+    '',
+  ];
+
+  if (motor === 'supabase') {
+    lineas.push('# Supabase → Project Settings → API');
+    lineas.push('SUPABASE_URL=FALTA');
+    lineas.push('SUPABASE_ANON_KEY=FALTA', '');
+  } else if (motor === 'firebase') {
+    lineas.push('# Firebase → Configuración del proyecto → Tus apps');
+    lineas.push('FIREBASE_API_KEY=FALTA');
+    lineas.push('FIREBASE_PROJECT_ID=FALTA', '');
+  }
+
+  if (wa && wa !== 'POR DEFINIR') lineas.push('WHATSAPP_NUM=' + wa, '');
+  else if (ficha?.apis?.pagos === 'whatsapp' || wa) lineas.push('WHATSAPP_NUM=FALTA', '');
+
+  const pasarela = ficha?.apis?.pagos;
+  if (pasarela === 'wompi') {
+    lineas.push('# La cuenta de Wompi la abre EL CLIENTE, con su NIT y su banco.');
+    lineas.push('# Tú solo integras la llave pública que te comparta.');
+    lineas.push('WOMPI_PUBLIC_KEY=FALTA', '');
+  }
+  if (ficha?.apis?.analitica === 'ga4') {
+    lineas.push('# Google Analytics → Administrar → Flujos de datos');
+    lineas.push('GA4_ID=FALTA', '');
+  }
+
+  if (ejemplo.trim()) {
+    lineas.push('# ── Resto de variables que la base declara ──');
+    lineas.push(ejemplo.split(/\r?\n/).map((l) => (l.trim() ? '# ' + l : l)).join('\n'));
+  }
+  return lineas.join('\n');
+}
+
 // ── Generación ────────────────────────────────────────────────
 
 export function crearProyecto(opciones) {
@@ -193,15 +290,20 @@ export function crearProyecto(opciones) {
   }
 
   // 5 · .env (plantilla, sin valores) + .gitignore
+  let ejemploEnv = '';
   const rutaEnvEj = join(dirBase, '.env.example');
   if (existsSync(rutaEnvEj)) {
-    const ej = readFileSync(rutaEnvEj, 'utf8');
+    ejemploEnv = readFileSync(rutaEnvEj, 'utf8');
     cpSync(rutaEnvEj, join(dirSalida, '.env.example'));
-    writeFileSync(join(dirSalida, '.env'),
-      '# Claves REALES de ' + cliente + '. Nunca se commitea.\n' +
-      '# Rellena cada valor cuando el cliente te lo entregue.\n\n' + ej, 'utf8');
-    creados.push('.env', '.env.example');
+    creados.push('.env.example');
   }
+  writeFileSync(join(dirSalida, '.env'), envDelProyecto(ficha, ejemploEnv), 'utf8');
+  creados.push('.env');
+
+  // 5b · Lo que hace que ARRANQUE: servidor de desarrollo y dependencias
+  writeFileSync(join(dirSalida, 'package.json'), packageJson(slug, ficha), 'utf8');
+  writeFileSync(join(dirSalida, 'vite.config.js'), viteConfig(), 'utf8');
+  creados.push('package.json', 'vite.config.js');
   writeFileSync(join(dirSalida, '.gitignore'),
     '.env\n.env.*\n!.env.example\nnode_modules/\ndist/\n', 'utf8');
   creados.push('.gitignore');
@@ -209,29 +311,69 @@ export function crearProyecto(opciones) {
   // 6 · README con lo que hay que pedirle al cliente
   const insumo = readdirSync(existsSync(INSUMOS) ? INSUMOS : dirBase)
     .find((n) => n.includes(base.split('-')[0]));
+  const motor = ficha?.base_de_datos?.motor || 'local';
+  const faltantes = (envDelProyecto(ficha, '').match(/^(\w+)=FALTA$/gm) || [])
+    .map((l) => l.split('=')[0]);
+
   const readme = [
     '# ' + cliente,
     '',
-    'Proyecto generado desde la base `' + base + '`.',
-    'Fecha: ' + new Date().toISOString().slice(0, 10),
+    'Generado desde la base `' + base + '` el ' + new Date().toISOString().slice(0, 10) + '.',
     '',
-    '## Qué hacer ahora',
-    '1. Corre `supabase.schema.sql` en el SQL Editor del proyecto Supabase del cliente.',
-    '2. Llena los valores de `.env` con las credenciales reales.',
-    '3. Ajusta los tokens de marca en `index.html` si la ficha cambió.',
-    '4. Corre el validador antes de entregar:',
-    '   ```',
-    '   node ../../herramientas/validar.js .',
-    '   ```',
+    '## Correrlo ahora mismo',
+    '',
+    '```bash',
+    'npm install',
+    'npm run dev',
+    '```',
+    '',
+    'Abre la URL que imprime Vite (normalmente http://localhost:5173).',
+    'Arranca aunque el `.env` esté incompleto: los adaptadores caen a datos',
+    'locales de ejemplo. Lo que falte simplemente no persistirá.',
+    '',
+    '> Vite hace falta porque un HTML suelto no puede leer un `.env` desde el',
+    '> navegador. `vite.config.js` amplía `envPrefix` para que los adaptadores',
+    '> copiados de la base funcionen sin reescribirlos.',
+    '',
+    '## Lo que falta para que funcione de verdad',
+    '',
+    faltantes.length
+      ? faltantes.map((v) => '- [ ] `' + v + '` — está como `FALTA` en el `.env`').join('\n')
+      : '- Nada: el `.env` quedó completo desde la ficha.',
+    '',
+    motor === 'supabase'
+      ? '- [ ] Correr `supabase.schema.sql` en el SQL Editor del proyecto Supabase.\n'
+        + '      Crea las tablas, los datos de ejemplo y las políticas RLS.'
+      : motor === 'firebase'
+      ? '- [ ] Crear la base en Firebase y publicar las reglas de seguridad.'
+      : '- [ ] Motor `local`: los datos viven en el navegador. Es punto de\n'
+        + '      partida válido, pero **no** es persistencia real. Decidir motor.',
+    '',
+    '## Antes de entregar',
+    '',
+    '```bash',
+    'npm run validar',
+    '```',
+    '',
+    'Sale con error si hay XSS, contraste insuficiente, RLS faltante o un',
+    'secreto en el código. No entregues con errores en rojo.',
     '',
     '## Qué pedirle al cliente',
-    insumo
-      ? 'Ver `09-que-necesito-de-ti/' + insumo + '` en el sistema de produccion.'
-      : 'Ver la carpeta `09-que-necesito-de-ti/` del sistema de produccion.',
     '',
+    insumo
+      ? 'La lista completa está en `09-que-necesito-de-ti/' + insumo + '`.'
+      : 'La lista completa está en `09-que-necesito-de-ti/` del sistema.',
+    '',
+    ficha?.apis?.pagos && ficha.apis.pagos !== 'whatsapp'
+      ? '**La cuenta de ' + ficha.apis.pagos + ' la abre el cliente**, con su NIT y su\n'
+        + 'cuenta bancaria: el dinero de sus ventas debe llegarle a él. Tú solo\n'
+        + 'integras la llave pública que te comparta.\n'
+      : '',
     '## Origen',
+    '',
     'No se reescribió ningún adaptador: `src/` es copia literal de la base.',
-    'Si arreglas un bug en `src/`, arréglalo también en la base.',
+    'Si arreglas un bug ahí, arréglalo también en',
+    '`02-bases/' + base + '/src/`, o la próxima copia lo trae de vuelta.',
     '',
   ].join('\n');
   writeFileSync(join(dirSalida, 'README.md'), readme, 'utf8');

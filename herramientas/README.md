@@ -177,6 +177,51 @@ una pasarela distinta de WhatsApp avisa que la cuenta la crea el cliente.
 Probado con un WhatsApp real desordenado: extrajo 12 campos, eligió
 `ecommerce-completo`, derivó `linea: pro` por las 3 sedes, y pasó la compuerta.
 
+## El proyecto generado CORRE
+
+`crear-proyecto.js` no deja una carpeta de archivos: deja algo que arranca.
+
+```bash
+cd ../Proyectos-Clientes/<cliente>
+npm install
+npm run dev
+```
+
+Genera `package.json` (con la dependencia que pida la ficha —
+`@supabase/supabase-js` o `firebase`, no las dos) y `vite.config.js` con el
+`envPrefix` ampliado. Vite hace falta porque **un HTML suelto no puede leer un
+`.env` desde el navegador**; es el mismo patrón que ya probamos en
+`prueba-ecommerce`.
+
+El `.env` sale con lo que la ficha ya sabía puesto y lo que falta marcado
+`FALTA`, con el enlace de dónde sacarlo. El proyecto arranca igual: los
+adaptadores caen a datos locales, y lo que falte simplemente no persiste.
+
+Verificado: `npm install` (20 paquetes, 6s) y `npm run dev` levantan y sirven
+la página con los tokens de marca aplicados.
+
+## Prompts maestros
+
+Sección **Prompts** del panel. Lee los cuatro archivos **reales** de
+`05-prompts-maestros/` (no copias que se desincronizan), recorta desde
+"INSTRUCCIONES (copiar desde aquí)" y le incrusta la ficha del proyecto que
+elijas. Copias y pegas.
+
+| Prompt | Para |
+|---|---|
+| Arranque | Ensamblar el proyecto, con checklist de entrega |
+| Detalle de la base | Las reglas finas: qué no tocar, qué confirmar |
+| Revisión | Auditar antes de entregar |
+| Contenido | Copy en el tono de la ficha, siempre como borrador |
+
+Al de **Revisión** se le añade una nota para que **no repita** lo que el
+validador gratis ya cubre — si no, pagarías por los mismos hallazgos dos veces.
+
+> **Ojo:** `prompt-por-base.md` solo tiene bloque para 5 de las 10 bases
+> (faltan `crm-simple`, `dashboard-analytics`, `suscripciones`,
+> `marketplace` y `backend-pro`), aunque su README diga que hay uno por cada
+> una. El panel te lo dice al elegirlas en vez de dar un prompt a medias.
+
 ## Estructura
 
 ```
@@ -192,6 +237,7 @@ herramientas/
    ├─ reglas.js            las reglas del validador
    ├─ brief.js             el cuestionario y la compuerta de ficha
    ├─ extraer.js           documento → respuestas (gratis o IA)
+   ├─ prompts.js           compone los prompts maestros con la ficha
    ├─ acceso.js            frase de acceso y sesión firmada
    └─ google.js            entrar con Google (OAuth)
 ```
