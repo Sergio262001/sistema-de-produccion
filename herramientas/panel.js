@@ -23,6 +23,9 @@ import { extraerPorPatrones, extraerConIA } from './lib/extraer.js';
 import { crearAcceso, leerCookie } from './lib/acceso.js';
 import { configurarGoogle, urlDeEntrada, canjearCodigo } from './lib/google.js';
 import { CATALOGO, componer, fichaDeProyecto } from './lib/prompts.js';
+import { estadoAgente, correrAgente, MODELOS_AGENTE, MODELO_AGENTE,
+         PRESUPUESTO_POR_DEFECTO, PRESUPUESTO_MAXIMO } from './lib/agente.js';
+import { abrirHistorial } from './lib/historial.js';
 
 const AQUI = fileURLToPath(new URL('.', import.meta.url));
 const RAIZ = resolve(AQUI, '..');
@@ -39,6 +42,7 @@ const SISTEMA = join(RAIZ, 'Sistema-de-Produccion', 'Sistema-de-Produccion');
 const CLIENTES = join(RAIZ, 'Proyectos-Clientes');
 const acceso = crearAcceso(AQUI);
 const google = configurarGoogle();
+const historial = abrirHistorial(AQUI);
 
 // Estados de OAuth pendientes: viven en memoria y caducan a los 10 minutos.
 const estadosPendientes = new Map();
@@ -125,6 +129,12 @@ function rutaSegura(rel) {
   const abs = resolve(RAIZ, rel || '.');
   if (!abs.startsWith(RAIZ)) throw new Error('Ruta fuera del proyecto');
   return abs;
+}
+
+/** "Proyectos-Clientes/casa-tela/x" → "casa-tela"; cualquier otra cosa → null */
+function slugDeRuta(rel) {
+  const m = String(rel || '').match(/^Proyectos-Clientes\/([^/]+)/);
+  return m ? m[1] : null;
 }
 
 function archivosDe(ruta) {
@@ -307,13 +317,80 @@ const servidor = createServer(async (req, res) => {
         linea: ficha.linea,
         marca: ficha.marca || {},
       });
+      if (r.ok) historial.anotar({ tipo: 'proyecto', proyecto: r.slug,
+        resumen: 'creado desde el asistente · ' + r.base,
+        detalle: { base: r.base, archivos: r.creados.length } });
       return json(res, r.ok ? 200 : 400, r);
+    }
+
+    // ─ Historial
+    if (ruta === '/api/historial') {
+      const proyecto = url.searchParams.get('proyecto') || null;
+      return json(res, 200, {
+        disponible: historial.disponible(),
+        motivo: historial.motivo,
+        eventos: historial.recientes({ proyecto, limite: 50 }),
+        tendencia: historial.tendencia(proyecto),
+        resumen: historial.resumen(),
+      });
+    }
+
+    // ─ Agente: estado
+    if (ruta === '/api/agente/estado') {
+      const e = await estadoAgente();
+      return json(res, 200, {
+        ...e,
+        modelos: Object.entries(MODELOS_AGENTE).map(([k, v]) => ({ clave: k, etiqueta: v.etiqueta })),
+        modeloPorDefecto: MODELO_AGENTE,
+        presupuesto: PRESUPUESTO_POR_DEFECTO,
+        presupuestoMaximo: PRESUPUESTO_MAXIMO,
+      });
+    }
+
+    // ─ Agente: conversación en vivo (Server-Sent Events)
+    if (req.method === 'POST' && ruta === '/api/agente') {
+      const { mensaje, modelo, presupuesto, soloLectura } = await leerCuerpo(req);
+      if (!mensaje || !String(mensaje).trim()) {
+        return json(res, 400, { error: 'Falta el mensaje.' });
+      }
+
+      res.writeHead(200, {
+        'Content-Type': 'text/event-stream; charset=utf-8',
+        'Cache-Control': 'no-cache',
+        Connection: 'keep-alive',
+      });
+      const enviar = (ev) => res.write('data: ' + JSON.stringify(ev) + '\n\n');
+
+      try {
+        const { costo, turnos } = await correrAgente(
+          { raiz: RAIZ, mensaje, modelo, presupuesto, soloLectura }, enviar);
+        historial.anotar({
+          tipo: 'agente', resumen: String(mensaje).slice(0, 160),
+          costo, detalle: { modelo, turnos, soloLectura: Boolean(soloLectura) },
+        });
+      } catch (e) {
+        enviar({ tipo: 'error', mensaje: e.message });
+        historial.anotar({ tipo: 'error', resumen: 'agente: ' + e.message.slice(0, 160) });
+      }
+      return res.end();
     }
 
     // ─ Modo gratis
     if (req.method === 'POST' && ruta === '/api/validar') {
       const { ruta: r } = await leerCuerpo(req);
-      return json(res, 200, { modo: 'gratis', costo: 0, ...validar(rutaSegura(r)) });
+      const objetivo = rutaSegura(r);
+      const resultado = validar(objetivo);
+      const errores = resultado.hallazgos.filter((h) => h.severidad === 'error').length;
+      const proyecto = slugDeRuta(r);
+      historial.anotar({
+        tipo: 'validacion', proyecto,
+        resumen: (r || 'todo') + ' · ' + resultado.hallazgos.length + ' hallazgos',
+        errores, avisos: resultado.hallazgos.length - errores,
+      });
+      return json(res, 200, {
+        modo: 'gratis', costo: 0, ...resultado,
+        tendencia: historial.tendencia(proyecto),
+      });
     }
     if (req.method === 'POST' && ruta === '/api/crear') {
       const d = await leerCuerpo(req);
@@ -332,7 +409,12 @@ const servidor = createServer(async (req, res) => {
     if (req.method === 'POST' && ruta === '/api/auditar') {
       const { ruta: r, modelo } = await leerCuerpo(req);
       try {
-        return json(res, 200, { modo: 'ia', ...await auditar(archivosDe(r), modelo || MODELO_POR_DEFECTO) });
+        const a = await auditar(archivosDe(r), modelo || MODELO_POR_DEFECTO);
+        historial.anotar({ tipo: 'auditoria',
+          proyecto: slugDeRuta(r),
+          resumen: (r || 'todo') + ' · ' + a.resultados.length + ' archivos',
+          costo: a.costoReal, detalle: { modelo: a.modelo } });
+        return json(res, 200, { modo: 'ia', ...a });
       } catch (e) { return json(res, 400, { error: e.message }); }
     }
 

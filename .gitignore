@@ -47,3 +47,7 @@ herramientas/.acceso.json
 Proyectos-Clientes/panaderia-la-espiga/
 Proyectos-Clientes/floristeria-el-jardin/
 Proyectos-Clientes/taller-norte/
+
+# Historial local del panel (datos de tu operacion, no del sistema)
+herramientas/historial.db
+herramientas/historial.db-*

@@ -275,6 +275,7 @@
     <button data-v="inicio"    aria-current="page">Inicio</button>
     <button data-v="asistente">Cliente nuevo</button>
     <button data-v="clientes">Proyectos</button>
+    <button data-v="agente">Asistente</button>
     <button data-v="prompts">Prompts</button>
     <button data-v="calidad">Control de calidad</button>
     <button data-v="salir" class="fin">Cerrar sesión</button>
@@ -386,6 +387,58 @@
       <h2 class="tit">Proyectos</h2>
       <p class="des">Cada carpeta en <code>Proyectos-Clientes/</code>.</p>
       <div class="tarj"><div id="tablaClientes" class="vacio">cargando…</div></div>
+    </section>
+
+    <!-- ── AGENTE ── -->
+    <section id="v-agente" class="oculto">
+      <h2 class="tit">Asistente</h2>
+      <p class="des">Pídele en español lo que necesites. Lee tus archivos, ejecuta tus
+         herramientas y te muestra la salida real — no una versión inventada de lo
+         que haría.</p>
+
+      <div id="agenteFalta" class="oculto"></div>
+
+      <div id="agenteListo" class="oculto">
+        <div class="tarj">
+          <h3>Qué necesitas</h3>
+          <textarea id="agMensaje" placeholder="Ej: revisa la landing de Casa Tela y dime qué le falta antes de entregar"></textarea>
+
+          <div class="dosc" style="margin-top:16px">
+            <div>
+              <label class="c" for="agModelo">Modelo</label>
+              <select id="agModelo"></select>
+            </div>
+            <div>
+              <label class="c" for="agTecho">Techo de gasto (USD)</label>
+              <select id="agTecho"></select>
+            </div>
+          </div>
+
+          <div class="ops" style="margin-top:14px">
+            <label class="op sel">
+              <input type="radio" name="agModo" value="lectura" checked>
+              <span><b>Solo mirar</b><span class="det">Lee y te dice. No escribe ningún archivo.</span></span>
+            </label>
+            <label class="op">
+              <input type="radio" name="agModo" value="escritura">
+              <span><b>Puede escribir</b><span class="det">Crea y edita dentro de Proyectos-Clientes. La fábrica sigue de solo lectura.</span></span>
+            </label>
+          </div>
+
+          <div class="costo pg" id="agAviso"></div>
+
+          <div class="fila">
+            <button class="btn" id="agEnviar">Enviar</button>
+            <button class="btn sec oculto" id="agParar">Detener</button>
+            <span id="agGasto" class="ayuda" style="margin-left:auto"></span>
+          </div>
+        </div>
+
+        <div class="tarj">
+          <h3>Conversación</h3>
+          <div id="agSalida" class="vacio">Todavía no has pedido nada.</div>
+        </div>
+      </div>
     </section>
 
     <!-- ── PROMPTS ── -->
@@ -542,7 +595,7 @@ async function arrancarApp() {
   $('#modelo').innerHTML = ESTADO.modelos
     .map((m) => '<option value="' + esc(m.clave) + '"' + (m.clave===ESTADO.modeloPorDefecto?' selected':'') + '>' + esc(m.etiqueta) + '</option>').join('');
 
-  pintarInicio(); pintarClientes(); iniciarPrompts();
+  pintarInicio(); pintarClientes(); iniciarPrompts(); iniciarAgente();
 }
 
 function pintarInicio() {
@@ -580,6 +633,7 @@ document.querySelectorAll('nav button').forEach((b) => {
     b.setAttribute('aria-current', 'page');
     document.querySelectorAll('main section').forEach((s) => s.classList.add('oculto'));
     $('#v-' + v).classList.remove('oculto');
+    if (v === 'agente') await iniciarAgente();
     if (v === 'clientes' || v === 'prompts') { ESTADO = await api('/api/estado'); pintarClientes(); refrescarSelectoresPrompt(); }
   };
 });
@@ -779,6 +833,152 @@ $('#btnConstruir').onclick = async () => {
   ESTADO = await api('/api/estado');
   pintarClientes(); pintarInicio();
 };
+
+/* ══════════ AGENTE ══════════ */
+let AG_ESTADO = null, AG_ABORTO = null;
+
+async function iniciarAgente() {
+  AG_ESTADO = await api('/api/agente/estado');
+
+  if (!AG_ESTADO.listo) {
+    $('#agenteFalta').classList.remove('oculto');
+    $('#agenteListo').classList.add('oculto');
+    $('#agenteFalta').innerHTML = '<div class="tarj"><h3>Falta un paso</h3>'
+      + '<p style="margin:0 0 14px">Para conversar con el asistente hace falta '
+      + esc(AG_ESTADO.faltan.join(' y ')) + '.</p>'
+      + '<div class="kv">cd herramientas\n'
+      + 'npm install @anthropic-ai/claude-agent-sdk\n\n'
+      + '# y en herramientas/.env:\nANTHROPIC_API_KEY=...</div>'
+      + '<p class="ayuda" style="margin-top:12px">Consíguela en console.anthropic.com. '
+      + 'Todo lo demás del panel funciona sin esto.</p></div>';
+    return;
+  }
+
+  $('#agenteFalta').classList.add('oculto');
+  $('#agenteListo').classList.remove('oculto');
+
+  $('#agModelo').innerHTML = AG_ESTADO.modelos.map((m) =>
+    '<option value="' + esc(m.clave) + '"' + (m.clave === AG_ESTADO.modeloPorDefecto ? ' selected' : '')
+    + '>' + esc(m.etiqueta) + '</option>').join('');
+
+  const techos = [0.10, 0.25, 0.50, 1.00, 2.00, 3.00]
+    .filter((t) => t <= AG_ESTADO.presupuestoMaximo);
+  $('#agTecho').innerHTML = techos.map((t) =>
+    '<option value="' + t + '"' + (t === AG_ESTADO.presupuesto ? ' selected' : '')
+    + '>$' + t.toFixed(2) + '</option>').join('');
+
+  pintarAvisoAgente();
+}
+
+function pintarAvisoAgente() {
+  const lectura = $('#v-agente').querySelector('[name="agModo"]:checked')?.value === 'lectura';
+  $('#agAviso').innerHTML = lectura
+    ? 'Modo <b style="font-size:12px">solo mirar</b> · no escribe nada. Se detiene al llegar a $'
+      + Number($('#agTecho').value).toFixed(2) + '.'
+    : 'Puede escribir en <b style="font-size:12px">Proyectos-Clientes</b>. '
+      + 'La fábrica (02-bases) sigue de solo lectura. Se detiene al llegar a $'
+      + Number($('#agTecho').value).toFixed(2) + '.';
+}
+
+$('#v-agente').querySelectorAll('[name="agModo"]').forEach((i) => {
+  i.onchange = () => {
+    $('#v-agente').querySelectorAll('.ops .op').forEach((o) => o.classList.remove('sel'));
+    i.closest('.op').classList.add('sel');
+    pintarAvisoAgente();
+  };
+});
+$('#agTecho').onchange = pintarAvisoAgente;
+
+function lineaAgente(clase, contenido) {
+  const s = $('#agSalida');
+  if (s.classList.contains('vacio')) { s.classList.remove('vacio'); s.innerHTML = ''; }
+  const d = document.createElement('div');
+  d.className = clase;
+  d.innerHTML = contenido;
+  s.appendChild(d);
+  s.scrollTop = s.scrollHeight;
+  return d;
+}
+
+$('#agEnviar').onclick = async () => {
+  const mensaje = $('#agMensaje').value.trim();
+  if (!mensaje) { $('#agMensaje').focus(); return; }
+
+  const soloLectura = $('#v-agente').querySelector('[name="agModo"]:checked').value === 'lectura';
+  $('#agEnviar').disabled = true;
+  $('#agParar').classList.remove('oculto');
+  $('#agSalida').className = '';
+  $('#agSalida').innerHTML = '';
+  lineaAgente('arch', '<div class="r">tú</div><div>' + esc(mensaje) + '</div>');
+
+  AG_ABORTO = new AbortController();
+  let parrafo = null;
+
+  try {
+    const r = await fetch('/api/agente', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        mensaje, soloLectura,
+        modelo: $('#agModelo').value,
+        presupuesto: Number($('#agTecho').value),
+      }),
+      signal: AG_ABORTO.signal,
+    });
+
+    const lector = r.body.getReader();
+    const dec = new TextDecoder();
+    let resto = '';
+
+    for (;;) {
+      const { done, value } = await lector.read();
+      if (done) break;
+      resto += dec.decode(value, { stream: true });
+      const trozos = resto.split('\n\n');
+      resto = trozos.pop();
+
+      for (const t of trozos) {
+        if (!t.startsWith('data: ')) continue;
+        let ev; try { ev = JSON.parse(t.slice(6)); } catch { continue; }
+
+        if (ev.tipo === 'inicio') {
+          lineaAgente('resumen', '<span>' + esc(ev.modelo) + '</span>'
+            + '<span>techo $' + ev.presupuesto.toFixed(2) + '</span>'
+            + '<span style="color:var(--jade)">' + (ev.soloLectura ? 'solo lectura' : 'puede escribir') + '</span>');
+          parrafo = null;
+        } else if (ev.tipo === 'texto') {
+          if (!parrafo) parrafo = lineaAgente('arch', '<div></div>');
+          parrafo.firstChild.textContent += ev.texto;
+          $('#agSalida').scrollTop = $('#agSalida').scrollHeight;
+        } else if (ev.tipo === 'herramienta') {
+          parrafo = null;
+          lineaAgente('h', '<span class="pin bajo"></span><span class="pt">·</span>'
+            + '<span><b>' + esc(ev.nombre) + '</b>'
+            + (ev.entrada ? '<span class="pista">' + esc(ev.entrada) + '</span>' : '') + '</span>');
+        } else if (ev.tipo === 'gasto') {
+          $('#agGasto').textContent = 'gasto: $' + ev.costo.toFixed(4);
+        } else if (ev.tipo === 'fin') {
+          parrafo = null;
+          lineaAgente('resumen', '<span style="color:var(--jade)">terminado</span>'
+            + '<span>' + ev.turnos + ' acciones</span>'
+            + '<span style="color:var(--laton)">$' + ev.costo.toFixed(4) + '</span>');
+        } else if (ev.tipo === 'error') {
+          parrafo = null;
+          lineaAgente('err', esc(ev.mensaje));
+        }
+      }
+    }
+  } catch (e) {
+    if (e.name !== 'AbortError') lineaAgente('err', esc(e.message));
+    else lineaAgente('resumen', '<span>detenido por ti</span>');
+  }
+
+  $('#agEnviar').disabled = false;
+  $('#agParar').classList.add('oculto');
+  AG_ABORTO = null;
+};
+
+$('#agParar').onclick = () => { if (AG_ABORTO) AG_ABORTO.abort(); };
 
 /* ══════════ PROMPTS ══════════ */
 let PROMPT_ID = 'arranque';
