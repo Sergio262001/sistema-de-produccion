@@ -10,6 +10,7 @@
 // ════════════════════════════════════════════════════════════
 
 import { createServer } from 'node:http';
+import { randomUUID } from 'node:crypto';
 import { readFileSync, existsSync, readdirSync, statSync } from 'node:fs';
 import { join, resolve, extname } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -20,15 +21,30 @@ import { MODELOS, MODELO_POR_DEFECTO, estimarCosto, auditar } from './auditor-ia
 import { PASOS, respuestasAFicha, validarFicha } from './lib/brief.js';
 import { extraerPorPatrones, extraerConIA } from './lib/extraer.js';
 import { crearAcceso, leerCookie } from './lib/acceso.js';
+import { configurarGoogle, urlDeEntrada, canjearCodigo } from './lib/google.js';
 
 const AQUI = fileURLToPath(new URL('.', import.meta.url));
 const RAIZ = resolve(AQUI, '..');
-const PUERTO = process.env.PUERTO || 4321;
 const BARRA = String.fromCharCode(92);
+
+// Node 20.6+ lee .env sin dependencias. El archivo es opcional.
+try { process.loadEnvFile(join(AQUI, '.env')); } catch { /* no hay .env, normal */ }
+
+const PUERTO = process.env.PUERTO || 4321;
+const ORIGEN = 'http://localhost:' + PUERTO;
+const RETORNO_GOOGLE = ORIGEN + '/api/acceso/google/retorno';
 
 const SISTEMA = join(RAIZ, 'Sistema-de-Produccion', 'Sistema-de-Produccion');
 const CLIENTES = join(RAIZ, 'Proyectos-Clientes');
 const acceso = crearAcceso(AQUI);
+const google = configurarGoogle();
+
+// Estados de OAuth pendientes: viven en memoria y caducan a los 10 minutos.
+const estadosPendientes = new Map();
+const limpiarEstados = () => {
+  const ahora = Date.now();
+  for (const [k, t] of estadosPendientes) if (ahora - t > 600_000) estadosPendientes.delete(k);
+};
 
 // ── Inventario ────────────────────────────────────────────────
 function listarProyectos() {
@@ -133,15 +149,69 @@ const servidor = createServer(async (req, res) => {
 
     // ─ Acceso (públicas)
     if (ruta === '/api/acceso/estado') {
+      const cookie = leerCookie(req.headers.cookie, 'sesion');
       return json(res, 200, {
-        configurado: acceso.configurado(),
-        autenticado: acceso.valido(leerCookie(req.headers.cookie, 'sesion')),
+        configurado: acceso.tieneFrase(),
+        autenticado: acceso.valido(cookie),
+        via: acceso.viaDe(cookie),
+        google: { activo: google.activo, faltan: google.faltan },
       });
     }
     if (req.method === 'POST' && ruta === '/api/acceso/configurar') {
-      if (acceso.configurado()) return json(res, 400, { ok: false, error: 'Ya hay una frase configurada.' });
+      if (acceso.tieneFrase()) return json(res, 400, { ok: false, error: 'Ya hay una frase configurada.' });
       const { frase } = await leerCuerpo(req);
       return json(res, 200, acceso.configurar(frase));
+    }
+
+    // ─ Google: ida
+    if (req.method === 'GET' && ruta === '/api/acceso/google') {
+      if (!google.activo) {
+        return json(res, 400, { error: 'Falta configurar: ' + google.faltan.join(', ') });
+      }
+      limpiarEstados();
+      const nonce = randomUUID();
+      estadosPendientes.set(nonce, Date.now());
+      const state = nonce + '.' + acceso.firmarEstado(nonce);
+      res.writeHead(302, { Location: urlDeEntrada(google, RETORNO_GOOGLE, state) });
+      return res.end();
+    }
+
+    // ─ Google: vuelta
+    if (req.method === 'GET' && ruta === '/api/acceso/google/retorno') {
+      const paginaError = (msg) => {
+        res.writeHead(400, { 'Content-Type': 'text/html; charset=utf-8' });
+        res.end('<!doctype html><meta charset="utf-8">'
+          + '<body style="font-family:system-ui;background:#12160F;color:#EDF0E8;'
+          + 'display:grid;place-items:center;height:100vh;margin:0;text-align:center">'
+          + '<div><h1 style="font-size:18px">No se pudo entrar</h1>'
+          + '<p style="color:#98A18C;font-size:13px;max-width:40ch">' + msg + '</p>'
+          + '<a href="/" style="color:#C96F4A">Volver al panel</a></div></body>');
+      };
+
+      if (url.searchParams.get('error')) {
+        return paginaError('Google respondió: ' + url.searchParams.get('error'));
+      }
+
+      const state = url.searchParams.get('state') || '';
+      const [nonce, firma] = state.split('.');
+      if (!nonce || !firma || !acceso.verificarEstado(nonce, firma) || !estadosPendientes.has(nonce)) {
+        return paginaError('La petición no coincide con la que inició este panel. Vuelve a intentar desde el botón.');
+      }
+      estadosPendientes.delete(nonce);
+
+      const codigo = url.searchParams.get('code');
+      if (!codigo) return paginaError('Google no devolvió el código de autorización.');
+
+      const r = await canjearCodigo(google, codigo, RETORNO_GOOGLE);
+      if (!r.ok) return paginaError(r.error);
+
+      const s = acceso.emitirSesion('google:' + r.correo);
+      res.writeHead(302, {
+        Location: '/',
+        'Set-Cookie': 'sesion=' + encodeURIComponent(s.token)
+          + '; HttpOnly; SameSite=Lax; Path=/; Max-Age=43200',
+      });
+      return res.end();
     }
     if (req.method === 'POST' && ruta === '/api/acceso/entrar') {
       const { frase } = await leerCuerpo(req);
@@ -156,9 +226,11 @@ const servidor = createServer(async (req, res) => {
       return json(res, 200, { ok: true }, { 'Set-Cookie': 'sesion=; HttpOnly; Path=/; Max-Age=0' });
     }
 
-    // ─ De aquí en adelante, todo exige sesión
+    // ─ De aquí en adelante, todo exige sesión.
+    //   Hay puerta si existe CUALQUIER forma de entrar: frase o Google.
     if (ruta.startsWith('/api/')) {
-      if (acceso.configurado() && !acceso.valido(leerCookie(req.headers.cookie, 'sesion'))) {
+      const hayPuerta = acceso.tieneFrase() || google.activo;
+      if (hayPuerta && !acceso.valido(leerCookie(req.headers.cookie, 'sesion'))) {
         return json(res, 401, { error: 'Sesión requerida' });
       }
     }
@@ -251,9 +323,12 @@ servidor.listen(PUERTO, '127.0.0.1', () => {
   console.log('  ' + n + 'Panel del estudio' + o);
   console.log('  ' + v + '→' + o + ' http://localhost:' + PUERTO);
   console.log('');
-  console.log('  ' + g + (acceso.configurado()
-    ? 'Acceso configurado. Te pedirá la frase.'
-    : 'Primera vez: define una frase de acceso al entrar.') + o);
+  console.log('  ' + g + (google.activo
+    ? 'Entrar con Google: activo (' + google.correos.join(', ') + ')'
+    : 'Entrar con Google: inactivo — falta ' + google.faltan.join(', ')) + o);
+  console.log('  ' + g + (acceso.tieneFrase()
+    ? 'Frase de respaldo: configurada.'
+    : 'Frase de respaldo: sin definir (se define al entrar).') + o);
   console.log('  ' + g + (process.env.ANTHROPIC_API_KEY
     ? 'API conectada. El modo con IA está disponible.'
     : 'Sin API key. El modo gratis funciona igual.') + o);

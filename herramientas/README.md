@@ -95,15 +95,48 @@ seguidos abarata mucho a partir del segundo.
 
 ## Acceso
 
-El panel pide una frase la primera vez y la guarda como hash scrypt con sal
-en `.acceso.json` (ignorado por git). La sesión dura 12 horas.
+Dos vías, la misma sesión de 12 horas:
+
+1. **Entrar con Google** — tu cuenta, y solo los correos que autorices.
+2. **Frase** — el respaldo. Si Google se cae, cambias de red o el `.env` queda
+   mal, no te quedas por fuera de tu propio panel.
 
 **Qué protege:** que alguien que se siente en tu computador, o esté en tu misma
 red, abra el panel, cree proyectos o gaste tu saldo de API.
 **Qué no protege:** los archivos — quien tenga acceso al disco los lee igual.
 Es la puerta del panel, no cifrado del sistema.
 
-El servidor solo escucha en `127.0.0.1`.
+El servidor solo escucha en `127.0.0.1`. La frase se guarda como hash scrypt con
+sal en `.acceso.json`; la sesión es un token HMAC en cookie `HttpOnly`.
+
+### Configurar Google (una vez, ~5 minutos, gratis)
+
+En [console.cloud.google.com](https://console.cloud.google.com):
+
+1. Crea un proyecto (o usa uno tuyo).
+2. **APIs y servicios → Pantalla de consentimiento de OAuth**
+   · Tipo **Externo** · nombre "Panel del estudio" · tu correo de contacto
+   · En **Usuarios de prueba**, agrega tu propio correo.
+   Déjala **en prueba** — así solo entran esos correos. No hay que publicarla.
+3. **Credenciales → Crear credenciales → ID de cliente de OAuth**
+   · Tipo **Aplicación web**
+   · URI de redireccionamiento autorizado, exactamente:
+     `http://localhost:4321/api/acceso/google/retorno`
+4. Copia `cp .env.example .env` y pega el ID y el secreto.
+
+```bash
+GOOGLE_CLIENT_ID=...
+GOOGLE_CLIENT_SECRET=...
+GOOGLE_CORREOS_AUTORIZADOS=tu-correo@gmail.com
+```
+
+**`GOOGLE_CORREOS_AUTORIZADOS` no es opcional.** Sin esa lista, entrar con
+Google queda desactivado a propósito: si no, cualquier persona con una cuenta
+de Google abriría tu panel.
+
+Flujo de código de autorización: el `id_token` se canjea servidor-a-servidor
+por TLS con Google, y se comprueban `aud`, `iss`, `exp`, `email_verified` y la
+lista de correos. El `state` va firmado con HMAC y es de un solo uso.
 
 ## Asistente de cliente nuevo
 
@@ -138,7 +171,8 @@ herramientas/
    ├─ reglas.js            las reglas del validador
    ├─ brief.js             el cuestionario y la compuerta de ficha
    ├─ extraer.js           documento → respuestas (gratis o IA)
-   └─ acceso.js            frase de acceso y sesión firmada
+   ├─ acceso.js            frase de acceso y sesión firmada
+   └─ google.js            entrar con Google (OAuth)
 ```
 
 ## Añadir una regla
