@@ -147,6 +147,14 @@ const servidor = createServer(async (req, res) => {
       return res.end(readFileSync(join(AQUI, 'panel.html'), 'utf8'));
     }
 
+    // ─ Formulario del cliente. Sin puerta a propósito: es la pieza que se
+    //   comparte, y no lee ni escribe nada del sistema — todo pasa en el
+    //   navegador de quien lo llena.
+    if (req.method === 'GET' && ruta === '/brief.html') {
+      res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
+      return res.end(readFileSync(join(AQUI, 'brief.html'), 'utf8'));
+    }
+
     // ─ Acceso (públicas)
     if (ruta === '/api/acceso/estado') {
       const cookie = leerCookie(req.headers.cookie, 'sesion');

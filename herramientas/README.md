@@ -138,6 +138,26 @@ Flujo de código de autorización: el `id_token` se canjea servidor-a-servidor
 por TLS con Google, y se comprueban `aud`, `iss`, `exp`, `email_verified` y la
 lista de correos. El `state` va firmado con HMAC y es de un solo uso.
 
+## El formulario del cliente
+
+`herramientas/brief.html` — autocontenido, abre con doble clic. Se lo mandas
+al cliente en vez de preguntarle por WhatsApp, o lo llenas tú en una llamada.
+
+1. **Elige el servicio** — los 9, con los nombres de `09-que-necesito-de-ti/`
+   en lenguaje de negocio ("Tienda online", no "ecommerce-completo").
+2. **Solo las preguntas que aplican** — quien pide una landing no ve las de
+   pasarela de pago.
+3. **Devuelve un brief** con un bloque `--- BRIEF-ESTUDIO v1 ---` que el panel
+   lee **exacto y gratis**: sin patrones, sin IA, sin adivinar.
+
+También está en `http://localhost:4321/brief.html` mientras el panel corre.
+Esa ruta no pide sesión a propósito: es la pieza que se comparte, y no lee ni
+escribe nada del sistema — todo pasa en el navegador de quien la llena.
+
+Si el documento trae ese bloque, el modo IA **no cobra**: detecta que ya es
+exacto y se salta la llamada. Pagar por interpretar algo estructurado sería
+tirar el dinero.
+
 ## Asistente de cliente nuevo
 
 Tres fases:
@@ -162,6 +182,7 @@ Probado con un WhatsApp real desordenado: extrajo 12 campos, eligió
 ```
 herramientas/
 ├─ panel.js / panel.html   interfaz: acceso, asistente, clientes, calidad
+├─ brief.html              formulario para el cliente (autocontenido)
 ├─ validar.js              modo gratis · control de calidad
 ├─ crear-proyecto.js       modo gratis · generador
 ├─ auditor-ia.js           modo con costo · criterio UX/UI

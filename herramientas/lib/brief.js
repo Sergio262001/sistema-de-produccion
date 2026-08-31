@@ -186,10 +186,22 @@ function ponerEnRuta(obj, ruta, valor) {
  * aplicando las implicaciones (varias sedes → pro, datos sensibles → pro…).
  * Devuelve { ficha, base, avisos }.
  */
+/** Las 9 bases de 02-bases/. El formulario manda el identificador directo. */
+export const BASES_CONOCIDAS = [
+  'menu-con-panel-admin', 'carrito-reutilizable', 'landing-modular', 'auth',
+  'ecommerce-completo', 'dashboard-analytics', 'crm-simple', 'suscripciones',
+  'marketplace',
+];
+
 export function respuestasAFicha(respuestas) {
   const ficha = {};
   const avisos = [];
-  let base = null;
+
+  // El brief.html ya eligió el servicio y manda su identificador. Si viene,
+  // manda sobre la deducción por palabras clave.
+  let base = BASES_CONOCIDAS.includes(respuestas.base) ? respuestas.base
+           : BASES_CONOCIDAS.includes(respuestas.objetivo) ? respuestas.objetivo
+           : null;
 
   for (const q of todasLasPreguntas()) {
     const valor = respuestas[q.id];

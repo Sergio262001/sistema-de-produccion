@@ -31,8 +31,39 @@ const PALABRAS_BASE = [
 const normalizar = (t) => String(t).toLowerCase()
   .normalize('NFD').replace(/[̀-ͯ]/g, '');
 
+/**
+ * El brief.html emite un bloque JSON entre marcas. Si viene, se lee tal cual:
+ * es exacto, no hay nada que adivinar y no cuesta nada. Los patrones quedan
+ * para el caso de siempre — el WhatsApp suelto.
+ */
+export function leerBloqueBrief(texto) {
+  const m = String(texto || '')
+    .match(/---\s*BRIEF-ESTUDIO\s+v1\s*---\s*([\s\S]*?)\s*---\s*FIN BRIEF\s*---/i);
+  if (!m) return null;
+  try { return JSON.parse(m[1]); } catch { return null; }
+}
+
 export function extraerPorPatrones(texto) {
   const t = String(texto || '');
+
+  // ─ Ruta exacta: el formulario del estudio
+  const bloque = leerBloqueBrief(t);
+  if (bloque) {
+    const { servicio, generado, ...respuestas } = bloque;
+    // `base` se queda dentro de las respuestas: es lo que respuestasAFicha
+    // y crear-proyecto necesitan para saber qué base copiar.
+    respuestas.base ??= servicio;
+    return {
+      respuestas,
+      encontrado: Object.keys(respuestas),
+      modo: 'gratis',
+      costo: 0,
+      fuente: 'formulario',
+      base: respuestas.base,
+    };
+  }
+
+  // ─ Ruta aproximada: texto libre
   const n = normalizar(t);
   const respuestas = {};
   const encontrado = [];
@@ -129,7 +160,7 @@ export function extraerPorPatrones(texto) {
     encontrado.push('línea pro (derivada)');
   }
 
-  return { respuestas, encontrado, modo: 'gratis', costo: 0 };
+  return { respuestas, encontrado, modo: 'gratis', costo: 0, fuente: 'texto libre' };
 }
 
 // ── Modo IA: texto libre ──────────────────────────────────────
@@ -167,6 +198,10 @@ Reglas:
 - Si menciona vender en línea con inventario, objetivo es "vender".`;
 
 export async function extraerConIA(texto, modeloClave = 'haiku') {
+  // Si el documento ya trae el bloque del formulario, no hay nada que
+  // interpretar: cobrar por esto sería tirar el dinero.
+  if (leerBloqueBrief(texto)) return extraerPorPatrones(texto);
+
   const { MODELOS } = await import('../auditor-ia.js');
   const m = MODELOS[modeloClave] || MODELOS.haiku;
 

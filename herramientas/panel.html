@@ -254,6 +254,19 @@
       <!-- fase 1: origen -->
       <div id="fase-origen">
         <div class="tarj">
+          <h3>Formulario para el cliente</h3>
+          <p style="margin:0 0 14px;font-size:13px">
+            Mándale este formulario al cliente en vez de preguntarle por WhatsApp.
+            Elige el servicio, responde, y te devuelve un brief que este panel lee
+            <b>exacto y gratis</b> — sin patrones, sin IA, sin adivinar.</p>
+          <div class="fila" style="margin-top:0">
+            <a class="btn" href="/brief.html" target="_blank" rel="noopener">Abrir el formulario</a>
+            <button class="btn sec" id="btnCopiarBrief">Copiar el archivo para enviarlo</button>
+          </div>
+          <p class="ayuda" id="rutaBrief" style="margin-top:10px"></p>
+        </div>
+
+        <div class="tarj">
           <h3>¿De dónde salen los datos?</h3>
           <label class="c" for="doc">Pega aquí el brief del cliente</label>
           <textarea id="doc" placeholder="El WhatsApp, el correo o el documento que te mandó el cliente. Tal cual, sin ordenar."></textarea>
@@ -488,6 +501,22 @@ function ponerModoEx(m) {
 
 $('#btnBlanco').onclick = () => { RESPUESTAS = {}; irAPasos(); };
 
+/* El formulario es un archivo suelto: se manda por WhatsApp o correo y
+   el cliente lo abre con doble clic, sin instalar nada. */
+$('#rutaBrief').textContent = 'El archivo es herramientas/brief.html — mándaselo '
+  + 'al cliente y lo abre con doble clic, sin instalar nada.';
+
+$('#btnCopiarBrief').onclick = async () => {
+  const b = $('#btnCopiarBrief');
+  try {
+    await navigator.clipboard.writeText('herramientas' + String.fromCharCode(92) + 'brief.html');
+    b.textContent = '✔ Ruta copiada';
+  } catch {
+    b.textContent = 'herramientas\\brief.html';
+  }
+  setTimeout(() => { b.textContent = 'Copiar el archivo para enviarlo'; }, 2400);
+};
+
 $('#btnExtraer').onclick = async () => {
   const texto = $('#doc').value.trim();
   if (!texto) { $('#doc').focus(); return; }
@@ -501,8 +530,10 @@ $('#btnExtraer').onclick = async () => {
 
   RESPUESTAS = r.respuestas || {};
   const n = Object.keys(RESPUESTAS).length;
+  const exacto = r.fuente === 'formulario';
   $('#exSalida').innerHTML =
-    '<p class="ok">✔ ' + n + ' campos extraídos · ' + (r.costo ? '$' + r.costo : '$0') + '</p>'
+    '<p class="ok">✔ ' + n + ' campos extraídos · ' + (r.costo ? '$' + r.costo : '$0')
+    + (exacto ? ' · lectura exacta del formulario' : ' · lectura aproximada de texto libre') + '</p>'
     + '<div class="kv">' + esc(JSON.stringify(RESPUESTAS, null, 2)) + '</div>'
     + '<p style="font-size:12px;color:var(--soft);margin-top:10px">'
     + 'Lo que no estaba en el documento quedó vacío — no se inventó nada. '
