@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Base: CRM Simple · Demo</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --brand:#1B36C9;--bg:#F5F7FB;--accent:#E8A02C;--surface:#fff;--ink:#0F1626;
+    --ink-soft:#454F66;--line:#E2E7F0;--danger:#E5484D;--good:#0FA56C;--radius:14px;
+    --display:'Space Grotesk',sans-serif;--body:'Inter',sans-serif;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--body);-webkit-font-smoothing:antialiased;}
+  h1,h2,h3{font-family:var(--display);margin:0;}
+  button{font-family:inherit;cursor:pointer;}
+
+  .sysbar{background:#0C1322;color:#C9D2EA;font-family:monospace;font-size:12.5px;}
+  .sysbar .in{max-width:920px;margin:0 auto;padding:11px 20px;display:flex;align-items:center;gap:14px;flex-wrap:wrap;}
+  .sysbar .tag{background:#1B2438;border:1px solid #2A3654;border-radius:6px;padding:3px 9px;color:#9BB0E0;}
+  .sysbar b{color:#fff;}
+
+  .wrap{max-width:920px;margin:0 auto;padding:30px 20px 60px;}
+  .head{display:flex;align-items:center;gap:14px;margin-bottom:20px;}
+  .head h1{font-size:24px;}
+  .logoutbtn{margin-left:auto;background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:9px 14px;font-size:12.5px;font-weight:600;color:var(--ink-soft);}
+
+  .layout{display:grid;grid-template-columns:300px 1fr;gap:18px;}
+  @media(max-width:720px){.layout{grid-template-columns:1fr;}}
+
+  .list{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;}
+  .crow{padding:14px 16px;border-bottom:1px solid var(--line);cursor:pointer;}
+  .crow:last-child{border-bottom:none;}
+  .crow.on{background:var(--bg);}
+  .crow .nm{font-weight:600;font-size:14px;}
+  .crow .ct{font-size:12px;color:var(--ink-soft);margin-top:2px;}
+  .status{font-family:monospace;font-size:10px;text-transform:uppercase;letter-spacing:.03em;padding:2px 7px;border-radius:5px;margin-top:6px;display:inline-block;}
+  .status.lead{background:#FBF0DC;color:#A9701A;}
+  .status.cliente{background:#E5F6EE;color:var(--good);}
+  .status.inactivo{background:var(--bg);color:var(--ink-soft);}
+
+  .detail{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:22px;}
+  .detail h2{font-size:19px;margin-bottom:3px;}
+  .detail .ct{font-size:13px;color:var(--ink-soft);margin-bottom:14px;}
+  .estados{display:flex;gap:8px;margin-bottom:18px;}
+  .estados button{background:var(--surface);border:1px solid var(--line);border-radius:20px;padding:7px 14px;font-size:12.5px;font-weight:500;color:var(--ink-soft);}
+  .estados button.on{background:var(--brand);color:#fff;border-color:var(--brand);}
+  .historial{border-top:1px solid var(--line);padding-top:14px;}
+  .historial h3{font-size:13px;text-transform:uppercase;letter-spacing:.04em;color:var(--ink-soft);margin-bottom:10px;}
+  .nota{padding:10px 0;border-bottom:1px solid var(--line);font-size:13.5px;}
+  .nota:last-child{border-bottom:none;}
+  .nota .f{font-family:monospace;font-size:11px;color:var(--ink-soft);margin-bottom:3px;}
+  .nota.empty{color:var(--ink-soft);}
+  .addnota{display:flex;gap:8px;margin-top:14px;}
+  .addnota input{flex:1;font-family:inherit;font-size:13.5px;padding:9px 11px;border:1px solid var(--line);border-radius:8px;background:#FCFAF6;}
+  .addnota button{background:var(--brand);color:#fff;border:0;border-radius:8px;padding:9px 14px;font-weight:600;font-size:13px;}
+
+  .loginbox{max-width:340px;margin:60px auto;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:26px;}
+  .loginbox h2{font-size:20px;margin-bottom:4px;}
+  .loginbox .sub{color:var(--ink-soft);font-size:13px;margin-bottom:16px;line-height:1.5;}
+  .loginbox input{width:100%;font-family:inherit;font-size:14px;padding:11px 13px;border:1px solid var(--line);border-radius:9px;margin-bottom:10px;color:var(--ink);background:#FCFAF6;}
+  .loginbox .err{color:var(--danger);font-size:12.5px;min-height:16px;margin-top:6px;}
+  .save{background:var(--brand);color:#fff;border:0;border-radius:9px;padding:12px;font-weight:600;font-size:14px;width:100%;}
+  #crmPanel.hide{display:none;}
+</style>
+</head>
+<body>
+
+<div class="sysbar"><div class="in">
+  <span class="tag">base: crm-simple</span>
+  <span>contexto: <b id="sysClient">Casa Tela</b></span>
+</div></div>
+
+<div class="wrap" id="app">
+  <div class="loginbox" id="loginBox">
+    <h2>Acceder al CRM</h2>
+    <div class="sub">Inicia sesión para ver clientes y su historial.<br>Demo: <b>admin@casatela.co</b> / <b>admin123</b></div>
+    <form id="loginForm">
+      <input type="email" name="email" placeholder="correo@ejemplo.com" required>
+      <input type="password" name="password" placeholder="Contraseña" required>
+      <button type="submit" class="save">Iniciar sesión</button>
+      <div class="err" id="loginErr"></div>
+    </form>
+  </div>
+
+  <div id="crmPanel" class="hide">
+    <div class="head">
+      <h1>Clientes</h1>
+      <button type="button" class="logoutbtn" onclick="logout()">Cerrar sesión</button>
+    </div>
+    <div class="layout">
+      <div class="list" id="list"></div>
+      <div class="detail" id="detail"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ── CONTEXTO ── */
+const CONTEXT = {
+  cliente: "Casa Tela",
+  base_de_datos: { motor: "local" },   // firebase | supabase | local
+  auth: { motor: "local", rol_requerido: "admin" },
+};
+
+/* ── DATOS (idéntico a src/data/local.adapter.js) ── */
+let DATA = {
+  clientes: [
+    { id:'c1', nombre:'Laura Gómez', contacto:'573001112222', estado:'cliente', interacciones:[
+      {fecha:'2026-05-02', nota:'Compró 2 camisetas, le gustó la calidad.'},
+      {fecha:'2026-06-10', nota:'Preguntó por la nueva colección.'},
+    ]},
+    { id:'c2', nombre:'Andrés Pardo', contacto:'573003334444', estado:'lead', interacciones:[
+      {fecha:'2026-06-15', nota:'Pidió catálogo por WhatsApp, no ha confirmado pedido.'},
+    ]},
+    { id:'c3', nombre:'Marcela Ríos', contacto:'573005556666', estado:'inactivo', interacciones:[
+      {fecha:'2025-11-20', nota:'Última compra hace más de 6 meses.'},
+    ]},
+  ],
+};
+const localAdapter = {
+  async load(){ return DATA; },
+  async agregarNota(id,nota){ const c=DATA.clientes.find(c=>c.id===id); if(c) c.interacciones.unshift({fecha:new Date().toISOString().slice(0,10),nota}); return {ok:true}; },
+  async actualizarEstado(id,estado){ const c=DATA.clientes.find(c=>c.id===id); if(c) c.estado=estado; return {ok:true}; },
+};
+const db = { local: localAdapter }[CONTEXT.base_de_datos.motor] || localAdapter;
+
+/* ---- SEGURIDAD (ver 03-componentes-ui/seguridad.js) ----
+   Todo dato escrito por alguien que no seas tú pasa por esc()
+   antes de tocar innerHTML. En un CRM esto no es teórico: los
+   clientes pueden llegar de un formulario público, y quien abre
+   la ficha después es el dueño con su sesión iniciada. */
+function esc(v){
+  if(v===null||v===undefined) return '';
+  return String(v).replace(/&/g,'&amp;').replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+}
+
+
+/* ── AUTH (idéntico a base: auth) ── */
+const ADMIN_USERS = [{ email:'admin@casatela.co', password:'admin123', rol:'admin' }];
+let authUser = null;
+const localAuth = {
+  async login(email,password){
+    const u = ADMIN_USERS.find(u=>u.email===email && u.password===password);
+    if(!u) throw new Error('Correo o contraseña incorrectos');
+    authUser = { email:u.email, rol:u.rol }; return {ok:true,user:authUser};
+  },
+  async logout(){ authUser=null; return {ok:true}; },
+  current(){ return authUser; },
+};
+const auth = { local: localAuth }[CONTEXT.auth.motor] || localAuth;
+
+function checkAccess(){
+  const user = auth.current();
+  const logged = !!user && user.rol===CONTEXT.auth.rol_requerido;
+  document.getElementById('loginBox').style.display = logged?'none':'block';
+  document.getElementById('crmPanel').classList.toggle('hide', !logged);
+  if(logged) renderCRM();
+}
+async function logout(){ await auth.logout(); checkAccess(); }
+document.getElementById('loginForm').addEventListener('submit', async (e)=>{
+  e.preventDefault();
+  const f=e.target; const err=document.getElementById('loginErr');
+  try{ await auth.login(f.email.value.trim(), f.password.value); err.textContent=''; f.reset(); checkAccess(); }
+  catch(loginErr){ err.textContent=loginErr.message; }
+});
+
+/* ── RENDER ── */
+let activeId = null;
+function renderCRM(){
+  if(!activeId) activeId = DATA.clientes[0]?.id;
+  const list=document.getElementById('list');
+  list.innerHTML = DATA.clientes.map(c=>`
+    <div class="crow ${c.id===activeId?'on':''}" data-id="${c.id}">
+      <div class="nm">${esc(c.nombre)}</div>
+      <div class="ct">${esc(c.contacto)}</div>
+      <span class="status ${c.estado}">${c.estado}</span>
+    </div>`).join('');
+  list.querySelectorAll('.crow').forEach(row=>row.onclick=()=>{ activeId=row.dataset.id; renderCRM(); });
+  renderDetail();
+}
+function renderDetail(){
+  const c = DATA.clientes.find(c=>c.id===activeId);
+  const detail = document.getElementById('detail');
+  if(!c){ detail.innerHTML=''; return; }
+  const estados=['lead','cliente','inactivo'];
+  detail.innerHTML=`
+    <h2>${esc(c.nombre)}</h2>
+    <div class="ct">${esc(c.contacto)}</div>
+    <div class="estados">${estados.map(e=>`<button type="button" class="${e===c.estado?'on':''}" data-estado="${e}">${e}</button>`).join('')}</div>
+    <div class="historial">
+      <h3>Historial</h3>
+      ${c.interacciones.length? c.interacciones.map(i=>`<div class="nota"><div class="f">${esc(i.fecha)}</div>${esc(i.nota)}</div>`).join('') : '<div class="nota empty">Sin interacciones registradas.</div>'}
+      <div class="addnota">
+        <input type="text" id="notaInput" placeholder="Agregar una nota de seguimiento...">
+        <button type="button" id="addNotaBtn">Agregar</button>
+      </div>
+    </div>`;
+  detail.querySelectorAll('.estados button').forEach(b=>b.onclick=async()=>{
+    await db.actualizarEstado(c.id, b.dataset.estado); renderCRM();
+  });
+  document.getElementById('addNotaBtn').onclick=async()=>{
+    const input=document.getElementById('notaInput');
+    if(!input.value.trim()) return;
+    await db.agregarNota(c.id, input.value.trim());
+    input.value=''; renderCRM();
+  };
+}
+
+document.getElementById('sysClient').textContent = CONTEXT.cliente;
+(async function init(){ DATA = await db.load(); checkAccess(); })();
+</script>
+</body>
+</html>

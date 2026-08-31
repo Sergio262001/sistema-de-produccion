@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Índice · Sistema de Producción</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --brand:#2F54FF;--bg:#F5F7FB;--surface:#fff;--ink:#0F1626;--ink-soft:#454F66;
+    --line:#E2E7F0;--radius:14px;--display:'Space Grotesk',sans-serif;--body:'Inter',sans-serif;
+    --starter:#0FA56C;--starter-bg:#E5F6EE;--pro:#6A3CF0;--pro-bg:#EDE7FD;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--body);-webkit-font-smoothing:antialiased;}
+  h1,h2{font-family:var(--display);margin:0;}
+  a{color:inherit;text-decoration:none;}
+
+  .topbar{position:sticky;top:0;z-index:10;background:#0C1322;color:#C9D2EA;font-family:monospace;font-size:12.5px;border-bottom:1px solid #1B2438;}
+  .topbar .in{max-width:980px;margin:0 auto;padding:12px 20px;display:flex;align-items:center;gap:18px;flex-wrap:wrap;}
+  .topbar .brand{color:#fff;font-weight:600;margin-right:auto;}
+  .topbar nav{display:flex;gap:16px;flex-wrap:wrap;}
+  .topbar nav a{color:#9BB0E0;}
+  .topbar nav a:hover{color:#fff;}
+
+  .hero{max-width:980px;margin:0 auto;padding:48px 20px 8px;}
+  .hero a.inline-link{color:var(--brand);text-decoration:underline;}
+  .hero h1{font-size:clamp(26px,4vw,34px);letter-spacing:-.01em;}
+  .hero p{color:var(--ink-soft);font-size:14.5px;max-width:620px;margin:12px 0 0;line-height:1.55;}
+  .stats{display:flex;gap:10px;margin-top:24px;flex-wrap:wrap;}
+  .stat{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:10px 16px;}
+  .stat .n{font-family:var(--display);font-size:20px;font-weight:600;}
+  .stat .l{font-family:monospace;font-size:10.5px;color:var(--ink-soft);letter-spacing:.03em;}
+
+  .wrap{max-width:980px;margin:0 auto;padding:8px 20px 70px;}
+
+  section{margin-top:42px;}
+  section .sh{display:flex;align-items:baseline;gap:10px;margin-bottom:14px;}
+  section h2{font-size:15px;text-transform:uppercase;letter-spacing:.05em;color:var(--ink-soft);font-family:monospace;font-weight:500;}
+  section .sh .count{font-family:monospace;font-size:11px;color:var(--ink-soft);background:var(--surface);border:1px solid var(--line);border-radius:20px;padding:2px 9px;}
+
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+  @media(max-width:680px){.grid{grid-template-columns:1fr;}}
+
+  .item{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:16px 18px;display:flex;gap:13px;align-items:flex-start;transition:.15s;}
+  .item:hover{border-color:var(--brand);transform:translateY(-1px);box-shadow:0 6px 16px -10px rgba(15,22,38,.25);}
+  .item .ic{font-size:21px;flex:none;width:34px;height:34px;border-radius:9px;background:var(--bg);display:grid;place-items:center;}
+  .item .body{flex:1;min-width:0;}
+  .item .row{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+  .item .t{font-weight:600;font-size:14.5px;}
+  .item .d{font-size:12.5px;color:var(--ink-soft);margin-top:3px;line-height:1.5;}
+  .item .meta{display:flex;gap:6px;margin-top:9px;flex-wrap:wrap;}
+  .tagnum{font-family:monospace;font-size:10.5px;color:var(--ink-soft);}
+  .pill{font-family:monospace;font-size:10px;font-weight:500;padding:2px 8px;border-radius:5px;letter-spacing:.02em;}
+  .pill.starter{background:var(--starter-bg);color:var(--starter);}
+  .pill.pro{background:var(--pro-bg);color:var(--pro);}
+  .pill.warn{background:#FBF0DC;color:#A9701A;}
+
+  footer{border-top:1px solid var(--line);padding:22px 20px;max-width:980px;margin:0 auto;font-size:12.5px;color:var(--ink-soft);font-family:monospace;}
+
+  .skip-link{position:absolute;left:-9999px;top:0;background:var(--brand);color:#fff;padding:8px 14px;border-radius:6px;z-index:100;}
+  .skip-link:focus{left:12px;top:12px;}
+  a:focus-visible,input:focus-visible,button:focus-visible{outline:2px solid var(--brand);outline-offset:2px;}
+
+  .quickstart{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:16px 18px;margin-top:24px;}
+  .quickstart .qt{font-family:monospace;font-size:11px;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.05em;margin-bottom:10px;}
+  .quickstart ol{margin:0;padding-left:20px;display:grid;gap:6px;font-size:13.5px;}
+  .quickstart li::marker{color:var(--brand);font-weight:600;}
+
+  .searchbar{position:relative;margin-top:18px;}
+  .searchbar input{width:100%;padding:11px 14px 11px 38px;border:1px solid var(--line);border-radius:10px;font-family:var(--body);font-size:13.5px;background:var(--surface);color:var(--ink);}
+  .searchbar input::placeholder{color:#9AA4BD;}
+  .searchbar .si{position:absolute;left:13px;top:50%;transform:translateY(-50%);color:var(--ink-soft);font-size:13px;}
+  .item.hide{display:none;}
+  .empty-msg{display:none;color:var(--ink-soft);font-size:13px;padding:14px 0;font-family:monospace;}
+</style>
+</head>
+<body>
+
+<a href="#contenido" class="skip-link">Saltar al contenido</a>
+
+<div class="topbar"><div class="in">
+  <span class="brand">Sistema de Producción</span>
+  <nav>
+    <a href="#documentos">Documentos</a>
+    <a href="#bases">Bases</a>
+    <a href="#kit">Kit y referencias</a>
+  </nav>
+</div></div>
+
+<div class="hero">
+  <h1>Índice de navegación local</h1>
+  <p>Acceso directo a documentos, bases técnicas, demos y plantillas. Abre este archivo con doble clic — todos los enlaces son relativos, así que funciona sin servidor. No es una página pública del estudio (esa es <code>08-pagina-del-estudio/</code>). ¿Primera vez aquí? Lee <a href="COMO-LO-USARIA-UN-EXPERTO.md" class="inline-link">cómo lo usaría un experto</a> antes de seguir.</p>
+  <div class="stats">
+    <div class="stat"><div class="n">9</div><div class="l">BASES TÉCNICAS</div></div>
+    <div class="stat"><div class="n">3</div><div class="l">FICHAS POR RUBRO</div></div>
+    <div class="stat"><div class="n">4</div><div class="l">PROMPTS MAESTROS</div></div>
+    <div class="stat"><div class="n">40/44</div><div class="l">BACKLOG COMPLETO</div></div>
+  </div>
+  <div class="quickstart">
+    <div class="qt">¿Por dónde empiezo hoy?</div>
+    <ol>
+      <li>Si te llega un cliente nuevo → manda <a href="06-plantillas-de-negocio/brief-de-cliente.md" class="inline-link">brief-de-cliente.md</a>.</li>
+      <li>Para elegir la base correcta → revisa <a href="04-fichas-de-contexto/README.md" class="inline-link">fichas de contexto por rubro</a>.</li>
+      <li>Para armar el proyecto → usa <a href="05-prompts-maestros/prompt-de-arranque.md" class="inline-link">prompt-de-arranque.md</a>.</li>
+    </ol>
+  </div>
+  <div class="searchbar">
+    <span class="si">🔎</span>
+    <input type="search" id="buscador" placeholder="Buscar por nombre (ej. carrito, ga4, login, precios)..." aria-label="Buscar en el índice">
+  </div>
+</div>
+
+<div class="wrap" id="contenido">
+
+  <section id="documentos">
+    <div class="sh"><h2>Documentos</h2><span class="count">3</span></div>
+    <div class="grid">
+      <a class="item" href="01-documentos/1-catalogo-de-servicios.html">
+        <div class="ic">📋</div>
+        <div class="body">
+          <div class="t">Catálogo de servicios</div>
+          <div class="d">Qué ofreces, Starter vs Pro, y las bases reutilizables.</div>
+        </div>
+      </a>
+      <a class="item" href="01-documentos/2-plan-de-construccion.html">
+        <div class="ic">🗺️</div>
+        <div class="body">
+          <div class="t">Plan de construcción</div>
+          <div class="d">Backlog, ficha de contexto v2 y plan por fases.</div>
+        </div>
+      </a>
+      <a class="item" href="01-documentos/3-automatizacion-y-nuevos-servicios.md">
+        <div class="ic">⚙️</div>
+        <div class="body">
+          <div class="t">Automatización y nuevos servicios</div>
+          <div class="d">Ideas de servicios recurrentes/automatizados y roadmap a futuro.</div>
+          <div class="meta"><span class="pill warn">ideas, no construido</span></div>
+        </div>
+      </a>
+    </div>
+    <p class="empty-msg" data-section="documentos">No hay resultados en esta sección.</p>
+  </section>
+
+  <section id="bases">
+    <div class="sh"><h2>Bases técnicas — demos</h2><span class="count">10</span></div>
+    <div class="grid">
+      <a class="item" href="02-bases/menu-con-panel-admin/demo.html">
+        <div class="ic">🍽️</div>
+        <div class="body">
+          <div class="t">Menú con Panel Admin</div>
+          <div class="d">Menú QR + panel de edición con login real protegido por rol.</div>
+          <div class="meta"><span class="tagnum">base 1</span><span class="pill starter">starter</span><span class="pill pro">pro</span></div>
+        </div>
+      </a>
+      <a class="item" href="02-bases/carrito-reutilizable/demo.html">
+        <div class="ic">🛒</div>
+        <div class="body">
+          <div class="t">Carrito Reutilizable</div>
+          <div class="d">Motor de carrito + checkout WhatsApp/Wompi/Mercado Pago/Stripe.</div>
+          <div class="meta"><span class="tagnum">base 2</span><span class="pill starter">starter</span><span class="pill pro">pro</span></div>
+        </div>
+      </a>
+      <a class="item" href="02-bases/landing-modular/demo.html">
+        <div class="ic">🌐</div>
+        <div class="body">
+          <div class="t">Landing Modular</div>
+          <div class="d">Landing por secciones con captura de leads.</div>
+          <div class="meta"><span class="tagnum">base 3</span><span class="pill starter">starter</span></div>
+        </div>
+      </a>
+      <a class="item" href="02-bases/auth/demo.html">
+        <div class="ic">🔐</div>
+        <div class="body">
+          <div class="t">Auth</div>
+          <div class="d">Login, registro y roles — Firebase, Supabase o local.</div>
+          <div class="meta"><span class="tagnum">base 4</span><span class="pill pro">pro</span></div>
+        </div>
+      </a>
+      <a class="item" href="02-bases/ecommerce-completo/demo.html">
+        <div class="ic">📦</div>
+        <div class="body">
+          <div class="t">Ecommerce Completo</div>
+          <div class="d">Catálogo con inventario real, filtros y panel admin protegido.</div>
+          <div class="meta"><span class="tagnum">base 5</span><span class="pill pro">pro</span></div>
+        </div>
+      </a>
+      <a class="item" href="02-bases/dashboard-analytics/demo.html">
+        <div class="ic">📊</div>
+        <div class="body">
+          <div class="t">Dashboard Analytics</div>
+          <div class="d">KPIs de leads e inventario.</div>
+          <div class="meta"><span class="tagnum">base 6</span><span class="pill pro">pro</span><span class="pill warn">sin tráfico GA4</span></div>
+        </div>
+      </a>
+      <a class="item" href="02-bases/crm-simple/demo.html">
+        <div class="ic">🗂️</div>
+        <div class="body">
+          <div class="t">CRM Simple</div>
+          <div class="d">Clientes, estado y un historial de interacciones que se acumula.</div>
+          <div class="meta"><span class="tagnum">base 7</span><span class="pill pro">pro</span></div>
+        </div>
+      </a>
+      <a class="item" href="02-bases/suscripciones/demo.html">
+        <div class="ic">🔁</div>
+        <div class="body">
+          <div class="t">Suscripciones</div>
+          <div class="d">Planes y registro de suscripción.</div>
+          <div class="meta"><span class="tagnum">base 8</span><span class="pill pro">pro</span><span class="pill warn">sin cobro automático</span></div>
+        </div>
+      </a>
+      <a class="item" href="02-bases/marketplace/demo.html">
+        <div class="ic">🏬</div>
+        <div class="body">
+          <div class="t">Marketplace</div>
+          <div class="d">Catálogo multi-vendedor con desglose de comisión por venta.</div>
+          <div class="meta"><span class="tagnum">base 9</span><span class="pill pro">pro</span><span class="pill warn">sin split automático</span></div>
+        </div>
+      </a>
+      <a class="item" href="02-bases/backend-pro/README.md">
+        <div class="ic">🔑</div>
+        <div class="body">
+          <div class="t">Backend Pro</div>
+          <div class="d">Cobro real con Wompi: firma de integridad, total recalculado en servidor y confirmación por webhook.</div>
+          <div class="meta"><span class="tagnum">base 10</span><span class="pill pro">pro</span><span class="pill warn">sin demo — es backend</span></div>
+        </div>
+      </a>
+    </div>
+    <p class="empty-msg" data-section="bases">No hay resultados en esta sección.</p>
+  </section>
+
+  <section id="kit">
+    <div class="sh"><h2>Kit y referencias</h2><span class="count">7</span></div>
+    <div class="grid">
+      <a class="item" href="03-componentes-ui/demo.html">
+        <div class="ic">🧩</div>
+        <div class="body">
+          <div class="t">Componentes UI</div>
+          <div class="d">Botones, cards, formularios, drawer, producto/carrito + conector GA4.</div>
+        </div>
+      </a>
+      <a class="item" href="04-fichas-de-contexto/README.md">
+        <div class="ic">📝</div>
+        <div class="body">
+          <div class="t">Fichas de contexto por rubro</div>
+          <div class="d">Restaurante, tienda y clínica — listas para adaptar.</div>
+        </div>
+      </a>
+      <a class="item" href="05-prompts-maestros/prompt-de-arranque.md">
+        <div class="ic">🚀</div>
+        <div class="body">
+          <div class="t">Prompts maestros</div>
+          <div class="d">Arranque, por base, revisión y contenido — el manual de ensamblaje.</div>
+        </div>
+      </a>
+      <a class="item" href="06-plantillas-de-negocio/README.md">
+        <div class="ic">💼</div>
+        <div class="body">
+          <div class="t">Plantillas de negocio</div>
+          <div class="d">Brief, lista de precios, propuesta, contrato y soporte.</div>
+        </div>
+      </a>
+      <a class="item" href="07-operacion-equipo/onboarding.md">
+        <div class="ic">👥</div>
+        <div class="body">
+          <div class="t">Operación de equipo</div>
+          <div class="d">Estructura de repos, guía de estilo, onboarding, tablero y checklist de mejoras.</div>
+        </div>
+      </a>
+      <a class="item" href="08-pagina-del-estudio/index.html">
+        <div class="ic">🏠</div>
+        <div class="body">
+          <div class="t">Página del estudio</div>
+          <div class="d">Landing propia, rediseñada: conmutador de identidad en vivo y dos temas. Completa los placeholders antes de publicar.</div>
+        </div>
+      </a>
+      <a class="item" href="09-que-necesito-de-ti/README.md">
+        <div class="ic">📋</div>
+        <div class="body">
+          <div class="t">Qué necesito de ti</div>
+          <div class="d">Un formato por servicio: datos, credenciales y advertencias antes de construir.</div>
+        </div>
+      </a>
+    </div>
+    <p class="empty-msg" data-section="kit">No hay resultados en esta sección.</p>
+  </section>
+
+</div>
+
+<footer>Sistema de Producción · Estudio Digital — generado y mantenido junto con CLAUDE.md</footer>
+
+<script>
+(function(){
+  var input = document.getElementById('buscador');
+  var sections = document.querySelectorAll('.wrap section');
+  input.addEventListener('input', function(){
+    var q = input.value.trim().toLowerCase();
+    sections.forEach(function(section){
+      var items = section.querySelectorAll('.item');
+      var visibleCount = 0;
+      items.forEach(function(item){
+        var text = item.textContent.toLowerCase();
+        var matches = q === '' || text.indexOf(q) !== -1;
+        item.classList.toggle('hide', !matches);
+        if (matches) visibleCount++;
+      });
+      var emptyMsg = section.querySelector('.empty-msg');
+      if (emptyMsg) emptyMsg.style.display = (visibleCount === 0 && q !== '') ? 'block' : 'none';
+    });
+  });
+})();
+</script>
+
+</body>
+</html>

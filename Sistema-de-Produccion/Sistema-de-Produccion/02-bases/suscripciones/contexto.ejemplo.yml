@@ -1,0 +1,52 @@
+# ════════════════════════════════════════════════════════════
+#  FICHA DE CONTEXTO — Base: suscripciones
+#  Copia este archivo por proyecto, llénalo, y pásamelo junto
+#  con la base. NO pongas claves reales aquí (van en .env).
+# ════════════════════════════════════════════════════════════
+
+proyecto:   "Casa Tela — membresía"
+cliente:    "Casa Tela"
+linea:      pro                # pagos recurrentes son siempre pro
+base:       suscripciones
+
+# ── BASE DE DATOS (registro de planes y suscripciones) ───────
+base_de_datos:
+  motor:  supabase             # firebase | supabase | local
+  tablas: [planes, suscripciones]
+
+# ── PLANES (completa con los reales del cliente — sin cifras de ejemplo) ─
+planes:
+  - id: basico
+    nombre: "Básico"
+    precio: 0          # ← completa con el precio real
+    ciclo: mensual
+    beneficios: []      # ← lista real de beneficios
+  - id: pro
+    nombre: "Pro"
+    precio: 0
+    ciclo: mensual
+    beneficios: []
+    destacado: true
+
+# ── COBRO RECURRENTE (requiere backend — ver README de la base) ─
+pagos:
+  proveedor: ninguno    # stripe | mercadopago | ninguno (ninguno = solo registro manual)
+  automatizado: false   # true solo si hay backend + webhook configurado
+
+# ── VARIABLES (solo nombres; valores reales en .env) ────────
+env:
+  - SUPABASE_URL
+  - SUPABASE_ANON_KEY
+
+# ── MARCA (alimenta los tokens de diseño) ───────────────────
+marca:
+  primario:   "#6A3CF0"
+  secundario: "#F5F7FB"
+  display:    "Space Grotesk"
+  body:       "Inter"
+
+# ── ENTREGA ─────────────────────────────────────────────────
+entrega:
+  dominio:  "casatela.co"
+  hosting:  vercel
+  idiomas:  [es]

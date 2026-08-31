@@ -1,0 +1,34 @@
+# ════════════════════════════════════════════════════════════
+#  FICHA DE CONTEXTO — Base: auth
+#  Copia este archivo por proyecto, llénalo, y pásamelo junto
+#  con la base. NO pongas claves reales aquí (van en .env).
+# ════════════════════════════════════════════════════════════
+
+proyecto:   "Café Raíz — acceso al panel"
+cliente:    "Café Raíz"
+linea:      pro                # starter | pro (auth con roles es típicamente Pro)
+base:       auth
+
+# ── PROVEEDOR DE AUTENTICACIÓN ───────────────────────────────
+auth:
+  motor:          supabase      # firebase | supabase | local
+  roles:          [admin, cliente]
+  rol_requerido:  admin         # rol que necesita el panel que proteges
+
+# ── VARIABLES (solo nombres; valores reales en .env) ────────
+env:
+  - SUPABASE_URL
+  - SUPABASE_ANON_KEY
+
+# ── MARCA (alimenta los tokens de diseño) ───────────────────
+marca:
+  primario: "#1B36C9"
+  secundario: "#F5F7FB"
+  display:  "Space Grotesk"
+  body:     "Inter"
+
+# ── ENTREGA ─────────────────────────────────────────────────
+entrega:
+  dominio:  "caferaiz.co"
+  hosting:  vercel
+  idiomas:  [es]

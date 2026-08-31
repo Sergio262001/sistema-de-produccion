@@ -1,0 +1,90 @@
+/* ════════════════════════════════════════════════════════════
+   COMPONENTES UI COMPARTIDOS
+   Cada bloque es independiente — copia solo el que necesites
+   dentro del <style> de tu base, o enlaza este archivo si tu
+   proyecto sirve varios HTML desde un mismo servidor.
+   Todos usan los nombres de --variables del contrato de tokens
+   (tokens.css de este kit), nunca colores fijos.
+   ════════════════════════════════════════════════════════════ */
+
+/* ---- reset mínimo ---- */
+*{box-sizing:border-box;}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--body);-webkit-font-smoothing:antialiased;}
+h1,h2,h3,h4{font-family:var(--display);margin:0;line-height:1.15;}
+button{font-family:inherit;cursor:pointer;}
+
+/* ---- sysbar — barra de demo que indica base/contexto/motor activo ---- */
+.sysbar{background:#0C1322;color:#C9D2EA;font-family:monospace;font-size:12.5px;}
+.sysbar .in{max-width:1000px;margin:0 auto;padding:11px 20px;display:flex;gap:14px;align-items:center;flex-wrap:wrap;}
+.sysbar .tag{background:#1B2438;border:1px solid #2A3654;border-radius:6px;padding:3px 9px;color:#9BB0E0;}
+.sysbar b{color:#fff;}
+
+/* ---- botones ---- */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border:0;border-radius:10px;padding:12px 20px;font-weight:600;font-size:14.5px;cursor:pointer;}
+.btn-primary{background:var(--brand);color:#fff;}
+.btn-ghost{background:var(--bg);border:1px solid var(--line);color:var(--ink-soft);}
+.btn-danger{background:#FBE6E7;color:var(--danger);}
+.btn-full{width:100%;}
+
+/* ---- pills / badges ---- */
+.pill{font-family:monospace;font-size:11px;font-weight:500;padding:3px 9px;border-radius:6px;background:var(--brand);color:#fff;letter-spacing:.02em;}
+.badge{font-family:monospace;font-size:10px;text-transform:uppercase;letter-spacing:.04em;padding:2px 7px;border-radius:5px;background:var(--bg);color:var(--ink-soft);font-weight:500;}
+
+/* ---- nav por pills (categorías, tabs) ---- */
+.nav-pills{display:flex;gap:8px;overflow-x:auto;}
+.nav-pills button{white-space:nowrap;background:var(--surface);border:1px solid var(--line);color:var(--ink-soft);border-radius:30px;padding:8px 16px;font-size:13.5px;font-weight:500;transition:.15s;}
+.nav-pills button.on{background:var(--brand);color:#fff;border-color:var(--brand);}
+
+/* ---- card ---- */
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:18px 20px;}
+.card h3{font-size:16px;margin:8px 0 6px;}
+.card p{font-size:13.5px;color:var(--ink-soft);line-height:1.5;margin:0;}
+
+/* ---- inputs / formularios ---- */
+.field{font-family:inherit;font-size:14px;padding:11px 13px;border:1px solid var(--line);border-radius:9px;background:var(--surface);color:var(--ink);width:100%;}
+.field:focus{outline:2px solid var(--brand);outline-offset:1px;border-color:transparent;}
+.field-msg{font-size:12.5px;min-height:16px;margin:0;}
+.field-msg.err{color:var(--danger);}
+.field-msg.ok{color:#0FA56C;}
+
+/* ---- switch (toggle on/off, ej. disponibilidad) ---- */
+.switch{width:38px;height:22px;border-radius:20px;background:var(--line);border:0;position:relative;flex:none;transition:.2s;}
+.switch.on{background:var(--brand);}
+.switch::after{content:"";position:absolute;top:2px;left:2px;width:18px;height:18px;border-radius:50%;background:#fff;transition:.2s;}
+.switch.on::after{left:18px;}
+
+/* ---- modal / drawer lateral (ej. carrito) ---- */
+.overlay{position:fixed;inset:0;background:rgba(15,22,38,.4);opacity:0;pointer-events:none;transition:.25s;z-index:30;}
+.overlay.show{opacity:1;pointer-events:auto;}
+.drawer{position:fixed;top:0;right:0;height:100%;width:380px;max-width:90vw;background:var(--bg);z-index:40;transform:translateX(100%);transition:.28s cubic-bezier(.4,0,.2,1);display:flex;flex-direction:column;box-shadow:-20px 0 50px -20px rgba(0,0,0,.3);}
+.drawer.show{transform:none;}
+.drawer .dh{padding:22px 22px 16px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--line);}
+.drawer .close{background:none;border:0;font-size:24px;color:var(--ink-soft);line-height:1;cursor:pointer;}
+@media(prefers-reduced-motion:reduce){.drawer,.overlay{transition:none;}}
+
+/* ---- footer simple ---- */
+.footer-simple{border-top:1px solid var(--line);padding:20px 0;display:flex;justify-content:space-between;font-size:13px;color:var(--ink-soft);}
+
+/* ---- producto (venta) — card con precio y botón agregar ---- */
+/* mismo HTML que produce cart.js al pintar PRODUCTOS en carrito-reutilizable */
+.product{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;display:flex;flex-direction:column;}
+.product .ph{height:120px;display:grid;place-items:center;font-size:46px;background:linear-gradient(135deg,#fff,var(--line));}
+.product .b{padding:14px 15px 15px;display:flex;flex-direction:column;flex:1;}
+.product h3{font-size:16px;font-family:var(--body);font-weight:600;margin:0 0 3px;}
+.product .d{font-size:12.5px;color:var(--ink-soft);margin:0 0 12px;line-height:1.4;flex:1;}
+.product .row{display:flex;align-items:center;justify-content:space-between;gap:10px;}
+.product .pr{font-family:var(--display);font-weight:600;font-size:18px;color:var(--brand);}
+
+/* ---- línea de carrito — fila con cantidad, igual a la del drawer ---- */
+.cart-line{display:flex;gap:12px;padding:15px 0;border-bottom:1px solid var(--line);align-items:center;}
+.cart-line .em{width:46px;height:46px;border-radius:10px;background:var(--surface);border:1px solid var(--line);display:grid;place-items:center;font-size:22px;flex:none;}
+.cart-line .li{flex:1;min-width:0;}
+.cart-line .nm{font-weight:600;font-size:14px;}
+.cart-line .lp{font-size:12.5px;color:var(--ink-soft);}
+.qty{display:flex;align-items:center;gap:8px;}
+.qty button{width:26px;height:26px;border-radius:7px;border:1px solid var(--line);background:var(--surface);font-size:15px;color:var(--ink);display:grid;place-items:center;}
+.qty span{font-family:monospace;font-size:13px;min-width:16px;text-align:center;}
+
+/* ---- resumen de checkout — subtotal/envío/total + botón pagar ---- */
+.checkout-summary .totrow{display:flex;justify-content:space-between;font-size:13.5px;color:var(--ink-soft);margin-bottom:7px;}
+.checkout-summary .totrow.big{font-size:18px;color:var(--ink);font-weight:600;margin:12px 0 16px;font-family:var(--display);}

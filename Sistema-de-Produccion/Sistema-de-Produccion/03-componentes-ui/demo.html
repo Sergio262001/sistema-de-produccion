@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Componentes UI · Catálogo</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  /* ── tokens.css (en línea para que el demo abra con doble clic) ── */
+  :root{
+    --brand:#2F54FF;--bg:#F5F7FB;--accent:#E8A02C;--surface:#fff;--ink:#0F1626;
+    --ink-soft:#454F66;--line:#E2E7F0;--danger:#E5484D;--radius:14px;
+    --display:'Space Grotesk',sans-serif;--body:'Inter',sans-serif;
+  }
+  /* ── components.css (en línea, idéntico al archivo) ── */
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--body);-webkit-font-smoothing:antialiased;}
+  h1,h2,h3,h4{font-family:var(--display);margin:0;line-height:1.15;}
+  button{font-family:inherit;cursor:pointer;}
+
+  .sysbar{background:#0C1322;color:#C9D2EA;font-family:monospace;font-size:12.5px;}
+  .sysbar .in{max-width:1000px;margin:0 auto;padding:11px 20px;display:flex;gap:14px;align-items:center;flex-wrap:wrap;}
+  .sysbar .tag{background:#1B2438;border:1px solid #2A3654;border-radius:6px;padding:3px 9px;color:#9BB0E0;}
+  .sysbar b{color:#fff;}
+
+  .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border:0;border-radius:10px;padding:12px 20px;font-weight:600;font-size:14.5px;cursor:pointer;}
+  .btn-primary{background:var(--brand);color:#fff;}
+  .btn-ghost{background:var(--bg);border:1px solid var(--line);color:var(--ink-soft);}
+  .btn-danger{background:#FBE6E7;color:var(--danger);}
+  .btn-full{width:100%;}
+
+  .pill{font-family:monospace;font-size:11px;font-weight:500;padding:3px 9px;border-radius:6px;background:var(--brand);color:#fff;letter-spacing:.02em;}
+  .badge{font-family:monospace;font-size:10px;text-transform:uppercase;letter-spacing:.04em;padding:2px 7px;border-radius:5px;background:var(--bg);color:var(--ink-soft);font-weight:500;}
+
+  .nav-pills{display:flex;gap:8px;overflow-x:auto;}
+  .nav-pills button{white-space:nowrap;background:var(--surface);border:1px solid var(--line);color:var(--ink-soft);border-radius:30px;padding:8px 16px;font-size:13.5px;font-weight:500;transition:.15s;}
+  .nav-pills button.on{background:var(--brand);color:#fff;border-color:var(--brand);}
+
+  .card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:18px 20px;}
+  .card h3{font-size:16px;margin:8px 0 6px;}
+  .card p{font-size:13.5px;color:var(--ink-soft);line-height:1.5;margin:0;}
+
+  .field{font-family:inherit;font-size:14px;padding:11px 13px;border:1px solid var(--line);border-radius:9px;background:var(--surface);color:var(--ink);width:100%;}
+  .field:focus{outline:2px solid var(--brand);outline-offset:1px;border-color:transparent;}
+  .field-msg{font-size:12.5px;min-height:16px;margin:0;}
+  .field-msg.err{color:var(--danger);}
+  .field-msg.ok{color:#0FA56C;}
+
+  .switch{width:38px;height:22px;border-radius:20px;background:var(--line);border:0;position:relative;flex:none;transition:.2s;}
+  .switch.on{background:var(--brand);}
+  .switch::after{content:"";position:absolute;top:2px;left:2px;width:18px;height:18px;border-radius:50%;background:#fff;transition:.2s;}
+  .switch.on::after{left:18px;}
+
+  .overlay{position:fixed;inset:0;background:rgba(15,22,38,.4);opacity:0;pointer-events:none;transition:.25s;z-index:30;}
+  .overlay.show{opacity:1;pointer-events:auto;}
+  .drawer{position:fixed;top:0;right:0;height:100%;width:340px;max-width:90vw;background:var(--bg);z-index:40;transform:translateX(100%);transition:.28s cubic-bezier(.4,0,.2,1);display:flex;flex-direction:column;box-shadow:-20px 0 50px -20px rgba(0,0,0,.3);}
+  .drawer.show{transform:none;}
+  .drawer .dh{padding:22px 22px 16px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--line);}
+  .drawer .close{background:none;border:0;font-size:24px;color:var(--ink-soft);line-height:1;cursor:pointer;}
+
+  .footer-simple{border-top:1px solid var(--line);padding:20px 0;display:flex;justify-content:space-between;font-size:13px;color:var(--ink-soft);}
+
+  .product{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;display:flex;flex-direction:column;}
+  .product .ph{height:100px;display:grid;place-items:center;font-size:38px;background:linear-gradient(135deg,#fff,var(--line));}
+  .product .b{padding:12px 14px 14px;display:flex;flex-direction:column;flex:1;}
+  .product h3{font-size:15px;font-family:var(--body);font-weight:600;margin:0 0 3px;}
+  .product .d{font-size:12px;color:var(--ink-soft);margin:0 0 10px;line-height:1.4;flex:1;}
+  .product .row2{display:flex;align-items:center;justify-content:space-between;gap:10px;}
+  .product .pr{font-family:var(--display);font-weight:600;font-size:16px;color:var(--brand);}
+
+  .cart-line{display:flex;gap:12px;padding:13px 0;border-bottom:1px solid var(--line);align-items:center;}
+  .cart-line .em{width:40px;height:40px;border-radius:10px;background:var(--bg);border:1px solid var(--line);display:grid;place-items:center;font-size:18px;flex:none;}
+  .cart-line .li{flex:1;min-width:0;}
+  .cart-line .nm{font-weight:600;font-size:13.5px;}
+  .cart-line .lp{font-size:12px;color:var(--ink-soft);}
+  .qty{display:flex;align-items:center;gap:8px;}
+  .qty button{width:24px;height:24px;border-radius:7px;border:1px solid var(--line);background:var(--surface);font-size:14px;color:var(--ink);display:grid;place-items:center;}
+  .qty span{font-family:monospace;font-size:13px;min-width:14px;text-align:center;}
+
+  .checkout-summary .totrow{display:flex;justify-content:space-between;font-size:13px;color:var(--ink-soft);margin-bottom:6px;}
+  .checkout-summary .totrow.big{font-size:17px;color:var(--ink);font-weight:600;margin:10px 0 14px;font-family:var(--display);}
+  .btn-sm{padding:8px 14px;font-size:13px;}
+  .card-narrow{max-width:320px;}
+  .mt-14{margin-top:14px;}
+  .h1-page{font-size:28px;margin:30px 0 6px;}
+  .p-sub{color:var(--ink-soft);font-size:14.5px;margin-bottom:0;}
+  .icon-24{font-size:24px;}
+  .form-narrow{max-width:320px;display:flex;flex-direction:column;gap:10px;}
+  .label-sm{font-size:13.5px;color:var(--ink-soft);}
+  .drawer-title{font-size:19px;}
+  .drawer-body{padding:20px;color:var(--ink-soft);font-size:13.5px;}
+
+  /* ── solo del catálogo (no es parte del kit) ── */
+  .wrap{max-width:760px;margin:0 auto;padding:40px 20px 70px;}
+  section{margin-bottom:42px;}
+  section h2{font-size:18px;margin-bottom:14px;}
+  .row{display:flex;gap:12px;flex-wrap:wrap;align-items:center;}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+  @media(max-width:600px){.grid2{grid-template-columns:1fr;}}
+</style>
+</head>
+<body>
+
+<div class="sysbar"><div class="in">
+  <span class="tag">kit: componentes-ui</span>
+  <span>úsalo como referencia, no como dependencia en runtime</span>
+</div></div>
+
+<div class="wrap">
+  <h1 class="h1-page">Catálogo de componentes</h1>
+  <p class="p-sub">Copia el bloque que necesites a tu base. Todos usan los mismos nombres de variable que <code>src/styles/tokens.css</code> en cada base.</p>
+
+  <section>
+    <h2>Botones</h2>
+    <div class="row">
+      <button type="button" class="btn btn-primary">Guardar cambios</button>
+      <button type="button" class="btn btn-ghost">Cancelar</button>
+      <button type="button" class="btn btn-danger">Eliminar</button>
+    </div>
+  </section>
+
+  <section>
+    <h2>Pills &amp; badges</h2>
+    <div class="row">
+      <span class="pill">solo el dueño</span>
+      <span class="badge">top</span>
+      <span class="badge">agotado</span>
+    </div>
+  </section>
+
+  <section>
+    <h2>Nav por pills</h2>
+    <div class="nav-pills">
+      <button type="button" class="on">Café</button>
+      <button type="button">Brunch</button>
+      <button type="button">Postres</button>
+    </div>
+  </section>
+
+  <section>
+    <h2>Cards</h2>
+    <div class="grid2">
+      <div class="card"><div class="icon-24">🎨</div><h3>UX/UI</h3><p>Diseño centrado en el usuario, de wireframe a interfaz final.</p></div>
+      <div class="card"><div class="icon-24">🌐</div><h3>Landing pages</h3><p>Páginas que comunican y convierten desde el primer scroll.</p></div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Formulario</h2>
+    <div class="form-narrow">
+      <input class="field" type="email" placeholder="correo@ejemplo.com">
+      <input class="field" type="password" placeholder="Contraseña">
+      <p class="field-msg err">Correo o contraseña incorrectos</p>
+      <button type="button" class="btn btn-primary btn-full">Iniciar sesión</button>
+    </div>
+  </section>
+
+  <section>
+    <h2>Switch</h2>
+    <div class="row">
+      <button type="button" class="switch on" id="sw1" onclick="this.classList.toggle('on')" aria-label="Disponible"></button>
+      <span class="label-sm">Disponible</span>
+    </div>
+  </section>
+
+  <section>
+    <h2>Producto (venta)</h2>
+    <div class="grid2">
+      <div class="product"><div class="ph">🥛</div><div class="b"><h3>Latte de la casa</h3><div class="d">Leche texturizada, arte latte</div><div class="row2"><span class="pr">$8.500</span><button type="button" class="btn btn-primary btn-sm">Agregar</button></div></div></div>
+      <div class="product"><div class="ph">🍰</div><div class="b"><h3>Cheesecake</h3><div class="d">Frutos del bosque</div><div class="row2"><span class="pr">$11.000</span><button type="button" class="btn btn-primary btn-sm">Agregar</button></div></div></div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Línea de carrito + resumen de checkout</h2>
+    <div class="card card-narrow">
+      <div class="cart-line"><div class="em">🥛</div><div class="li"><div class="nm">Latte de la casa</div><div class="lp">$8.500 c/u</div></div><div class="qty"><button type="button">−</button><span>2</span><button type="button">+</button></div></div>
+      <div class="checkout-summary mt-14">
+        <div class="totrow"><span>Subtotal</span><span>$17.000</span></div>
+        <div class="totrow big"><span>Total</span><span>$17.000</span></div>
+        <button type="button" class="btn btn-primary btn-full">Pedir por WhatsApp</button>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Drawer / modal lateral</h2>
+    <button type="button" class="btn btn-ghost" onclick="openDrawer()">Abrir carrito</button>
+  </section>
+
+  <div class="footer-simple"><span>Componentes UI</span><span>kit de referencia</span></div>
+</div>
+
+<div class="overlay" id="overlay" onclick="closeDrawer()"></div>
+<aside class="drawer" id="drawer">
+  <div class="dh"><h2 class="drawer-title">Tu pedido</h2><button type="button" class="close" onclick="closeDrawer()" aria-label="Cerrar">×</button></div>
+  <div class="drawer-body">Este drawer es el mismo componente que usa <code>carrito-reutilizable</code>.</div>
+</aside>
+
+<script>
+function openDrawer(){ document.getElementById('drawer').classList.add('show'); document.getElementById('overlay').classList.add('show'); }
+function closeDrawer(){ document.getElementById('drawer').classList.remove('show'); document.getElementById('overlay').classList.remove('show'); }
+</script>
+</body>
+</html>

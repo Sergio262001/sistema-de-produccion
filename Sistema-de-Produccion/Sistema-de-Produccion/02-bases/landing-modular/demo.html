@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Base: Landing Modular · Demo</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --brand:#2F54FF;--bg:#F5F7FB;--accent:#E8A02C;--surface:#fff;--ink:#0F1626;
+    --ink-soft:#454F66;--line:#E2E7F0;--radius:14px;
+    --display:'Space Grotesk',sans-serif;--body:'Inter',sans-serif;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--body);-webkit-font-smoothing:antialiased;}
+  h1,h2,h3{font-family:var(--display);margin:0;line-height:1.15;}
+  a{color:inherit;}
+
+  .sysbar{background:#0C1322;color:#C9D2EA;font-family:monospace;font-size:12.5px;}
+  .sysbar .in{max-width:1000px;margin:0 auto;padding:11px 20px;display:flex;gap:14px;align-items:center;flex-wrap:wrap;}
+  .sysbar .tag{background:#1B2438;border:1px solid #2A3654;border-radius:6px;padding:3px 9px;color:#9BB0E0;}
+  .sysbar b{color:#fff;}
+
+  .wrap{max-width:880px;margin:0 auto;padding:0 24px;}
+
+  .hero{padding:70px 0 56px;text-align:center;}
+  .hero h1{font-size:clamp(30px,5vw,48px);letter-spacing:-.02em;}
+  .hero .lead{max-width:560px;margin:18px auto 0;color:var(--ink-soft);font-size:17px;line-height:1.6;}
+  .hero .cta{display:inline-block;margin-top:28px;background:var(--brand);color:#fff;font-weight:600;font-size:14.5px;padding:13px 24px;border-radius:10px;text-decoration:none;}
+
+  .servicios{padding:46px 0;}
+  .servicios h2{font-size:26px;text-align:center;margin-bottom:28px;}
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px;}
+  .card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:22px 20px;}
+  .card .ic{font-size:28px;}
+  .card h3{font-size:16px;margin:10px 0 6px;}
+  .card p{font-size:13.5px;color:var(--ink-soft);line-height:1.5;margin:0;}
+
+  .leads{padding:50px 0 70px;}
+  .leads h2{font-size:24px;text-align:center;margin-bottom:22px;}
+  form{max-width:420px;margin:0 auto;display:flex;flex-direction:column;gap:10px;background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:24px;}
+  form input,form textarea{font-family:inherit;font-size:14px;padding:11px 13px;border:1px solid var(--line);border-radius:9px;background:#fff;color:var(--ink);}
+  form button{background:var(--brand);color:#fff;font-weight:600;font-size:14.5px;border:0;border-radius:9px;padding:12px;cursor:pointer;}
+  form .msg{margin:0;font-size:13px;color:var(--brand);min-height:16px;}
+
+  footer{border-top:1px solid var(--line);padding:20px 0;display:flex;justify-content:space-between;font-size:13px;color:var(--ink-soft);}
+</style>
+</head>
+<body>
+
+<div class="sysbar"><div class="in">
+  <span class="tag">base: landing-modular</span>
+  <span>contexto: <b id="sysClient">Estudio Lumen</b></span>
+  <span class="tag">leads: <b id="sysDB">local</b></span>
+</div></div>
+
+<div class="wrap" id="app"></div>
+
+<script>
+/* ── CONTENIDO — vendría de la ficha de contexto, nunca incrustado en el HTML ── */
+const CONTENT = {
+  hero: {
+    titulo: "Diseño y desarrollo web que convierte",
+    subtitulo: "Landing pages, menús digitales y ecommerce con bases sólidas, listas en días, no meses.",
+    cta: "Cuéntame tu proyecto",
+  },
+  servicios_titulo: "Lo que hacemos",
+  servicios: [
+    { icono: "🎨", titulo: "UX/UI", desc: "Diseño centrado en el usuario, de wireframe a interfaz final." },
+    { icono: "🌐", titulo: "Landing pages", desc: "Páginas que comunican y convierten desde el primer scroll." },
+    { icono: "🍽️", titulo: "Menús digitales", desc: "Cartas QR con panel admin para que el cliente las edite solo." },
+    { icono: "🛒", titulo: "Ecommerce", desc: "Catálogo, carrito y checkout listos para vender." },
+  ],
+  leads_titulo: "Hablemos de tu proyecto",
+  footer_nota: "Respuesta en menos de 24h",
+};
+
+/* CONTEXTO — identidad, marca y conectores del proyecto */
+const CONTEXT = {
+  cliente: "Estudio Lumen",
+  marca: { primario: "#2F54FF", secundario: "#F5F7FB" },
+  apis: { mensajeria: "whatsapp", whatsapp_num: "573001234567" },
+  base_de_datos: { motor: "local" },
+};
+
+/* tema desde contexto */
+const r = document.documentElement.style;
+r.setProperty('--brand', CONTEXT.marca.primario);
+r.setProperty('--bg', CONTEXT.marca.secundario);
+document.getElementById('sysClient').textContent = CONTEXT.cliente;
+document.getElementById('sysDB').textContent = CONTEXT.base_de_datos.motor;
+
+/* ── Adaptador de datos (idéntico a src/data/local.adapter.js) ── */
+let leads = [];
+const db = {
+  async save(lead) {
+    leads.push({ ...lead, id: crypto.randomUUID(), fecha: new Date().toISOString() });
+    return { ok: true, motor: 'local' };
+  },
+};
+
+/* ── Secciones (idénticas a src/sections/*.js) ── */
+function renderHero(content) {
+  const { titulo, subtitulo, cta } = content.hero;
+  return `<section class="hero"><h1>${titulo}</h1><p class="lead">${subtitulo}</p><a class="cta" href="#leads">${cta}</a></section>`;
+}
+function renderServicios(content) {
+  const items = content.servicios.map(s => `
+    <div class="card"><div class="ic">${s.icono}</div><h3>${s.titulo}</h3><p>${s.desc}</p></div>
+  `).join('');
+  return `<section class="servicios" id="servicios"><h2>${content.servicios_titulo}</h2><div class="grid">${items}</div></section>`;
+}
+function renderLeadsForm(content) {
+  return `
+    <section class="leads" id="leads">
+      <h2>${content.leads_titulo}</h2>
+      <form id="leadForm" novalidate>
+        <input name="nombre" type="text" placeholder="Tu nombre" required>
+        <input name="contacto" type="text" placeholder="WhatsApp o correo" required>
+        <textarea name="mensaje" placeholder="Cuéntame qué necesitas" rows="3"></textarea>
+        <button type="submit">Enviar</button>
+        <p class="msg" id="leadMsg" role="status"></p>
+      </form>
+    </section>`;
+}
+function renderFooter(content, ctx) {
+  return `<footer><span>${ctx.cliente}</span><span>${content.footer_nota}</span></footer>`;
+}
+
+/* pinta la página componiendo las secciones */
+document.getElementById('app').innerHTML =
+  renderHero(CONTENT) + renderServicios(CONTENT) + renderLeadsForm(CONTENT) + renderFooter(CONTENT, CONTEXT);
+
+/* conecta el formulario al adaptador activo */
+const form = document.getElementById('leadForm');
+const msg = document.getElementById('leadMsg');
+form.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const lead = {
+    nombre: form.nombre.value.trim(),
+    contacto: form.contacto.value.trim(),
+    mensaje: form.mensaje.value.trim(),
+  };
+  if (!lead.nombre || !lead.contacto) return;
+  await db.save(lead);
+  msg.textContent = '¡Gracias! Te contactamos pronto.';
+  form.reset();
+  if (CONTEXT.apis.mensajeria === 'whatsapp' && CONTEXT.apis.whatsapp_num) {
+    const texto = `Hola, soy ${lead.nombre}. ${lead.mensaje || 'Quiero más información.'}`;
+    window.open(`https://wa.me/${CONTEXT.apis.whatsapp_num}?text=${encodeURIComponent(texto)}`, '_blank');
+  }
+});
+</script>
+</body>
+</html>

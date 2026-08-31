@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Plan de Construcción · Sistema de Producción</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --canvas:#E9ECF3;--panel:#FFFFFF;--ink:#0F1626;--ink-soft:#454F66;--ink-faint:#828DA3;
+    --line:#D2D8E4;--line-soft:#E2E7F0;
+    --cobalt:#2F54FF;--cobalt-deep:#1B36C9;
+    --starter:#0FA56C;--starter-bg:#E5F6EE;
+    --pro:#6A3CF0;--pro-bg:#EDE7FD;
+    --ink-bg:#0C1322;--ink-bg-2:#121B30;--amber:#E8A02C;
+    --p0:#E5484D;--p0-bg:#FBE6E7;--p1:#E8A02C;--p1-bg:#FBF0DC;--p2:#4A87FF;--p2-bg:#E4ECFF;
+    --radius:14px;--maxw:1120px;
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{margin:0;background:var(--canvas);color:var(--ink);font-family:'Inter',system-ui,sans-serif;font-size:16px;line-height:1.6;-webkit-font-smoothing:antialiased;}
+  h1,h2,h3,h4{font-family:'Space Grotesk',sans-serif;line-height:1.12;margin:0;font-weight:600;letter-spacing:-.01em;}
+  p{margin:0;}
+  a{color:inherit;text-decoration:none;}
+  .wrap{max-width:var(--maxw);margin:0 auto;padding:0 28px;}
+  .eyebrow{font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:.18em;text-transform:uppercase;color:var(--ink-faint);display:flex;align-items:center;gap:10px;}
+  .eyebrow::before{content:"";width:24px;height:1px;background:var(--ink-faint);display:inline-block;}
+
+  .topbar{position:sticky;top:0;z-index:50;background:rgba(233,236,243,.82);backdrop-filter:blur(12px);border-bottom:1px solid var(--line);}
+  .topbar .wrap{display:flex;align-items:center;justify-content:space-between;height:60px;}
+  .brand{font-family:'Space Grotesk';font-weight:700;font-size:16px;letter-spacing:-.02em;display:flex;align-items:center;gap:9px;}
+  .brand .dot{width:11px;height:11px;border-radius:3px;background:var(--cobalt);box-shadow:3px 3px 0 0 var(--pro);}
+  .nav{display:flex;gap:24px;}
+  .nav a{font-size:13.5px;color:var(--ink-soft);font-weight:500;transition:color .2s;}
+  .nav a:hover{color:var(--ink);}
+  @media(max-width:880px){.nav{display:none;}}
+
+  /* HERO */
+  .hero{background:var(--ink-bg);color:#EAEEF7;position:relative;overflow:hidden;}
+  .hero::before{content:"";position:absolute;inset:0;background-image:linear-gradient(#fff 1px,transparent 1px),linear-gradient(90deg,#fff 1px,transparent 1px);background-size:46px 46px;opacity:.04;}
+  .hero .wrap{position:relative;padding:70px 28px 60px;}
+  .hero-tag{font-family:'JetBrains Mono';font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:#7C89FF;display:flex;gap:10px;align-items:center;}
+  .hero-tag::before{content:"";width:26px;height:1px;background:#7C89FF;}
+  .hero h1{font-size:clamp(32px,5vw,56px);margin:20px 0 0;font-weight:700;letter-spacing:-.02em;}
+  .hero h1 .accent{color:#8E9BFF;}
+  .hero .lead{max-width:600px;margin:22px 0 0;color:#A9B3CC;font-size:17px;line-height:1.65;}
+  .prog{display:flex;gap:14px;margin-top:40px;flex-wrap:wrap;}
+  .prog .pc{background:var(--ink-bg-2);border:1px solid #243150;border-radius:12px;padding:16px 18px;min-width:150px;}
+  .prog .pc .n{font-family:'Space Grotesk';font-size:24px;color:#fff;font-weight:600;}
+  .prog .pc .l{font-family:'JetBrains Mono';font-size:11px;color:#8893AD;letter-spacing:.05em;margin-top:2px;}
+  .prog .pc.done{border-color:#0FA56C55;}
+  .prog .pc.now{border-color:#2F54FF55;}
+
+  section{padding:74px 0;}
+  .sec-head{max-width:700px;margin-bottom:40px;}
+  .sec-head h2{font-size:clamp(26px,3.6vw,40px);margin:14px 0 0;}
+  .sec-head p{color:var(--ink-soft);margin-top:14px;font-size:16.5px;}
+
+  /* BACKLOG / EPICS */
+  .epic{background:var(--panel);border:1px solid var(--line-soft);border-radius:16px;padding:24px 24px;margin-bottom:16px;}
+  .epic-head{display:flex;align-items:center;gap:14px;margin-bottom:18px;}
+  .epic-code{font-family:'JetBrains Mono';font-size:13px;font-weight:500;color:#fff;background:var(--ink);border-radius:8px;padding:6px 11px;flex:none;}
+  .epic-head h3{font-size:19px;}
+  .epic-head .meta{margin-left:auto;font-family:'JetBrains Mono';font-size:12px;color:var(--ink-faint);}
+  .tasks{display:grid;grid-template-columns:1fr 1fr;gap:10px 22px;}
+  @media(max-width:760px){.tasks{grid-template-columns:1fr;}}
+  .task{display:flex;align-items:flex-start;gap:11px;padding:9px 0;border-bottom:1px solid var(--line-soft);}
+  .task:nth-last-child(-n+1){border-bottom:none;}
+  .box{width:17px;height:17px;border-radius:5px;border:2px solid var(--line);flex:none;margin-top:2px;}
+  .box.done{background:var(--starter);border-color:var(--starter);position:relative;}
+  .box.done::after{content:"✓";color:#fff;font-size:11px;position:absolute;top:-2px;left:2px;font-weight:700;}
+  .task .tt{font-size:14.5px;color:var(--ink-soft);flex:1;}
+  .task .tt b{color:var(--ink);font-weight:600;}
+  .prio{font-family:'JetBrains Mono';font-size:10px;font-weight:500;padding:2px 7px;border-radius:5px;flex:none;letter-spacing:.04em;margin-top:2px;}
+  .prio.p0{background:var(--p0-bg);color:var(--p0);}
+  .prio.p1{background:var(--p1-bg);color:var(--p1);}
+  .prio.p2{background:var(--p2-bg);color:var(--p2);}
+  .legend{display:flex;gap:14px;flex-wrap:wrap;margin-bottom:26px;font-family:'JetBrains Mono';font-size:12px;color:var(--ink-soft);}
+  .legend span{display:inline-flex;align-items:center;gap:7px;}
+  .legend .prio{margin-top:0;}
+
+  /* CONTEXT v2 */
+  .ctxsec{background:var(--ink-bg);color:#E7EBF5;}
+  .ctxsec .sec-head h2{color:#fff;}
+  .ctxsec .sec-head p{color:#9BA6C2;}
+  .ctxsec .eyebrow{color:#7C89FF;}.ctxsec .eyebrow::before{background:#7C89FF;}
+  .ctx-layout{display:grid;grid-template-columns:1.15fr .85fr;gap:30px;align-items:start;}
+  @media(max-width:900px){.ctx-layout{grid-template-columns:1fr;}}
+  .codecard{background:#070C16;border-radius:var(--radius);overflow:hidden;border:1px solid #20283f;}
+  .codecard .bar{display:flex;align-items:center;gap:8px;padding:13px 16px;border-bottom:1px solid #20283f;}
+  .codecard .bar .b{width:11px;height:11px;border-radius:50%;}
+  .codecard .bar .b1{background:#FF5F57;}.codecard .bar .b2{background:#FEBC2E;}.codecard .bar .b3{background:#28C840;}
+  .codecard .bar .fname{margin-left:8px;font-family:'JetBrains Mono';font-size:12px;color:#7A87A6;}
+  .codecard pre{margin:0;padding:18px 20px;font-family:'JetBrains Mono';font-size:12.5px;line-height:1.7;color:#C7D0E6;overflow-x:auto;}
+  .ck{color:#7C89FF;}.cs{color:#5FD0A6;}.cv{color:#E8B86A;}.cc{color:#56617E;}.ce{color:#E58BB0;}
+  .ctx-notes{display:flex;flex-direction:column;gap:12px;}
+  .cnote{background:var(--ink-bg-2);border:1px solid #232E49;border-radius:12px;padding:16px 18px;}
+  .cnote h4{font-size:15px;color:#fff;margin-bottom:5px;display:flex;align-items:center;gap:8px;}
+  .cnote h4 .tagk{font-family:'JetBrains Mono';font-size:11px;color:#7C89FF;background:#1B2438;padding:2px 7px;border-radius:5px;}
+  .cnote p{font-size:13px;color:#94A0BD;line-height:1.55;}
+
+  /* PHASES */
+  .phase{display:grid;grid-template-columns:auto 1fr;gap:26px;position:relative;padding-bottom:30px;}
+  .phase:last-child{padding-bottom:0;}
+  .phase .rail{display:flex;flex-direction:column;align-items:center;}
+  .phase .pnum{width:48px;height:48px;border-radius:12px;background:var(--ink);color:#fff;font-family:'Space Grotesk';font-weight:600;font-size:19px;display:grid;place-items:center;flex:none;z-index:2;}
+  .phase.cur .pnum{background:var(--cobalt);}
+  .phase.first .pnum{background:var(--starter);}
+  .phase .line{width:2px;flex:1;background:var(--line);margin-top:6px;}
+  .phase:last-child .line{display:none;}
+  .phase .body{background:var(--panel);border:1px solid var(--line-soft);border-radius:16px;padding:24px 26px;margin-bottom:4px;}
+  .phase .body .ph-top{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:6px;}
+  .phase .body h3{font-size:20px;}
+  .phase .when{font-family:'JetBrains Mono';font-size:11px;padding:4px 10px;border-radius:20px;background:var(--canvas);color:var(--ink-soft);letter-spacing:.04em;}
+  .phase .goal{font-size:14.5px;color:var(--ink-soft);margin:8px 0 16px;}
+  .phase ul{list-style:none;padding:0;margin:0;display:grid;grid-template-columns:1fr 1fr;gap:8px 20px;}
+  @media(max-width:680px){.phase ul{grid-template-columns:1fr;}}
+  .phase li{font-size:14px;color:var(--ink-soft);display:flex;gap:9px;align-items:flex-start;}
+  .phase li::before{content:"›";color:var(--cobalt);font-weight:700;flex:none;}
+  .doneline{margin-top:16px;padding-top:14px;border-top:1px dashed var(--line);font-family:'JetBrains Mono';font-size:12px;color:var(--ink-faint);}
+  .doneline b{color:var(--starter);}
+
+  /* WORKFLOW */
+  .flow{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;}
+  @media(max-width:820px){.flow{grid-template-columns:1fr 1fr;}}
+  @media(max-width:460px){.flow{grid-template-columns:1fr;}}
+  .fstep{background:var(--panel);border:1px solid var(--line-soft);border-radius:14px;padding:22px 20px;position:relative;}
+  .fstep .fn{font-family:'JetBrains Mono';font-size:12px;color:var(--cobalt);font-weight:500;}
+  .fstep h4{font-size:16px;margin:8px 0 7px;}
+  .fstep p{font-size:13.5px;color:var(--ink-soft);line-height:1.55;}
+
+  .closer{background:var(--ink-bg);color:#fff;text-align:center;}
+  .closer .wrap{padding:68px 28px;}
+  .closer h2{font-size:clamp(24px,3.6vw,38px);max-width:660px;margin:0 auto;}
+  .closer p{color:#A1ABC6;max-width:540px;margin:18px auto 0;font-size:16.5px;}
+  .closer .next{display:flex;gap:14px;justify-content:center;flex-wrap:wrap;margin-top:30px;}
+  .nbtn{background:var(--ink-bg-2);border:1px solid #2A3654;border-radius:10px;padding:14px 20px;font-family:'JetBrains Mono';font-size:13px;color:#C9D2EA;display:flex;align-items:center;gap:10px;}
+  .nbtn .k{color:var(--cobalt);font-weight:600;}
+
+  footer{background:#080D18;color:#5E6B8E;font-size:13px;}
+  footer .wrap{padding:26px 28px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px;font-family:'JetBrains Mono';}
+
+  .reveal{opacity:0;transform:translateY(18px);transition:opacity .6s ease,transform .6s ease;}
+  .reveal.in{opacity:1;transform:none;}
+  @media(prefers-reduced-motion:reduce){.reveal{opacity:1;transform:none;transition:none;}html{scroll-behavior:auto;}}
+  :focus-visible{outline:2px solid var(--cobalt);outline-offset:3px;border-radius:4px;}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="wrap">
+    <div class="brand"><span class="dot"></span>Plan de Construcción</div>
+    <nav class="nav">
+      <a href="#backlog">Backlog</a>
+      <a href="#contexto">Ficha de contexto</a>
+      <a href="#fases">Fases</a>
+      <a href="#flujo">Flujo por proyecto</a>
+    </nav>
+  </div>
+</div>
+
+<!-- HERO -->
+<header class="hero">
+  <div class="wrap">
+    <div class="hero-tag">Documento 2 de 2 · Hoja de ruta</div>
+    <h1>Todo lo que falta,<br><span class="accent">y en qué orden hacerlo.</span></h1>
+    <p class="lead">El backlog completo del sistema, una ficha de contexto ampliada donde eliges base de datos y dejas listos los espacios de APIs, y un plan por fases para que cada entrega ya genere valor mientras construyes la siguiente.</p>
+    <div class="prog">
+      <div class="pc done"><div class="n">✓</div><div class="l">Catálogo + bases definidas</div></div>
+      <div class="pc now"><div class="n">10</div><div class="l">Frentes de trabajo (épicas)</div></div>
+      <div class="pc"><div class="n">6</div><div class="l">Fases de construcción</div></div>
+      <div class="pc"><div class="n">1</div><div class="l">Flujo repetible por proyecto</div></div>
+    </div>
+  </div>
+</header>
+
+<!-- BACKLOG -->
+<section id="backlog">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <div class="eyebrow">Backlog a gran escala</div>
+      <h2>Los 10 frentes de trabajo.</h2>
+      <p>Todo lo que compone el sistema, agrupado en épicas. Cada tarea tiene prioridad para que sepas qué mueve la aguja primero. Lo marcado en verde ya está hecho.</p>
+    </div>
+
+    <div class="legend reveal">
+      <span><span class="prio p0">P0</span> crítico — habilita lo demás</span>
+      <span><span class="prio p1">P1</span> importante — alto valor</span>
+      <span><span class="prio p2">P2</span> mejora — cuando haya espacio</span>
+    </div>
+
+    <!-- E1 -->
+    <div class="epic reveal">
+      <div class="epic-head"><span class="epic-code">E1</span><h3>Bases técnicas core</h3><span class="meta">4 tareas</span></div>
+      <div class="tasks">
+        <div class="task"><span class="box done"></span><span class="tt"><b>Base: Menú con panel admin</b> — construida primero para validar el patrón</span><span class="prio p0">P0</span></div>
+        <div class="task"><span class="box done"></span><span class="tt"><b>Base: Carrito reutilizable</b> — núcleo de toda venta</span><span class="prio p0">P0</span></div>
+        <div class="task"><span class="box done"></span><span class="tt"><b>Base: Auth</b> — login/registro Firebase y Supabase</span><span class="prio p0">P0</span></div>
+        <div class="task"><span class="box done"></span><span class="tt"><b>Base: Landing modular</b> — secciones por contexto</span><span class="prio p1">P1</span></div>
+      </div>
+    </div>
+
+    <!-- E2 -->
+    <div class="epic reveal">
+      <div class="epic-head"><span class="epic-code">E2</span><h3>Bases técnicas avanzadas</h3><span class="meta">5 tareas</span></div>
+      <div class="tasks">
+        <div class="task"><span class="box done"></span><span class="tt"><b>Base: Ecommerce completo</b> — inventario + panel</span><span class="prio p1">P1</span></div>
+        <div class="task"><span class="box done"></span><span class="tt"><b>Base: Marketplace</b> — multi-vendedor y comisiones</span><span class="prio p2">P2</span></div>
+        <div class="task"><span class="box done"></span><span class="tt"><b>Base: Dashboard analytics</b> — métricas + gráficas</span><span class="prio p1">P1</span></div>
+        <div class="task"><span class="box done"></span><span class="tt"><b>Base: Suscripciones</b> — pagos recurrentes por plan</span><span class="prio p2">P2</span></div>
+        <div class="task"><span class="box done"></span><span class="tt"><b>Base: CRM simple</b> — clientes y seguimiento</span><span class="prio p2">P2</span></div>
+      </div>
+    </div>
+
+    <!-- E3 -->
+    <div class="epic reveal">
+      <div class="epic-head"><span class="epic-code">E3</span><h3>Sistema de contexto</h3><span class="meta">4 tareas</span></div>
+      <div class="tasks">
+        <div class="task"><span class="box done"></span><span class="tt"><b>Ficha de contexto v2</b> — con base de datos y APIs</span><span class="prio p0">P0</span></div>
+        <div class="task"><span class="box done"></span><span class="tt"><b>Variantes por tipo</b> — menú, landing, ecommerce…</span><span class="prio p1">P1</span></div>
+        <div class="task"><span class="box done"></span><span class="tt"><b>Validador de ficha</b> — checklist de campos mínimos</span><span class="prio p2">P2</span></div>
+        <div class="task"><span class="box done"></span><span class="tt"><b>Ejemplos llenos</b> — una ficha real por base</span><span class="prio p1">P1</span></div>
+      </div>
+    </div>
+
+    <!-- E4 -->
+    <div class="epic reveal">
+      <div class="epic-head"><span class="epic-code">E4</span><h3>Librería de componentes compartida</h3><span class="meta">5 tareas</span></div>
+      <div class="tasks">
+        <div class="task"><span class="box done"></span><span class="tt"><b>Design tokens</b> — colores, tipo y espacios como variables</span><span class="prio p0">P0</span></div>
+        <div class="task"><span class="box done"></span><span class="tt"><b>Componentes UI</b> — nav, hero, card, footer, modal</span><span class="prio p1">P1</span></div>
+        <div class="task"><span class="box done"></span><span class="tt"><b>Componentes de venta</b> — producto, carrito, checkout</span><span class="prio p1">P1</span></div>
+        <div class="task"><span class="box done"></span><span class="tt"><b>Patrones de formulario</b> — validación y estados</span><span class="prio p1">P1</span></div>
+        <div class="task"><span class="box done"></span><span class="tt"><b>Kit Figma equivalente</b> — diseño y código en paralelo</span><span class="prio p2">P2</span></div>
+      </div>
+    </div>
+
+    <!-- E5 -->
+    <div class="epic reveal">
+      <div class="epic-head"><span class="epic-code">E5</span><h3>Capa de datos &amp; APIs</h3><span class="meta">6 tareas</span></div>
+      <div class="tasks">
+        <div class="task"><span class="box done"></span><span class="tt"><b>Adaptador Firebase</b> — interfaz única de datos</span><span class="prio p0">P0</span></div>
+        <div class="task"><span class="box done"></span><span class="tt"><b>Adaptador Supabase</b> — misma interfaz, otro motor</span><span class="prio p0">P0</span></div>
+        <div class="task"><span class="box done"></span><span class="tt"><b>Conector pagos</b> — Wompi / Mercado Pago / Stripe</span><span class="prio p1">P1</span></div>
+        <div class="task"><span class="box done"></span><span class="tt"><b>Conector mensajería</b> — WhatsApp (link y API)</span><span class="prio p1">P1</span></div>
+        <div class="task"><span class="box done"></span><span class="tt"><b>Conector analítica</b> — GA4 + eventos estándar</span><span class="prio p1">P1</span></div>
+        <div class="task"><span class="box done"></span><span class="tt"><b>Plantilla de variables (.env)</b> — secretos por proyecto</span><span class="prio p0">P0</span></div>
+      </div>
+    </div>
+
+    <!-- E6 -->
+    <div class="epic reveal">
+      <div class="epic-head"><span class="epic-code">E6</span><h3>Prompts maestros (trabajar con IA)</h3><span class="meta">4 tareas</span></div>
+      <div class="tasks">
+        <div class="task"><span class="box done"></span><span class="tt"><b>Prompt por base</b> — instrucción lista para cada una</span><span class="prio p1">P1</span></div>
+        <div class="task"><span class="box done"></span><span class="tt"><b>Prompt de arranque</b> — "toma esta ficha + esta base"</span><span class="prio p0">P0</span></div>
+        <div class="task"><span class="box done"></span><span class="tt"><b>Prompt de revisión</b> — auditar calidad y accesibilidad</span><span class="prio p2">P2</span></div>
+        <div class="task"><span class="box done"></span><span class="tt"><b>Prompt de contenido</b> — generar copy con el tono</span><span class="prio p2">P2</span></div>
+      </div>
+    </div>
+
+    <!-- E7 -->
+    <div class="epic reveal">
+      <div class="epic-head"><span class="epic-code">E7</span><h3>Plantillas de negocio</h3><span class="meta">5 tareas</span></div>
+      <div class="tasks">
+        <div class="task"><span class="box done"></span><span class="tt"><b>Lista de precios</b> — Starter y Pro por servicio</span><span class="prio p1">P1</span></div>
+        <div class="task"><span class="box done"></span><span class="tt"><b>Plantilla de propuesta</b> — alcance + entregables</span><span class="prio p1">P1</span></div>
+        <div class="task"><span class="box done"></span><span class="tt"><b>Contrato base</b> — términos, pagos, mantenimiento</span><span class="prio p2">P2</span></div>
+        <div class="task"><span class="box done"></span><span class="tt"><b>Brief de cliente</b> — el que alimenta la ficha</span><span class="prio p1">P1</span></div>
+        <div class="task"><span class="box done"></span><span class="tt"><b>Planes de soporte</b> — niveles de mantenimiento</span><span class="prio p2">P2</span></div>
+      </div>
+    </div>
+
+    <!-- E8 -->
+    <div class="epic reveal">
+      <div class="epic-head"><span class="epic-code">E8</span><h3>Portafolio &amp; publicidad</h3><span class="meta">4 tareas</span></div>
+      <div class="tasks">
+        <div class="task"><span class="box done"></span><span class="tt"><b>Catálogo de servicios</b> — el documento 1, listo</span><span class="prio p1">P1</span></div>
+        <div class="task"><span class="box done"></span><span class="tt"><b>Demos en vivo</b> — un ejemplo navegable por base</span><span class="prio p1">P1</span></div>
+        <div class="task"><span class="box done"></span><span class="tt"><b>Página del estudio</b> — landing propia que venda</span><span class="prio p2">P2</span></div>
+        <div class="task"><span class="box"></span><span class="tt"><b>Piezas para redes</b> — anuncios de cada servicio</span><span class="prio p2">P2</span></div>
+      </div>
+    </div>
+
+    <!-- E9 -->
+    <div class="epic reveal">
+      <div class="epic-head"><span class="epic-code">E9</span><h3>Operación de equipo</h3><span class="meta">4 tareas</span></div>
+      <div class="tasks">
+        <div class="task"><span class="box done"></span><span class="tt"><b>Estructura de repos</b> — un estándar para todos</span><span class="prio p1">P1</span></div>
+        <div class="task"><span class="box done"></span><span class="tt"><b>Guía de estilo de código</b> — para que otro lo retome</span><span class="prio p2">P2</span></div>
+        <div class="task"><span class="box done"></span><span class="tt"><b>Onboarding</b> — cómo sumar a 1–2 personas</span><span class="prio p2">P2</span></div>
+        <div class="task"><span class="box done"></span><span class="tt"><b>Tablero de proyectos</b> — seguimiento de entregas</span><span class="prio p2">P2</span></div>
+      </div>
+    </div>
+
+    <!-- E10 -->
+    <div class="epic reveal">
+      <div class="epic-head"><span class="epic-code">E10</span><h3>Productos propios</h3><span class="meta">3 tareas</span></div>
+      <div class="tasks">
+        <div class="task"><span class="box"></span><span class="tt"><b>MenuOS (SaaS)</b> — el menú vuelto plataforma</span><span class="prio p2">P2</span></div>
+        <div class="task"><span class="box"></span><span class="tt"><b>LandingKit</b> — templates como producto vendible</span><span class="prio p2">P2</span></div>
+        <div class="task"><span class="box"></span><span class="tt"><b>Starter Pack</b> — bundle Figma + código</span><span class="prio p2">P2</span></div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- CONTEXT v2 -->
+<section id="contexto" class="ctxsec">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <div class="eyebrow">Ficha de contexto · v2</div>
+      <h2>Eliges base de datos. Las APIs ya tienen su lugar.</h2>
+      <p>Esta es la pieza operativa: la llenas al iniciar cada proyecto y me la pasas junto con la base. Ahora incluye el motor de datos, los conectores de API y los espacios de variables — sin secretos reales adentro.</p>
+    </div>
+
+    <div class="ctx-layout">
+      <div class="codecard reveal">
+        <div class="bar"><span class="b b1"></span><span class="b b2"></span><span class="b b3"></span><span class="fname">contexto.proyecto.yml</span></div>
+<pre><span class="cc"># ── IDENTIDAD ─────────────────────────</span>
+<span class="ck">proyecto</span>:   <span class="cs">"Café Raíz — menú digital"</span>
+<span class="ck">cliente</span>:    <span class="cs">"Café Raíz"</span>
+<span class="ck">linea</span>:      <span class="cs">starter</span>        <span class="cc"># starter | pro</span>
+<span class="ck">base</span>:       <span class="cs">menu-con-panel-admin</span>
+
+<span class="cc"># ── BASE DE DATOS (tú eliges) ─────────</span>
+<span class="ck">base_de_datos</span>:
+  <span class="ck">motor</span>:        <span class="cs">supabase</span>     <span class="cc"># firebase | supabase | ninguno</span>
+  <span class="ck">necesita_auth</span>: <span class="cv">true</span>
+  <span class="ck">tablas</span>:       [<span class="cs">categorias</span>, <span class="cs">items</span>, <span class="cs">pedidos</span>]
+  <span class="ck">acceso</span>:       <span class="cs">rls_por_rol</span>  <span class="cc"># reglas de seguridad</span>
+
+<span class="cc"># ── APIs / CONECTORES (espacios listos) ─</span>
+<span class="ck">apis</span>:
+  <span class="ck">pagos</span>:       <span class="cs">wompi</span>        <span class="cc"># wompi | mercadopago | stripe | ninguno</span>
+  <span class="ck">mensajeria</span>:  <span class="cs">whatsapp</span>     <span class="cc"># link | api | ninguno</span>
+  <span class="ck">mapas</span>:       <span class="cs">google_maps</span>
+  <span class="ck">analitica</span>:   <span class="cs">ga4</span>
+  <span class="ck">correo</span>:      <span class="cs">resend</span>       <span class="cc"># notificaciones</span>
+
+<span class="cc"># ── VARIABLES (solo nombres, sin valores) ─</span>
+<span class="ck">env</span>:
+  - <span class="ce">SUPABASE_URL</span>
+  - <span class="ce">SUPABASE_ANON_KEY</span>
+  - <span class="ce">WOMPI_PUBLIC_KEY</span>
+  - <span class="ce">GA4_ID</span>
+
+<span class="cc"># ── MARCA ─────────────────────────────</span>
+<span class="ck">marca</span>:
+  <span class="ck">primario</span>:   <span class="cv">"#1F6B4A"</span>
+  <span class="ck">secundario</span>: <span class="cv">"#F3ECE0"</span>
+  <span class="ck">tipografia</span>: <span class="cs">"Fraunces + Inter"</span>
+  <span class="ck">tono</span>:       <span class="cs">"cercano, artesanal"</span>
+
+<span class="cc"># ── ENTREGA ───────────────────────────</span>
+<span class="ck">entrega</span>:
+  <span class="ck">dominio</span>:   <span class="cs">"caferaiz.co"</span>
+  <span class="ck">hosting</span>:   <span class="cs">vercel</span>
+  <span class="ck">idiomas</span>:   [<span class="cs">es</span>, <span class="cs">en</span>]
+  <span class="ck">soporte</span>:   <span class="cs">plan_mensual</span></pre>
+      </div>
+
+      <div class="ctx-notes reveal">
+        <div class="cnote"><h4><span class="tagk">motor</span> Base de datos a elección</h4><p>Eliges Firebase o Supabase según el proyecto. La base técnica funciona igual con cualquiera porque la capa de datos (E5) tiene un adaptador para cada uno.</p></div>
+        <div class="cnote"><h4><span class="tagk">apis</span> Conectores con su lugar</h4><p>Cada integración tiene su campo. Si un proyecto no usa pagos, va <span class="mono">ninguno</span>. Nunca improvisas dónde meter la API: ya está previsto.</p></div>
+        <div class="cnote"><h4><span class="tagk">env</span> Variables, no secretos</h4><p>Aquí solo van los nombres de las claves. Los valores reales viven en el archivo <span class="mono">.env</span> del proyecto, fuera de la ficha y fuera de Git.</p></div>
+        <div class="cnote"><h4><span class="tagk">linea</span> Una ficha, dos profundidades</h4><p>El campo <span class="mono">linea</span> le dice a la base si activar el núcleo Starter o la extensión Pro. Mismo motor, alcance distinto.</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PHASES -->
+<section id="fases">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <div class="eyebrow">Plan por fases</div>
+      <h2>El orden para cumplirlo.</h2>
+      <p>De fundamentos a productos propios. Cada fase termina con algo usable y vendible, no con trabajo a medias. Los tiempos son referencia para una persona; con equipo se comprimen.</p>
+    </div>
+
+    <div class="phases">
+      <div class="phase first reveal">
+        <div class="rail"><div class="pnum">0</div><div class="line"></div></div>
+        <div class="body">
+          <div class="ph-top"><h3>Fundamentos</h3><span class="when">~1 semana</span></div>
+          <p class="goal">Dejar lista la cancha: estándares, tokens y la primera ficha de contexto.</p>
+          <ul>
+            <li>Estructura de repos y carpetas (E9)</li>
+            <li>Design tokens base (E4)</li>
+            <li>Ficha de contexto v2 (E3)</li>
+            <li>Plantilla de variables .env (E5)</li>
+          </ul>
+          <div class="doneline">Listo cuando: <b>puedes arrancar un proyecto nuevo con una ficha y un repo limpio.</b></div>
+        </div>
+      </div>
+
+      <div class="phase cur reveal">
+        <div class="rail"><div class="pnum">1</div><div class="line"></div></div>
+        <div class="body">
+          <div class="ph-top"><h3>Primer producto de punta a punta</h3><span class="when">~2 semanas</span></div>
+          <p class="goal">Construir el menú con panel admin completo para validar todo el sistema antes de replicar el patrón a ecommerce, tu línea principal.</p>
+          <ul>
+            <li>Base: Menú con panel admin (E1)</li>
+            <li>Adaptador Supabase + Firebase (E5)</li>
+            <li>Auth básico (E1)</li>
+            <li>Conector WhatsApp + GA4 (E5)</li>
+          </ul>
+          <div class="doneline">Listo cuando: <b>un cliente real puede editar su menú solo y recibir pedidos.</b></div>
+        </div>
+      </div>
+
+      <div class="phase reveal">
+        <div class="rail"><div class="pnum">2</div><div class="line"></div></div>
+        <div class="body">
+          <div class="ph-top"><h3>Bases core restantes</h3><span class="when">~2–3 semanas</span></div>
+          <p class="goal">Completar el set que cubre la mayoría de proyectos pequeños.</p>
+          <ul>
+            <li>Base: Carrito reutilizable (E1)</li>
+            <li>Base: Landing modular (E1)</li>
+            <li>Componentes UI y de venta (E4)</li>
+            <li>Conector de pagos: Wompi (E5)</li>
+          </ul>
+          <div class="doneline">Listo cuando: <b>cubres landing, menú y venta simple sin construir de cero.</b></div>
+        </div>
+      </div>
+
+      <div class="phase reveal">
+        <div class="rail"><div class="pnum">3</div><div class="line"></div></div>
+        <div class="body">
+          <div class="ph-top"><h3>Sistema de contexto + prompts</h3><span class="when">~1–2 semanas</span></div>
+          <p class="goal">Hacer que arrancar conmigo sea pegar una ficha y una base. Aquí se nota el ahorro de tiempo.</p>
+          <ul>
+            <li>Variantes de ficha por tipo (E3)</li>
+            <li>Ejemplos llenos por base (E3)</li>
+            <li>Prompt de arranque y por base (E6)</li>
+            <li>Brief de cliente (E7)</li>
+          </ul>
+          <div class="doneline">Listo cuando: <b>un proyecto nuevo arranca en minutos, no en horas.</b></div>
+        </div>
+      </div>
+
+      <div class="phase reveal">
+        <div class="rail"><div class="pnum">4</div><div class="line"></div></div>
+        <div class="body">
+          <div class="ph-top"><h3>Línea Pro: bases avanzadas</h3><span class="when">~3–4 semanas</span></div>
+          <p class="goal">Subir a empresas medianas: plataforma, datos y administración.</p>
+          <ul>
+            <li>Ecommerce completo (E2)</li>
+            <li>Dashboard analytics (E2)</li>
+            <li>Auth con roles + multi-rol (E1)</li>
+            <li>Suscripciones / CRM (E2)</li>
+          </ul>
+          <div class="doneline">Listo cuando: <b>puedes vender y entregar proyectos Pro con confianza.</b></div>
+        </div>
+      </div>
+
+      <div class="phase reveal">
+        <div class="rail"><div class="pnum">5</div><div class="line"></div></div>
+        <div class="body">
+          <div class="ph-top"><h3>Vender, mostrar y escalar a equipo</h3><span class="when">continuo</span></div>
+          <p class="goal">Convertir el sistema en negocio: portafolio, precios y la posibilidad de delegar.</p>
+          <ul>
+            <li>Demos en vivo + página del estudio (E8)</li>
+            <li>Precios, propuesta y contrato (E7)</li>
+            <li>Onboarding y guía de código (E9)</li>
+            <li>Primer producto propio: MenuOS (E10)</li>
+          </ul>
+          <div class="doneline">Listo cuando: <b>otra persona puede entregar un proyecto con tu sistema.</b></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- WORKFLOW -->
+<section id="flujo" style="background:var(--panel);border-top:1px solid var(--line-soft);border-bottom:1px solid var(--line-soft);">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <div class="eyebrow">Flujo por proyecto</div>
+      <h2>Cómo iniciaremos cada trabajo.</h2>
+      <p>Una vez el sistema esté armado, todo proyecto nuevo sigue estos cuatro pasos. Esto es lo que te ahorra horas en cada arranque.</p>
+    </div>
+    <div class="flow">
+      <div class="fstep reveal"><div class="fn">PASO 1</div><h4>Brief → Ficha</h4><p>Tomas el brief del cliente y lo conviertes en la ficha de contexto: línea, base, base de datos y APIs.</p></div>
+      <div class="fstep reveal"><div class="fn">PASO 2</div><h4>Ficha + Base → yo</h4><p>Me pasas la ficha y eliges la base. Yo ensamblo el producto configurado respetando la estructura.</p></div>
+      <div class="fstep reveal"><div class="fn">PASO 3</div><h4>Conectar datos</h4><p>Pones tus claves en el .env. El adaptador conecta Firebase o Supabase sin tocar el resto.</p></div>
+      <div class="fstep reveal"><div class="fn">PASO 4</div><h4>Revisar y entregar</h4><p>Ajuste fino de diseño, revisión de calidad y deploy. Queda listo para soporte mensual.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- CLOSER -->
+<section class="closer">
+  <div class="wrap">
+    <h2>El plan está trazado. Empecemos por la Fase 0 o saltemos a la base estrella.</h2>
+    <p>Mi recomendación: arrancar la Fase 1 con el menú con panel admin, porque construirlo nos obliga a dejar listos los fundamentos de paso.</p>
+    <div class="next">
+      <div class="nbtn"><span class="k">A ›</span> Fase 0: fundamentos y tokens</div>
+      <div class="nbtn"><span class="k">B ›</span> Fase 1: base Menú + Panel</div>
+      <div class="nbtn"><span class="k">C ›</span> Capa de datos &amp; APIs (E5)</div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <span>// Sistema de Producción · Plan de Construcción</span>
+    <span>v1.0 · documento 2 de 2</span>
+  </div>
+</footer>
+
+<script>
+  const io = new IntersectionObserver((es)=>{es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target);}});},{threshold:0.1});
+  document.querySelectorAll('.reveal').forEach(el=>io.observe(el));
+</script>
+
+</body>
+</html>

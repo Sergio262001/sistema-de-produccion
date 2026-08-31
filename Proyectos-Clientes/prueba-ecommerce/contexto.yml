@@ -1,0 +1,30 @@
+# Ficha de contexto — Prueba Ecommerce
+# Proyecto de prueba personal, sin cliente real todavía.
+# Sirve para validar el flujo completo de la base "ecommerce-completo"
+# contra un proyecto Supabase real. No tiene secretos (esos van en .env
+# / hardcodeados en index.html solo porque la anon key es pública por diseño).
+
+cliente: "Prueba Ecommerce"
+proyecto: "prueba-ecommerce"
+linea: pro
+bases:
+  - ecommerce-completo
+
+base_de_datos:
+  motor: supabase
+  proyecto_supabase: xexumsbmretqbcxvzmwq
+
+auth:
+  motor: local   # login del panel es local en esta prueba; ver README sobre RLS
+
+apis:
+  pagos: whatsapp
+  whatsapp_num: "573000000000"   # número de ejemplo, no real
+
+marca:
+  primario: "#1B36C9"
+  secundario: "#F5F7FB"
+  inicial: "P"
+
+entrega:
+  estado: prueba interna, no entregado a ningún cliente

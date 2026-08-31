@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Base: Menú con Panel Admin · Demo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  /* ====================================================================
+     TOKENS — se inyectan desde el CONTEXTO (config.marca) por JS.
+     Cambiar la marca de un cliente = cambiar la ficha, no el CSS.
+     ==================================================================== */
+  :root{
+    --brand:#1F6B4A; --brand-soft:#2C7C58; --bg:#F3ECE0; --surface:#FFFFFF;
+    --ink:#23201A; --ink-soft:#6B6359; --line:#E4DACA; --accent:#C2703D;
+    --radius:16px; --sys:#2F54FF; --sys-bg:#11182B;
+    --display:'Fraunces',serif; --body:'Inter',sans-serif;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--body);-webkit-font-smoothing:antialiased;}
+  h1,h2,h3{font-family:var(--display);margin:0;line-height:1.1;font-weight:600;}
+  button{font-family:inherit;cursor:pointer;}
+  .mono{font-family:'JetBrains Mono',monospace;}
+
+  /* ---- system bar (explica la demo, no es parte del producto) ---- */
+  .sysbar{background:var(--sys-bg);color:#C9D2EA;font-family:'JetBrains Mono',monospace;font-size:12.5px;}
+  .sysbar .in{max-width:920px;margin:0 auto;padding:11px 20px;display:flex;align-items:center;gap:14px;flex-wrap:wrap;}
+  .sysbar b{color:#fff;font-weight:500;}
+  .sysbar .tag{background:#1B2438;border:1px solid #2A3654;border-radius:6px;padding:3px 9px;color:#9BB0E0;}
+  .sysbar .adapter{margin-left:auto;color:#8E9AB8;}
+  .sysbar .adapter b{color:#5FD0A6;}
+  .sysbar .adapter .hint{color:#56617E;}
+  .toggle{display:flex;background:#1B2438;border:1px solid #2A3654;border-radius:8px;overflow:hidden;}
+  .toggle button{background:transparent;border:0;color:#9BB0E0;font-family:'JetBrains Mono',monospace;font-size:12px;padding:6px 13px;}
+  .toggle button.on{background:var(--sys);color:#fff;}
+
+  .app{max-width:920px;margin:0 auto;padding:0 20px;}
+
+  /* ---- header del local ---- */
+  .mhead{display:flex;align-items:center;gap:16px;padding:34px 0 22px;}
+  .logo{width:52px;height:52px;border-radius:14px;background:var(--brand);display:grid;place-items:center;color:#fff;font-family:var(--display);font-size:26px;font-weight:700;flex:none;box-shadow:0 6px 18px -8px var(--brand);}
+  .mhead h1{font-size:30px;letter-spacing:-.01em;}
+  .mhead .sub{color:var(--ink-soft);font-size:14px;margin-top:3px;}
+  .mhead .sub .dot{color:var(--accent);}
+
+  /* ---- nav categorías ---- */
+  .cats{position:sticky;top:0;z-index:10;background:var(--bg);padding:10px 0;display:flex;gap:8px;overflow-x:auto;border-bottom:1px solid var(--line);}
+  .cats button{white-space:nowrap;background:var(--surface);border:1px solid var(--line);color:var(--ink-soft);border-radius:30px;padding:8px 16px;font-size:13.5px;font-weight:500;transition:.15s;}
+  .cats button.on{background:var(--brand);color:#fff;border-color:var(--brand);}
+
+  /* ---- menú ---- */
+  .menu{padding:24px 0 40px;}
+  .catblock{margin-bottom:34px;}
+  .catblock h2{font-size:22px;margin-bottom:4px;}
+  .catblock .cdesc{color:var(--ink-soft);font-size:13.5px;margin-bottom:16px;}
+  .item{display:flex;gap:16px;padding:16px 0;border-bottom:1px solid var(--line);align-items:flex-start;}
+  .item:last-child{border-bottom:none;}
+  .thumb{width:64px;height:64px;border-radius:13px;flex:none;display:grid;place-items:center;font-size:28px;background:linear-gradient(135deg,#fff,var(--line));border:1px solid var(--line);}
+  .item .info{flex:1;min-width:0;}
+  .item .nm{font-weight:600;font-size:16px;display:flex;align-items:center;gap:8px;}
+  .badge{font-size:10px;font-family:'JetBrains Mono',monospace;text-transform:uppercase;letter-spacing:.04em;padding:2px 7px;border-radius:5px;background:#FBF0DC;color:#A9701A;font-weight:500;}
+  .item .ds{color:var(--ink-soft);font-size:13.5px;margin-top:3px;line-height:1.45;}
+  .item .pr{font-family:var(--display);font-weight:600;font-size:17px;color:var(--brand);flex:none;}
+  .item.off{opacity:.45;}
+  .item.off .pr{color:var(--ink-soft);text-decoration:line-through;}
+
+  .wa{position:fixed;right:20px;bottom:20px;background:#25D366;color:#fff;border:0;border-radius:30px;padding:14px 20px;font-weight:600;font-size:14.5px;display:flex;align-items:center;gap:9px;box-shadow:0 10px 28px -10px rgba(37,211,102,.7);z-index:20;}
+  .wa svg{width:19px;height:19px;}
+
+  /* ---- panel admin ---- */
+  .admin{padding:24px 0 60px;display:none;}
+  .admin.show{display:block;}
+  .menu.hide{display:none;}
+  .adminhead{display:flex;align-items:center;gap:12px;margin-bottom:20px;flex-wrap:wrap;}
+  .adminhead h2{font-size:24px;}
+  .adminhead .pill{font-family:'JetBrains Mono',monospace;font-size:11px;background:var(--brand);color:#fff;padding:4px 10px;border-radius:6px;}
+  .addbtn{margin-left:auto;background:var(--brand);color:#fff;border:0;border-radius:10px;padding:11px 16px;font-weight:600;font-size:13.5px;}
+  .acat{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:16px 18px;margin-bottom:14px;}
+  .acat > h3{font-size:16px;margin-bottom:12px;color:var(--brand);font-family:var(--body);font-weight:600;text-transform:uppercase;letter-spacing:.04em;font-size:12px;}
+  .arow{display:grid;grid-template-columns:1fr 110px auto auto;gap:10px;align-items:center;padding:8px 0;border-top:1px solid var(--line);}
+  .arow:first-of-type{border-top:none;}
+  .arow input[type=text],.arow input[type=number]{font-family:inherit;font-size:14px;border:1px solid var(--line);border-radius:8px;padding:8px 10px;width:100%;color:var(--ink);background:#FCFAF6;}
+  .arow input:focus{outline:2px solid var(--brand);outline-offset:1px;border-color:transparent;}
+  .arow .av{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--ink-soft);font-family:'JetBrains Mono',monospace;}
+  .sw{width:38px;height:22px;border-radius:20px;background:var(--line);border:0;position:relative;transition:.2s;flex:none;}
+  .sw.on{background:var(--brand);}
+  .sw::after{content:"";position:absolute;top:2px;left:2px;width:18px;height:18px;border-radius:50%;background:#fff;transition:.2s;}
+  .sw.on::after{left:18px;}
+  .del{background:#FBE6E7;color:#E5484D;border:0;border-radius:8px;width:34px;height:34px;font-size:16px;flex:none;}
+  .savebar{position:sticky;bottom:0;background:linear-gradient(transparent,var(--bg) 30%);padding:18px 0 6px;display:flex;gap:12px;align-items:center;}
+  .save{background:var(--brand);color:#fff;border:0;border-radius:10px;padding:13px 22px;font-weight:600;font-size:14.5px;}
+  .saved{font-family:'JetBrains Mono',monospace;font-size:12.5px;color:var(--brand-soft);opacity:0;transition:.3s;}
+  .saved.show{opacity:1;}
+  @media(max-width:560px){.arow{grid-template-columns:1fr 90px;grid-auto-flow:row;}.arow .av{grid-column:1;}.del{grid-column:2;justify-self:end;}}
+
+  /* ---- login del panel admin (base: auth) ---- */
+  .loginbox{max-width:340px;margin:40px auto;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:26px;}
+  .loginbox h2{font-size:20px;margin-bottom:4px;}
+  .loginbox .sub{color:var(--ink-soft);font-size:13px;margin-bottom:16px;line-height:1.5;}
+  .loginbox input{width:100%;font-family:inherit;font-size:14px;padding:11px 13px;border:1px solid var(--line);border-radius:9px;margin-bottom:10px;color:var(--ink);background:#FCFAF6;}
+  .loginbox .err{color:#E5484D;font-size:12.5px;min-height:16px;margin-top:6px;}
+  .logoutbtn{background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:9px 14px;font-size:12.5px;font-weight:600;color:var(--ink-soft);}
+  .loginbox .save.full{width:100%;}
+  #adminPanel.hide{display:none;}
+</style>
+</head>
+<body>
+
+<!-- BARRA DE SISTEMA (demo): muestra qué adaptador y base de datos están activos -->
+<div class="sysbar">
+  <div class="in">
+    <span class="tag">base: menu-con-panel-admin</span>
+    <span>Contexto: <b id="sysClient">Café Raíz</b></span>
+    <div class="toggle">
+      <button type="button" id="tMenu" class="on" onclick="setView('menu')">Vista cliente</button>
+      <button type="button" id="tAdmin" onclick="setView('admin')">Panel admin</button>
+    </div>
+    <span class="adapter">datos: <b id="sysAdapter">local</b> <span class="hint">→ listo para Supabase/Firebase</span></span>
+  </div>
+</div>
+
+<div class="app">
+
+  <!-- HEADER DEL LOCAL (tematizado por contexto) -->
+  <div class="mhead">
+    <div class="logo" id="logoBox">R</div>
+    <div>
+      <h1 id="bizName">Café Raíz</h1>
+      <div class="sub" id="bizSub">Cafetería de especialidad <span class="dot">•</span> Bogotá</div>
+    </div>
+  </div>
+
+  <!-- NAV CATEGORÍAS (vista cliente) -->
+  <div class="cats" id="cats"></div>
+
+  <!-- MENÚ (vista cliente) -->
+  <div class="menu" id="menu"></div>
+
+  <!-- PANEL ADMIN -->
+  <div class="admin" id="admin">
+
+    <!-- gate de acceso (base: auth) — se pinta si no hay sesión con el rol requerido -->
+    <div class="loginbox" id="adminLogin">
+      <h2>Acceder al panel</h2>
+      <div class="sub">Inicia sesión para editar la carta.<br>Demo: <b>admin@caferaiz.co</b> / <b>admin123</b></div>
+      <form id="adminLoginForm">
+        <input type="email" name="email" placeholder="correo@ejemplo.com" required>
+        <input type="password" name="password" placeholder="Contraseña" required>
+        <button type="submit" class="save full">Iniciar sesión</button>
+        <div class="err" id="adminLoginErr"></div>
+      </form>
+    </div>
+
+    <div id="adminPanel" class="hide">
+      <div class="adminhead">
+        <h2>Editar carta</h2>
+        <span class="pill">solo el dueño</span>
+        <button type="button" class="addbtn" onclick="addItem()">+ Agregar producto</button>
+        <button type="button" class="logoutbtn" onclick="adminLogout()">Cerrar sesión</button>
+      </div>
+      <div id="adminList"></div>
+      <div class="savebar">
+        <button type="button" class="save" onclick="save()">Guardar cambios</button>
+        <span class="saved" id="savedMsg">✓ Guardado en la base de datos</span>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<button type="button" class="wa" onclick="orderWhatsApp()" aria-label="Pedir por WhatsApp">
+  <svg viewBox="0 0 24 24" fill="currentColor"><path d="M17.5 14.4c-.3-.2-1.7-.8-2-.9-.3-.1-.5-.2-.6.2-.2.3-.7.8-.8 1-.2.2-.3.2-.6.1-1.5-.8-2.6-1.4-3.6-3.2-.3-.5.3-.5.8-1.5.1-.2 0-.3 0-.5 0-.1-.6-1.5-.8-2.1-.2-.5-.4-.4-.6-.4h-.5c-.2 0-.5.1-.7.3-1 1-1 2.4-.1 3.9 1.3 2 2.3 3.1 4.4 4 1.3.5 1.8.6 2.5.5.4-.1 1.3-.5 1.5-1 .2-.5.2-1 .1-1.1-.1-.1-.2-.1-.5-.3zM12 2a10 10 0 00-8.5 15.2L2 22l4.9-1.4A10 10 0 1012 2z"/></svg>
+  Pedir por WhatsApp
+</button>
+
+<script>
+/* ====================================================================
+   1) CONTEXTO  — esto vendría de tu ficha contexto.proyecto.yml
+   ==================================================================== */
+const CONTEXT = {
+  cliente: "Café Raíz",
+  linea: "starter",
+  marca: {
+    primario:"#1F6B4A", secundario:"#F3ECE0", acento:"#C2703D",
+    display:"'Fraunces',serif", body:"'Inter',sans-serif",
+    inicial:"R", subtitulo:"Cafetería de especialidad • Bogotá"
+  },
+  base_de_datos:{ motor:"supabase" },     // firebase | supabase | local
+  apis:{ mensajeria:"whatsapp", whatsapp_num:"573001234567", pagos:"wompi" },
+  auth:{ motor:"local", rol_requerido:"admin" },   // firebase | supabase | local — base: auth
+  moneda:"$"
+};
+
+/* ====================================================================
+   2) DATOS SEMILLA — en el producto real viven en tu base de datos
+   ==================================================================== */
+let DATA = {
+  categorias:[
+    {id:"cafe", nombre:"Café", desc:"Tostado propio, grano de origen", items:[
+      {id:"c1", nombre:"Espresso", desc:"Doble shot, intenso", precio:4500, emoji:"☕", disp:true},
+      {id:"c2", nombre:"Latte de la casa", desc:"Leche texturizada, arte latte", precio:8500, emoji:"🥛", disp:true, badge:"top"},
+      {id:"c3", nombre:"Cold brew", desc:"Extracción en frío 18h", precio:9000, emoji:"🧊", disp:true},
+    ]},
+    {id:"brunch", nombre:"Brunch", desc:"Hasta las 2 de la tarde", items:[
+      {id:"b1", nombre:"Huevos benedictinos", desc:"Pan de masa madre, holandesa", precio:18500, emoji:"🍳", disp:true, badge:"top"},
+      {id:"b2", nombre:"Avo toast", desc:"Aguacate, tomate, sésamo", precio:15000, emoji:"🥑", disp:true},
+      {id:"b3", nombre:"Pancakes", desc:"Miel de maple, frutos rojos", precio:16000, emoji:"🥞", disp:false},
+    ]},
+    {id:"postres", nombre:"Postres", desc:"Hechos en casa", items:[
+      {id:"p1", nombre:"Cheesecake", desc:"Frutos del bosque", precio:11000, emoji:"🍰", disp:true},
+      {id:"p2", nombre:"Brownie", desc:"Chocolate 70%, nuez", precio:9500, emoji:"🍫", disp:true},
+    ]},
+  ]
+};
+
+/* ====================================================================
+   3) CAPA DE DATOS — patrón ADAPTADOR
+   La misma interfaz (load / save) funciona con cualquier motor.
+   En esta demo usamos el adaptador LOCAL (en memoria).
+   En el proyecto real, según CONTEXT.base_de_datos.motor, se usa
+   supabaseAdapter o firebaseAdapter sin tocar el resto del código.
+   ==================================================================== */
+const localAdapter = {
+  async load(){ return DATA; },
+  async save(data){ DATA = data; return {ok:true, motor:"local"}; }
+};
+// supabaseAdapter / firebaseAdapter: misma forma { load(), save() }
+// se conectan con las claves del .env. Stub para la demo:
+const adapters = { local: localAdapter };
+const db = adapters[ adapters[CONTEXT.base_de_datos.motor] ? CONTEXT.base_de_datos.motor : "local" ];
+
+/* ====================================================================
+   3.1) AUTH — patrón ADAPTADOR (base: auth), misma interfaz
+   register/login/logout/subscribe sin importar el proveedor.
+   En esta demo usamos el adaptador LOCAL; en el proyecto real, según
+   CONTEXT.auth.motor, se usa supabaseAuth o firebaseAuth sin tocar
+   el resto del panel.
+   ==================================================================== */
+const ADMIN_USERS = [{ email:'admin@caferaiz.co', password:'admin123', rol:'admin', nombre:'Dueño' }];
+let authUser = null;
+const localAuth = {
+  async login(email,password){
+    const u = ADMIN_USERS.find(u=>u.email===email && u.password===password);
+    if(!u) throw new Error('Correo o contraseña incorrectos');
+    authUser = { email:u.email, rol:u.rol, nombre:u.nombre };
+    return { ok:true, user:authUser };
+  },
+  async logout(){ authUser = null; return { ok:true }; },
+  current(){ return authUser; },
+};
+// supabaseAuth / firebaseAuth: misma forma { login(), logout(), current()/subscribe() }
+const authAdapters = { local: localAuth };
+const auth = authAdapters[CONTEXT.auth.motor] || localAuth;
+
+function checkAdminAccess(){
+  const user = auth.current();
+  const logged = !!user && user.rol === CONTEXT.auth.rol_requerido;
+  document.getElementById('adminLogin').style.display = logged ? 'none' : 'block';
+  document.getElementById('adminPanel').classList.toggle('hide', !logged);
+  if(logged) renderAdmin();
+}
+async function adminLogout(){
+  await auth.logout();
+  checkAdminAccess();
+}
+
+/* ====================================================================
+   4) THEMING — los tokens salen del contexto
+   ==================================================================== */
+function applyTheme(){
+  const m = CONTEXT.marca, r = document.documentElement.style;
+  r.setProperty('--brand', m.primario);
+  r.setProperty('--bg', m.secundario);
+  r.setProperty('--accent', m.acento);
+  r.setProperty('--display', m.display);
+  r.setProperty('--body', m.body);
+  document.getElementById('logoBox').textContent = m.inicial;
+  document.getElementById('bizName').textContent = CONTEXT.cliente;
+  document.getElementById('sysClient').textContent = CONTEXT.cliente;
+  document.getElementById('sysAdapter').textContent = CONTEXT.base_de_datos.motor;
+  document.getElementById('bizSub').innerHTML = m.subtitulo.replace('•','<span class="dot">•</span>');
+}
+
+const money = n => CONTEXT.moneda + n.toLocaleString('es-CO');
+
+/* ---- SEGURIDAD (ver 03-componentes-ui/seguridad.js) ----
+   Todo dato escrito por alguien que no seas tú pasa por esc()
+   antes de tocar innerHTML. Sin esto, un nombre como
+   <img src=x onerror=...> se ejecuta en la sesión del admin. */
+function esc(v){
+  if(v===null||v===undefined) return "";
+  return String(v).replace(/&/g,"&amp;").replace(/</g,"&lt;")
+    .replace(/>/g,"&gt;").replace(/\"/g,"&quot;").replace(/'/g,"&#39;");
+}
+
+
+/* ====================================================================
+   5) VISTA CLIENTE
+   ==================================================================== */
+let activeCat = null;
+function renderMenu(){
+  const cats = document.getElementById('cats');
+  const menu = document.getElementById('menu');
+  cats.innerHTML=''; menu.innerHTML='';
+  DATA.categorias.forEach((c,i)=>{
+    const b=document.createElement('button');
+    b.textContent=c.nombre; b.className=(activeCat===c.id||(!activeCat&&i===0))?'on':'';
+    b.onclick=()=>{activeCat=c.id;renderMenu();document.getElementById('cat-'+c.id).scrollIntoView({behavior:'smooth',block:'start'});};
+    cats.appendChild(b);
+
+    const block=document.createElement('div');
+    block.className='catblock'; block.id='cat-'+c.id;
+    block.innerHTML=`<h2>${esc(c.nombre)}</h2><div class="cdesc">${esc(c.desc||'')}</div>`;
+    c.items.forEach(it=>{
+      const row=document.createElement('div');
+      row.className='item'+(it.disp?'':' off');
+      row.innerHTML=`
+        <div class="thumb">${esc(it.emoji||'🍽️')}</div>
+        <div class="info">
+          <div class="nm">${esc(it.nombre)} ${it.badge?'<span class="badge">'+esc(it.badge)+'</span>':''}</div>
+          <div class="ds">${esc(it.desc||'')}</div>
+        </div>
+        <div class="pr">${money(it.precio)}</div>`;
+      block.appendChild(row);
+    });
+    menu.appendChild(block);
+  });
+}
+
+/* ====================================================================
+   6) PANEL ADMIN — editar, agregar, borrar, disponibilidad
+   ==================================================================== */
+function renderAdmin(){
+  const list=document.getElementById('adminList'); list.innerHTML='';
+  DATA.categorias.forEach(c=>{
+    const box=document.createElement('div'); box.className='acat';
+    box.innerHTML=`<h3>${esc(c.nombre)}</h3>`;
+    c.items.forEach(it=>{
+      const row=document.createElement('div'); row.className='arow';
+      row.innerHTML=`
+        <input type="text" value="${esc(it.nombre)}" oninput="upd('${esc(c.id)}','${esc(it.id)}','nombre',this.value)">
+        <input type="number" value="${it.precio}" step="500" oninput="upd('${c.id}','${it.id}','precio',+this.value)">
+        <div class="av"><button type="button" class="sw ${it.disp?'on':''}" onclick="toggleDisp('${c.id}','${it.id}',this)" aria-label="Disponible"></button>${it.disp?'activo':'agotado'}</div>
+        <button type="button" class="del" onclick="delItem('${c.id}','${it.id}')" aria-label="Eliminar">×</button>`;
+      box.appendChild(row);
+    });
+    list.appendChild(box);
+  });
+}
+function upd(cat,id,field,val){
+  const c=DATA.categorias.find(x=>x.id===cat); const it=c.items.find(x=>x.id===id); it[field]=val;
+}
+function toggleDisp(cat,id,el){
+  const c=DATA.categorias.find(x=>x.id===cat); const it=c.items.find(x=>x.id===id);
+  it.disp=!it.disp; el.classList.toggle('on',it.disp); el.nextSibling.textContent=it.disp?'activo':'agotado';
+}
+function delItem(cat,id){
+  const c=DATA.categorias.find(x=>x.id===cat); c.items=c.items.filter(x=>x.id!==id); renderAdmin();
+}
+function addItem(){
+  const c=DATA.categorias[0];
+  c.items.push({id:'n'+Date.now(),nombre:'Nuevo producto',desc:'',precio:0,emoji:'🍽️',disp:true});
+  renderAdmin();
+  document.getElementById('adminList').scrollIntoView({behavior:'smooth'});
+}
+async function save(){
+  await db.save(DATA);                 // ← aquí escribe en Supabase/Firebase en el real
+  renderMenu();
+  const m=document.getElementById('savedMsg');
+  m.textContent = '✓ Guardado ('+CONTEXT.base_de_datos.motor+')';
+  m.classList.add('show'); setTimeout(()=>m.classList.remove('show'),2200);
+}
+
+/* ====================================================================
+   7) WHATSAPP — sale del contexto apis.whatsapp_num
+   ==================================================================== */
+function orderWhatsApp(){
+  const num=CONTEXT.apis.whatsapp_num;
+  const txt=encodeURIComponent(`Hola ${CONTEXT.cliente}, quiero hacer un pedido 🙌`);
+  window.open(`https://wa.me/${num}?text=${txt}`,'_blank');
+}
+
+/* ---- view switch ---- */
+function setView(v){
+  document.getElementById('menu').classList.toggle('hide',v==='admin');
+  document.getElementById('cats').style.display=v==='admin'?'none':'flex';
+  document.getElementById('admin').classList.toggle('show',v==='admin');
+  document.getElementById('tMenu').classList.toggle('on',v==='menu');
+  document.getElementById('tAdmin').classList.toggle('on',v==='admin');
+  document.querySelector('.wa').style.display=v==='admin'?'none':'flex';
+  if(v==='admin') checkAdminAccess();
+}
+
+/* ---- login form (base: auth) ---- */
+document.getElementById('adminLoginForm').addEventListener('submit', async (e)=>{
+  e.preventDefault();
+  const f = e.target;
+  const err = document.getElementById('adminLoginErr');
+  try {
+    await auth.login(f.email.value.trim(), f.password.value);
+    err.textContent = '';
+    f.reset();
+    checkAdminAccess();
+  } catch (loginErr) {
+    err.textContent = loginErr.message;
+  }
+});
+
+/* ---- init ---- */
+(async function init(){
+  applyTheme();
+  DATA = await db.load();
+  renderMenu();
+})();
+</script>
+</body>
+</html>

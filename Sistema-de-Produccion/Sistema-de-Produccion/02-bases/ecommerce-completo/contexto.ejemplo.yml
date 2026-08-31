@@ -1,0 +1,60 @@
+# ════════════════════════════════════════════════════════════
+#  FICHA DE CONTEXTO — Base: ecommerce-completo
+#  Copia este archivo por proyecto, llénalo, y pásamelo junto
+#  con la base. NO pongas claves reales aquí (van en .env).
+# ════════════════════════════════════════════════════════════
+
+proyecto:   "Casa Tela — tienda con inventario"
+cliente:    "Casa Tela"
+linea:      pro                # casi siempre pro: inventario + panel + roles
+base:       ecommerce-completo
+
+# ── BASE DE DATOS (catálogo + stock) ─────────────────────────
+base_de_datos:
+  motor:  supabase             # firebase | supabase | local
+  tablas: [categorias, productos]
+  acceso: rls_por_rol
+
+# ── AUTH (login del panel de inventario) ─────────────────────
+auth:
+  motor:          supabase     # firebase | supabase | local
+  rol_requerido:  admin
+
+# ── CARRITO (reglas de negocio, igual que carrito-reutilizable) ─
+carrito:
+  moneda:       "$"
+  envio:        8000
+  impuesto:     0
+  max_por_item: 10
+
+# ── APIs / CONECTORES ───────────────────────────────────────
+apis:
+  pagos:        whatsapp       # whatsapp | wompi | mercadopago | stripe
+  whatsapp_num: "573098765432"
+  analitica:    ga4
+
+# ── VARIABLES (solo nombres; valores reales en .env) ────────
+env:
+  - SUPABASE_URL
+  - SUPABASE_ANON_KEY
+  - WHATSAPP_NUM
+  - WOMPI_PUBLIC_KEY
+  - WOMPI_INTEGRITY_SECRET
+  - GA4_ID
+
+# ── MARCA (alimenta los tokens de diseño) ───────────────────
+marca:
+  inicial:    "C"
+  primario:   "#1B36C9"
+  secundario: "#F5F7FB"
+  display:    "Space Grotesk"
+  body:       "Inter"
+  tono:       "claro, confiable"
+
+# ── ENTREGA ─────────────────────────────────────────────────
+entrega:
+  dominio:  "casatela.co"
+  hosting:  vercel
+  moneda:   "$"
+  idiomas:  [es]
+  soporte:  plan_mensual

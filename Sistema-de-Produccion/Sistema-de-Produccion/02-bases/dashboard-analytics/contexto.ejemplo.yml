@@ -1,0 +1,45 @@
+# ════════════════════════════════════════════════════════════
+#  FICHA DE CONTEXTO — Base: dashboard-analytics
+#  Copia este archivo por proyecto, llénalo, y pásamelo junto
+#  con la base. NO pongas claves reales aquí (van en .env).
+# ════════════════════════════════════════════════════════════
+
+proyecto:   "Casa Tela — métricas del negocio"
+cliente:    "Casa Tela"
+linea:      pro                # este dashboard es siempre pro
+base:       dashboard-analytics
+
+# ── BASE DE DATOS (lee leads/productos de OTRAS bases del cliente) ─
+base_de_datos:
+  motor:  supabase             # firebase | supabase | local
+  # Requiere que el proyecto ya tenga las tablas "leads" (de
+  # landing-modular) y/o "productos" (de ecommerce-completo).
+  # Si el cliente solo usa una de las dos, esa sección queda vacía.
+
+# ── AUTH (acceso al dashboard) ───────────────────────────────
+auth:
+  motor:          supabase     # firebase | supabase | local
+  rol_requerido:  admin
+
+# ── ANALÍTICA REAL (tráfico/visitas — fuera del alcance de esta base) ─
+analitica:
+  ga4_conectado: false         # true solo si hay backend con GA4 Data API
+  nota: "Sin backend, este dashboard solo muestra datos de tu propia BD (leads, inventario), no tráfico de GA4."
+
+# ── VARIABLES (solo nombres; valores reales en .env) ────────
+env:
+  - SUPABASE_URL
+  - SUPABASE_ANON_KEY
+
+# ── MARCA (alimenta los tokens de diseño) ───────────────────
+marca:
+  primario:   "#1B36C9"
+  secundario: "#F5F7FB"
+  display:    "Space Grotesk"
+  body:       "Inter"
+
+# ── ENTREGA ─────────────────────────────────────────────────
+entrega:
+  dominio:  "casatela.co"
+  hosting:  vercel
+  idiomas:  [es]

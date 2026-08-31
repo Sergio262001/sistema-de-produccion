@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Base: Dashboard Analytics · Demo</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --brand:#1B36C9;--bg:#F5F7FB;--accent:#E8A02C;--surface:#fff;--ink:#0F1626;
+    --ink-soft:#454F66;--line:#E2E7F0;--danger:#E5484D;--good:#0FA56C;--radius:14px;
+    --display:'Space Grotesk',sans-serif;--body:'Inter',sans-serif;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--body);-webkit-font-smoothing:antialiased;}
+  h1,h2,h3{font-family:var(--display);margin:0;}
+  button{font-family:inherit;cursor:pointer;}
+
+  .sysbar{background:#0C1322;color:#C9D2EA;font-family:monospace;font-size:12.5px;}
+  .sysbar .in{max-width:980px;margin:0 auto;padding:11px 20px;display:flex;align-items:center;gap:14px;flex-wrap:wrap;}
+  .sysbar .tag{background:#1B2438;border:1px solid #2A3654;border-radius:6px;padding:3px 9px;color:#9BB0E0;}
+  .sysbar b{color:#fff;}
+  .sysbar .warn{margin-left:auto;color:#E8B86A;}
+
+  .wrap{max-width:980px;margin:0 auto;padding:30px 20px 60px;}
+  .head{display:flex;align-items:center;gap:14px;margin-bottom:22px;}
+  .head h1{font-size:24px;}
+  .logoutbtn{margin-left:auto;background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:9px 14px;font-size:12.5px;font-weight:600;color:var(--ink-soft);}
+
+  .kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:24px;}
+  @media(max-width:760px){.kpis{grid-template-columns:1fr 1fr;}}
+  .kpi{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:16px 18px;}
+  .kpi .n{font-family:var(--display);font-size:26px;font-weight:600;}
+  .kpi .l{font-size:12px;color:var(--ink-soft);margin-top:2px;}
+  .kpi.warn .n{color:var(--danger);}
+
+  .panel{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:20px;margin-bottom:18px;}
+  .panel h2{font-size:15px;margin-bottom:14px;}
+  .chart{display:flex;align-items:flex-end;gap:10px;height:140px;}
+  .bar{flex:1;display:flex;flex-direction:column;align-items:center;gap:6px;}
+  .bar .col{width:100%;background:var(--brand);border-radius:6px 6px 0 0;min-height:3px;}
+  .bar .v{font-family:monospace;font-size:11px;color:var(--ink-soft);}
+  .bar .d{font-size:10.5px;color:var(--ink-soft);}
+
+  table{width:100%;border-collapse:collapse;font-size:13.5px;}
+  th{text-align:left;font-size:11px;text-transform:uppercase;letter-spacing:.04em;color:var(--ink-soft);padding:6px 8px;border-bottom:1px solid var(--line);}
+  td{padding:8px;border-bottom:1px solid var(--line);}
+  .badge0{font-family:monospace;font-size:10.5px;background:#FBE6E7;color:var(--danger);padding:2px 7px;border-radius:5px;}
+  .empty-row{color:var(--ink-soft);}
+
+  .loginbox{max-width:340px;margin:60px auto;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:26px;}
+  .loginbox h2{font-size:20px;margin-bottom:4px;}
+  .loginbox .sub{color:var(--ink-soft);font-size:13px;margin-bottom:16px;line-height:1.5;}
+  .loginbox input{width:100%;font-family:inherit;font-size:14px;padding:11px 13px;border:1px solid var(--line);border-radius:9px;margin-bottom:10px;color:var(--ink);background:#FCFAF6;}
+  .loginbox .err{color:var(--danger);font-size:12.5px;min-height:16px;margin-top:6px;}
+  .save{background:var(--brand);color:#fff;border:0;border-radius:9px;padding:12px;font-weight:600;font-size:14px;width:100%;}
+  #dashboardPanel.hide{display:none;}
+</style>
+</head>
+<body>
+
+<div class="sysbar"><div class="in">
+  <span class="tag">base: dashboard-analytics</span>
+  <span>contexto: <b id="sysClient">Casa Tela</b></span>
+  <span class="warn">tráfico/visitas de GA4 no incluido — necesita backend (ver README)</span>
+</div></div>
+
+<div class="wrap" id="app">
+  <div class="loginbox" id="loginBox">
+    <h2>Acceder al dashboard</h2>
+    <div class="sub">Inicia sesión para ver métricas del negocio.<br>Demo: <b>admin@casatela.co</b> / <b>admin123</b></div>
+    <form id="loginForm">
+      <input type="email" name="email" placeholder="correo@ejemplo.com" required>
+      <input type="password" name="password" placeholder="Contraseña" required>
+      <button type="submit" class="save">Iniciar sesión</button>
+      <div class="err" id="loginErr"></div>
+    </form>
+  </div>
+
+  <div id="dashboardPanel" class="hide">
+    <div class="head">
+      <h1>Métricas del negocio</h1>
+      <button type="button" class="logoutbtn" onclick="logout()">Cerrar sesión</button>
+    </div>
+    <div class="kpis" id="kpis"></div>
+    <div class="panel">
+      <h2>Ventas</h2>
+      <div class="kpis" id="kpisVenta"></div>
+      <table>
+        <thead><tr><th>Producto</th><th>Unidades vendidas</th></tr></thead>
+        <tbody id="topTable"></tbody>
+      </table>
+    </div>
+    <div class="panel">
+      <h2>Leads por día (últimos 7 días)</h2>
+      <div class="chart" id="chart"></div>
+    </div>
+    <div class="panel">
+      <h2>Productos con stock bajo o agotado</h2>
+      <table>
+        <thead><tr><th>Producto</th><th>Categoría</th><th>Stock</th></tr></thead>
+        <tbody id="stockTable"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ── CONTEXTO ── */
+const CONTEXT = {
+  cliente: "Casa Tela",
+  base_de_datos: { motor: "local" },   // firebase | supabase | local
+  auth: { motor: "local", rol_requerido: "admin" },
+};
+
+/* ── DATOS (idéntico a src/data/local.adapter.js) ── */
+const hoy = new Date();
+const diasAtras = n => new Date(hoy.getFullYear(), hoy.getMonth(), hoy.getDate()-n).toISOString().slice(0,10);
+const SEED_DATA = {
+  leads: [
+    {id:'l1',fecha:diasAtras(0)}, {id:'l2',fecha:diasAtras(0)}, {id:'l3',fecha:diasAtras(1)},
+    {id:'l4',fecha:diasAtras(2)}, {id:'l5',fecha:diasAtras(3)}, {id:'l6',fecha:diasAtras(5)}, {id:'l7',fecha:diasAtras(6)},
+  ],
+  productos: [
+    {id:'r1',categoria:'Ropa',nombre:'Camiseta básica',precio:45000,stock:12},
+    {id:'r2',categoria:'Ropa',nombre:'Pantalón jogger',precio:89000,stock:5},
+    {id:'r3',categoria:'Ropa',nombre:'Chaqueta liviana',precio:135000,stock:0},
+    {id:'a1',categoria:'Accesorios',nombre:'Gorra bordada',precio:38000,stock:20},
+    {id:'a2',categoria:'Accesorios',nombre:'Bolso de lona',precio:62000,stock:8},
+  ],
+  pedidos: [
+    {id:'PED-7K3F9',fecha:diasAtras(0),estado:'entregado', total:128000,items:[{nombre:'Camiseta básica',qty:2},{nombre:'Gorra bordada',qty:1}]},
+    {id:'PED-M2X4B',fecha:diasAtras(0),estado:'preparando',total:89000, items:[{nombre:'Pantalón jogger',qty:1}]},
+    {id:'PED-Q8H5T',fecha:diasAtras(1),estado:'enviado',   total:107000,items:[{nombre:'Bolso de lona',qty:1},{nombre:'Camiseta básica',qty:1}]},
+    {id:'PED-R4N7C',fecha:diasAtras(2),estado:'nuevo',     total:45000, items:[{nombre:'Camiseta básica',qty:1}]},
+    {id:'PED-Z9V3K',fecha:diasAtras(3),estado:'cancelado', total:135000,items:[{nombre:'Chaqueta liviana',qty:1}]},
+    {id:'PED-B6D2W',fecha:diasAtras(5),estado:'entregado', total:76000, items:[{nombre:'Gorra bordada',qty:2}]},
+  ],
+};
+const localAdapter = { async load(){ return SEED_DATA; } };
+const adapters = { local: localAdapter };
+const db = adapters[CONTEXT.base_de_datos.motor] || localAdapter;
+
+/* ── AUTH (idéntico a base: auth) ── */
+const ADMIN_USERS = [{ email:'admin@casatela.co', password:'admin123', rol:'admin' }];
+let authUser = null;
+const localAuth = {
+  async login(email,password){
+    const u = ADMIN_USERS.find(u=>u.email===email && u.password===password);
+    if(!u) throw new Error('Correo o contraseña incorrectos');
+    authUser = { email:u.email, rol:u.rol };
+    return { ok:true, user:authUser };
+  },
+  async logout(){ authUser=null; return {ok:true}; },
+  current(){ return authUser; },
+};
+const auth = { local: localAuth }[CONTEXT.auth.motor] || localAuth;
+
+function checkAccess(){
+  const user = auth.current();
+  const logged = !!user && user.rol===CONTEXT.auth.rol_requerido;
+  document.getElementById('loginBox').style.display = logged?'none':'block';
+  document.getElementById('dashboardPanel').classList.toggle('hide', !logged);
+  if(logged) renderDashboard();
+}
+async function logout(){ await auth.logout(); checkAccess(); }
+
+document.getElementById('loginForm').addEventListener('submit', async (e)=>{
+  e.preventDefault();
+  const f=e.target; const err=document.getElementById('loginErr');
+  try{ await auth.login(f.email.value.trim(), f.password.value); err.textContent=''; f.reset(); checkAccess(); }
+  catch(loginErr){ err.textContent=loginErr.message; }
+});
+
+/* ── RENDER ── */
+let DATA = null;
+
+/* ---- SEGURIDAD (ver 03-componentes-ui/seguridad.js) ----
+   Todo dato escrito por alguien que no seas tú pasa por esc()
+   antes de tocar innerHTML. En un CRM esto no es teórico: los
+   clientes pueden llegar de un formulario público, y quien abre
+   la ficha después es el dueño con su sesión iniciada. */
+function esc(v){
+  if(v===null||v===undefined) return '';
+  return String(v).replace(/&/g,'&amp;').replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+}
+
+function money(n){ return '$'+(n||0).toLocaleString('es-CO'); }
+
+async function renderDashboard(){
+  if(!DATA) DATA = await db.load();
+
+  const totalLeads = DATA.leads.length;
+  const desde = diasAtras(6);
+  const leadsRecientes = DATA.leads.filter(l=>l.fecha>=desde).length;
+  const agotados = DATA.productos.filter(p=>p.stock<=0).length;
+  const valorInventario = DATA.productos.reduce((n,p)=>n+p.precio*p.stock,0);
+
+  document.getElementById('kpis').innerHTML = `
+    <div class="kpi"><div class="n">${totalLeads}</div><div class="l">Leads totales</div></div>
+    <div class="kpi"><div class="n">${leadsRecientes}</div><div class="l">Leads últimos 7 días</div></div>
+    <div class="kpi ${agotados?'warn':''}"><div class="n">${agotados}</div><div class="l">Productos agotados</div></div>
+    <div class="kpi"><div class="n">${money(valorInventario)}</div><div class="l">Valor en inventario</div></div>`;
+
+  /* ── VENTAS ──
+     Solo cuentan como venta los pedidos que avanzaron. Un "nuevo"
+     todavía no se confirmó y un "cancelado" nunca fue venta —
+     contarlos infla el número y el cliente pierde la confianza en
+     el panel el día que cuadre caja. */
+  const ESTADOS_VENTA = ['confirmado','preparando','enviado','entregado'];
+  const pedidos = DATA.pedidos || [];
+  const ventas = pedidos.filter(p=>ESTADOS_VENTA.includes(p.estado));
+  const ingresos = ventas.reduce((n,p)=>n+p.total,0);
+  const ticket = ventas.length ? Math.round(ingresos/ventas.length) : 0;
+  const porAtender = pedidos.filter(p=>p.estado==='nuevo').length;
+
+  document.getElementById('kpisVenta').innerHTML = pedidos.length ? `
+    <div class="kpi"><div class="n">${money(ingresos)}</div><div class="l">Ingresos</div></div>
+    <div class="kpi"><div class="n">${ventas.length}</div><div class="l">Ventas</div></div>
+    <div class="kpi ${porAtender?'warn':''}"><div class="n">${porAtender}</div><div class="l">Pedidos por atender</div></div>
+    <div class="kpi"><div class="n">${money(ticket)}</div><div class="l">Ticket promedio</div></div>`
+    : '<p class="empty-row">Este proyecto todavía no guarda pedidos. Corre el esquema de pedidos en la base que corresponda para ver ventas aquí.</p>';
+
+  const porProducto = new Map();
+  ventas.forEach(p=>(p.items||[]).forEach(i=>{
+    porProducto.set(i.nombre, (porProducto.get(i.nombre)||0) + i.qty);
+  }));
+  const top = [...porProducto.entries()].sort((a,b)=>b[1]-a[1]).slice(0,5);
+  document.getElementById('topTable').innerHTML = top.length
+    ? top.map(([nombre,qty])=>`<tr><td>${esc(nombre)}</td><td>${qty}</td></tr>`).join('')
+    : '<tr><td colspan="2" class="empty-row">Todavía no hay ventas registradas.</td></tr>';
+
+  const dias7 = Array.from({length:7},(_,i)=>diasAtras(6-i));
+  const conteos = dias7.map(d=>DATA.leads.filter(l=>l.fecha===d).length);
+  const max = Math.max(1, ...conteos);
+  document.getElementById('chart').innerHTML = dias7.map((d,i)=>{
+    const h = Math.round((conteos[i]/max)*110)+4;
+    const etiqueta = new Date(d).toLocaleDateString('es-CO',{day:'2-digit',month:'2-digit'});
+    return `<div class="bar"><div class="v">${conteos[i]}</div><div class="col" style="height:${h}px"></div><div class="d">${etiqueta}</div></div>`;
+  }).join('');
+
+  const bajos = DATA.productos.filter(p=>p.stock<=5).sort((a,b)=>a.stock-b.stock);
+  document.getElementById('stockTable').innerHTML = bajos.length ? bajos.map(p=>`
+    <tr><td>${esc(p.nombre)}</td><td>${esc(p.categoria)}</td><td>${p.stock<=0?'<span class="badge0">agotado</span>':p.stock}</td></tr>
+  `).join('') : '<tr><td colspan="3" class="empty-row">Sin productos con stock bajo.</td></tr>';
+}
+
+document.getElementById('sysClient').textContent = CONTEXT.cliente;
+checkAccess();
+</script>
+</body>
+</html>

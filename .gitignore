@@ -1,0 +1,38 @@
+# ─── Secretos ─────────────────────────────────────────────────
+# Nunca, bajo ninguna circunstancia. Los .env.example SÍ se suben.
+.env
+.env.*
+!.env.example
+*.key
+*.pem
+secrets.json
+
+# ─── Dependencias y builds ────────────────────────────────────
+node_modules/
+dist/
+build/
+.next/
+.vite/
+*.tsbuildinfo
+
+# ─── Informatecol ─────────────────────────────────────────────
+# Tiene su propio repositorio git con remoto propio (AGPL-3.0).
+# No se anida aquí: se clona aparte.
+Informatecol/
+
+# ─── Sistema operativo / editor ───────────────────────────────
+Thumbs.db
+desktop.ini
+.DS_Store
+*.lnk
+~$*
+.vscode/
+.idea/
+
+# ─── Local de Claude Code ─────────────────────────────────────
+.claude/settings.local.json
+ChangeLog.md
+
+# ─── Logs ─────────────────────────────────────────────────────
+*.log
+npm-debug.log*

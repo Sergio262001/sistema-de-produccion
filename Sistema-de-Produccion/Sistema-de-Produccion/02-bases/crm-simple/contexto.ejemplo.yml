@@ -1,0 +1,39 @@
+# ════════════════════════════════════════════════════════════
+#  FICHA DE CONTEXTO — Base: crm-simple
+#  Copia este archivo por proyecto, llénalo, y pásamelo junto
+#  con la base. NO pongas claves reales aquí (van en .env).
+# ════════════════════════════════════════════════════════════
+
+proyecto:   "Casa Tela — seguimiento de clientes"
+cliente:    "Casa Tela"
+linea:      pro                # datos de clientes son sensibles: casi siempre pro
+base:       crm-simple
+
+# ── BASE DE DATOS ─────────────────────────────────────────────
+base_de_datos:
+  motor:  supabase             # firebase | supabase | local
+  tablas: [clientes, interacciones]
+  acceso: rls_por_rol          # solo admin lee/escribe — no es público
+
+# ── AUTH ─────────────────────────────────────────────────────
+auth:
+  motor:          supabase     # firebase | supabase | local
+  rol_requerido:  admin
+
+# ── VARIABLES (solo nombres; valores reales en .env) ────────
+env:
+  - SUPABASE_URL
+  - SUPABASE_ANON_KEY
+
+# ── MARCA (alimenta los tokens de diseño) ───────────────────
+marca:
+  primario:   "#1B36C9"
+  secundario: "#F5F7FB"
+  display:    "Space Grotesk"
+  body:       "Inter"
+
+# ── ENTREGA ─────────────────────────────────────────────────
+entrega:
+  dominio:  "casatela.co"
+  hosting:  vercel
+  idiomas:  [es]

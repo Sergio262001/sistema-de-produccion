@@ -1,0 +1,42 @@
+# ════════════════════════════════════════════════════════════
+#  FICHA DE CONTEXTO — Base: carrito-reutilizable
+#  Copia este archivo por proyecto, llénalo, y pásamelo junto
+#  con la base. NO pongas claves reales aquí (van en .env).
+# ════════════════════════════════════════════════════════════
+
+proyecto:   "Café Raíz — pedidos"
+cliente:    "Café Raíz"
+linea:      starter            # starter | pro
+base:       carrito-reutilizable
+
+# ── CARRITO (reglas de negocio) ─────────────────────────────
+carrito:
+  moneda:       "$"
+  envio:        0
+  impuesto:     0              # % sobre el subtotal
+  max_por_item: 99
+
+# ── APIs / CHECKOUT (tú eliges el método) ───────────────────
+apis:
+  pagos:        whatsapp       # whatsapp | wompi | mercadopago | stripe
+  whatsapp_num: "573001234567"
+
+# ── VARIABLES (solo nombres; valores reales en .env) ────────
+env:
+  - WHATSAPP_NUM
+  - WOMPI_PUBLIC_KEY        # va al frontend (la usa el widget)
+  - WOMPI_INTEGRITY_SECRET  # solo backend — firma de integridad en producción
+
+# ── MARCA (alimenta los tokens de diseño) ───────────────────
+marca:
+  inicial:    "R"
+  primario:   "#1F6B4A"
+  secundario: "#F3ECE0"
+  display:    "Fraunces"
+  body:       "Inter"
+
+# ── ENTREGA ─────────────────────────────────────────────────
+entrega:
+  dominio:  "caferaiz.co"
+  hosting:  vercel
+  idiomas:  [es]

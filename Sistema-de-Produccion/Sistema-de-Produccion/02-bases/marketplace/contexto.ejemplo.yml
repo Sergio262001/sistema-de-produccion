@@ -1,0 +1,42 @@
+# ════════════════════════════════════════════════════════════
+#  FICHA DE CONTEXTO — Base: marketplace
+#  Copia este archivo por proyecto, llénalo, y pásamelo junto
+#  con la base. NO pongas claves reales aquí (van en .env).
+# ════════════════════════════════════════════════════════════
+
+proyecto:   "Mercado Hecho a Mano — multi-vendedor"
+cliente:    "Mercado Hecho a Mano"
+linea:      pro                # multi-vendedor es siempre pro
+base:       marketplace
+
+# ── BASE DE DATOS ─────────────────────────────────────────────
+base_de_datos:
+  motor:  supabase             # firebase | supabase | local
+  tablas: [vendedores, productos]
+
+# ── COMISIÓN (cuánto se queda la plataforma por venta) ───────
+comision_porcentaje: 12        # ← ajusta al acuerdo real con los vendedores
+
+# ── PAGOS ────────────────────────────────────────────────────
+apis:
+  pagos:        whatsapp       # whatsapp | otro (split automático no incluido, ver README)
+  whatsapp_num: "573001112222"
+
+# ── VARIABLES (solo nombres; valores reales en .env) ────────
+env:
+  - SUPABASE_URL
+  - SUPABASE_ANON_KEY
+  - WHATSAPP_NUM
+
+# ── MARCA (alimenta los tokens de diseño) ───────────────────
+marca:
+  primario:   "#6A3CF0"
+  secundario: "#F5F7FB"
+  display:    "Space Grotesk"
+  body:       "Inter"
+
+# ── ENTREGA ─────────────────────────────────────────────────
+entrega:
+  dominio:  "mercadohechoamano.co"
+  hosting:  vercel
+  idiomas:  [es]

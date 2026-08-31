@@ -1,0 +1,20 @@
+/* ════════════════════════════════════════════════════════════
+   DESIGN TOKENS — valores neutros, se sobrescriben desde el contexto.
+   ════════════════════════════════════════════════════════════ */
+:root{
+  --brand:#1B36C9;
+  --bg:#F5F7FB;
+  --accent:#E8A02C;
+  --surface:#FFFFFF;
+  --ink:#0F1626;
+  --ink-soft:#454F66;
+  --line:#E2E7F0;
+  --danger:#E5484D;
+  --good:#0FA56C;
+
+  --display:'Space Grotesk',sans-serif;
+  --body:'Inter',sans-serif;
+
+  --radius:14px;
+  --space:16px;
+}

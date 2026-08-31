@@ -1,0 +1,634 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sistema de Producción · Estudio Digital</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --canvas:#E9ECF3;
+    --panel:#FFFFFF;
+    --ink:#0F1626;
+    --ink-soft:#454F66;
+    --ink-faint:#828DA3;
+    --line:#D2D8E4;
+    --line-soft:#E2E7F0;
+    --cobalt:#2F54FF;
+    --cobalt-deep:#1B36C9;
+    --starter:#0FA56C;
+    --starter-bg:#E5F6EE;
+    --pro:#6A3CF0;
+    --pro-bg:#EDE7FD;
+    --ink-bg:#0C1322;
+    --ink-bg-2:#121B30;
+    --amber:#E8A02C;
+    --radius:14px;
+    --maxw:1120px;
+  }
+
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    margin:0;
+    background:var(--canvas);
+    color:var(--ink);
+    font-family:'Inter',system-ui,sans-serif;
+    font-size:16px;
+    line-height:1.6;
+    -webkit-font-smoothing:antialiased;
+  }
+  h1,h2,h3,h4{font-family:'Space Grotesk',sans-serif;line-height:1.1;margin:0;font-weight:600;letter-spacing:-0.01em;}
+  p{margin:0;}
+  a{color:inherit;text-decoration:none;}
+  .mono{font-family:'JetBrains Mono',monospace;}
+
+  .wrap{max-width:var(--maxw);margin:0 auto;padding:0 28px;}
+
+  /* eyebrow / labels */
+  .eyebrow{
+    font-family:'JetBrains Mono',monospace;
+    font-size:12px;
+    letter-spacing:.18em;
+    text-transform:uppercase;
+    color:var(--ink-faint);
+    display:flex;align-items:center;gap:10px;
+  }
+  .eyebrow::before{content:"";width:24px;height:1px;background:var(--ink-faint);display:inline-block;}
+
+  /* ---------- TOP BAR ---------- */
+  .topbar{
+    position:sticky;top:0;z-index:50;
+    background:rgba(233,236,243,.82);
+    backdrop-filter:blur(12px);
+    border-bottom:1px solid var(--line);
+  }
+  .topbar .wrap{display:flex;align-items:center;justify-content:space-between;height:60px;}
+  .brand{font-family:'Space Grotesk';font-weight:700;font-size:16px;letter-spacing:-.02em;display:flex;align-items:center;gap:9px;}
+  .brand .dot{width:11px;height:11px;border-radius:3px;background:var(--cobalt);box-shadow:3px 3px 0 0 var(--pro);}
+  .nav{display:flex;gap:26px;}
+  .nav a{font-size:13.5px;color:var(--ink-soft);font-weight:500;transition:color .2s;}
+  .nav a:hover{color:var(--ink);}
+  @media(max-width:820px){.nav{display:none;}}
+
+  /* ---------- HERO ---------- */
+  .hero{background:var(--ink-bg);color:#EAEEF7;position:relative;overflow:hidden;}
+  .hero::before{
+    content:"";position:absolute;inset:0;
+    background-image:linear-gradient(var(--line-soft) 1px,transparent 1px),linear-gradient(90deg,var(--line-soft) 1px,transparent 1px);
+    background-size:46px 46px;
+    opacity:.04;
+  }
+  .hero .wrap{position:relative;padding:74px 28px 64px;}
+  .hero-tag{font-family:'JetBrains Mono';font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:#7C89FF;display:flex;gap:10px;align-items:center;}
+  .hero-tag::before{content:"";width:26px;height:1px;background:#7C89FF;}
+  .hero h1{font-size:clamp(34px,5.4vw,62px);margin:20px 0 0;font-weight:700;letter-spacing:-.02em;}
+  .hero h1 .accent{color:#8E9BFF;}
+  .hero .lead{max-width:600px;margin:22px 0 0;color:#A9B3CC;font-size:17.5px;line-height:1.65;}
+  .hero-meta{display:flex;flex-wrap:wrap;gap:30px;margin-top:38px;}
+  .hero-meta .m{display:flex;flex-direction:column;gap:3px;}
+  .hero-meta .m b{font-family:'Space Grotesk';font-size:26px;font-weight:600;color:#fff;}
+  .hero-meta .m span{font-size:12.5px;color:#8893AD;font-family:'JetBrains Mono';letter-spacing:.04em;}
+
+  /* pipeline machine (signature) */
+  .pipe{margin-top:50px;display:grid;grid-template-columns:1fr auto 1fr auto 1fr;align-items:stretch;gap:0;}
+  .pipe-node{
+    background:var(--ink-bg-2);
+    border:1px solid #243150;
+    border-radius:12px;
+    padding:20px 18px;
+    position:relative;
+  }
+  .pipe-node .k{font-family:'JetBrains Mono';font-size:11px;letter-spacing:.15em;text-transform:uppercase;color:#6E7B9C;}
+  .pipe-node h4{font-size:18px;color:#fff;margin:8px 0 8px;}
+  .pipe-node p{font-size:13px;color:#94A0BD;line-height:1.5;}
+  .pipe-node.ctx{border-color:#2F54FF55;}
+  .pipe-node.base{border-color:#6A3CF055;}
+  .pipe-node.out{border-color:#0FA56C55;}
+  .pipe-node .corner{position:absolute;top:14px;right:14px;width:8px;height:8px;border-radius:50%;}
+  .ctx .corner{background:var(--cobalt);} .base .corner{background:var(--pro);} .out .corner{background:var(--starter);}
+  .pipe-arrow{display:flex;align-items:center;justify-content:center;padding:0 8px;color:#4A5882;}
+  .pipe-arrow svg{width:30px;height:30px;}
+  .pipe-arrow path{stroke:#4A5882;}
+  @media(max-width:760px){
+    .pipe{grid-template-columns:1fr;gap:10px;}
+    .pipe-arrow{transform:rotate(90deg);height:26px;}
+  }
+
+  /* ---------- SECTION SHELL ---------- */
+  section{padding:78px 0;}
+  .sec-head{max-width:680px;margin-bottom:44px;}
+  .sec-head h2{font-size:clamp(26px,3.6vw,40px);margin:14px 0 0;}
+  .sec-head p{color:var(--ink-soft);margin-top:14px;font-size:16.5px;}
+
+  /* ---------- HOW IT WORKS / context ---------- */
+  .ctx-grid{display:grid;grid-template-columns:1.05fr .95fr;gap:34px;align-items:start;}
+  @media(max-width:880px){.ctx-grid{grid-template-columns:1fr;}}
+  .steps{display:flex;flex-direction:column;gap:14px;}
+  .step{display:flex;gap:16px;background:var(--panel);border:1px solid var(--line-soft);border-radius:var(--radius);padding:20px 22px;}
+  .step .num{font-family:'JetBrains Mono';font-size:13px;color:var(--cobalt);font-weight:500;flex:none;width:30px;}
+  .step h4{font-size:17px;margin-bottom:5px;}
+  .step p{font-size:14.5px;color:var(--ink-soft);}
+
+  .codecard{background:var(--ink-bg);border-radius:var(--radius);overflow:hidden;border:1px solid #20283f;position:sticky;top:84px;}
+  .codecard .bar{display:flex;align-items:center;gap:8px;padding:13px 16px;border-bottom:1px solid #20283f;}
+  .codecard .bar .b{width:11px;height:11px;border-radius:50%;}
+  .codecard .bar .b1{background:#FF5F57;}.codecard .bar .b2{background:#FEBC2E;}.codecard .bar .b3{background:#28C840;}
+  .codecard .bar .fname{margin-left:8px;font-family:'JetBrains Mono';font-size:12px;color:#7A87A6;}
+  .codecard pre{margin:0;padding:20px 20px;font-family:'JetBrains Mono';font-size:13px;line-height:1.75;color:#C7D0E6;overflow-x:auto;}
+  .codecard .ck{color:#7C89FF;} .codecard .cs{color:#5FD0A6;} .codecard .cc{color:#56617E;} .codecard .cv{color:#E8B86A;}
+  .cc2{color:#56617E;}
+
+  /* ---------- TWO LINES ---------- */
+  .lines{display:grid;grid-template-columns:1fr 1fr;gap:24px;}
+  @media(max-width:780px){.lines{grid-template-columns:1fr;}}
+  .line-card{background:var(--panel);border:1px solid var(--line-soft);border-radius:18px;padding:30px 28px;position:relative;overflow:hidden;}
+  .line-card .ribbon{position:absolute;top:0;left:0;width:100%;height:5px;}
+  .line-card.starter .ribbon{background:var(--starter);}
+  .line-card.pro .ribbon{background:var(--pro);}
+  .line-tag{display:inline-flex;align-items:center;gap:8px;font-family:'JetBrains Mono';font-size:12px;letter-spacing:.1em;text-transform:uppercase;font-weight:500;padding:6px 12px;border-radius:20px;}
+  .line-card.starter .line-tag{background:var(--starter-bg);color:var(--starter);}
+  .line-card.pro .line-tag{background:var(--pro-bg);color:var(--pro);}
+  .line-card h3{font-size:23px;margin:18px 0 6px;}
+  .line-card .who{font-size:14px;color:var(--ink-faint);margin-bottom:20px;}
+  .line-card ul{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:11px;}
+  .line-card li{display:flex;gap:11px;font-size:14.5px;color:var(--ink-soft);align-items:flex-start;}
+  .line-card li svg{flex:none;width:17px;height:17px;margin-top:2px;}
+  .starter li svg path{stroke:var(--starter);} .pro li svg path{stroke:var(--pro);}
+  .line-foot{margin-top:22px;padding-top:18px;border-top:1px dashed var(--line);font-size:13px;color:var(--ink-faint);font-family:'JetBrains Mono';}
+
+  /* ---------- SERVICE CATALOG ---------- */
+  .cat-block{margin-bottom:42px;}
+  .cat-block:last-child{margin-bottom:0;}
+  .cat-title{display:flex;align-items:center;gap:13px;margin-bottom:18px;}
+  .cat-title .ico{width:38px;height:38px;border-radius:10px;display:grid;place-items:center;flex:none;font-size:19px;}
+  .cat-title h3{font-size:20px;}
+  .cat-title .count{margin-left:auto;font-family:'JetBrains Mono';font-size:12px;color:var(--ink-faint);}
+  .svc-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(248px,1fr));gap:14px;}
+  .svc{background:var(--panel);border:1px solid var(--line-soft);border-radius:12px;padding:18px 18px;transition:transform .18s,box-shadow .18s,border-color .18s;}
+  .svc:hover{transform:translateY(-3px);box-shadow:0 12px 28px -16px rgba(15,22,38,.3);border-color:var(--line);}
+  .svc .top{display:flex;justify-content:space-between;align-items:flex-start;gap:8px;margin-bottom:8px;}
+  .svc h4{font-size:15.5px;}
+  .svc p{font-size:13px;color:var(--ink-soft);line-height:1.5;}
+  .pill{font-family:'JetBrains Mono';font-size:10px;letter-spacing:.06em;text-transform:uppercase;padding:3px 7px;border-radius:6px;flex:none;font-weight:500;}
+  .pill.s{background:var(--starter-bg);color:var(--starter);}
+  .pill.p{background:var(--pro-bg);color:var(--pro);}
+  .pill.b{background:#FBF0DC;color:#B17B16;}
+
+  /* ---------- TECH BASES ---------- */
+  .bases{background:var(--ink-bg);color:#E7EBF5;}
+  .bases .sec-head h2{color:#fff;}
+  .bases .sec-head p{color:#9BA6C2;}
+  .bases .eyebrow{color:#7C89FF;}
+  .bases .eyebrow::before{background:#7C89FF;}
+  .basecat{margin-bottom:40px;}
+  .basecat > .bc-head{display:flex;align-items:baseline;gap:12px;margin-bottom:16px;padding-bottom:12px;border-bottom:1px solid #222C45;}
+  .basecat .bc-head .n{font-family:'JetBrains Mono';font-size:12px;color:#5E6B8E;}
+  .basecat .bc-head h3{font-size:19px;color:#fff;}
+  .basecat .bc-head .tag{margin-left:auto;font-family:'JetBrains Mono';font-size:11px;color:#7A87A6;}
+  .bgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:14px;}
+  .bcard{background:var(--ink-bg-2);border:1px solid #232E49;border-radius:12px;padding:18px 18px 16px;}
+  .bcard h4{font-size:16px;color:#fff;margin-bottom:6px;display:flex;align-items:center;gap:8px;}
+  .bcard .solves{font-size:12.5px;color:#8E9AB8;line-height:1.5;margin-bottom:13px;min-height:34px;}
+  .bcard .row{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px;}
+  .chip{font-family:'JetBrains Mono';font-size:10.5px;padding:4px 8px;border-radius:6px;background:#1B2438;color:#9BB0E0;border:1px solid #2A3654;}
+  .bcard .scale{display:flex;gap:8px;font-size:11px;font-family:'JetBrains Mono';border-top:1px solid #232E49;padding-top:11px;}
+  .bcard .scale .lvl{display:flex;align-items:center;gap:6px;}
+  .bcard .scale .ld{width:7px;height:7px;border-radius:50%;}
+  .ld.s{background:var(--starter);} .ld.p{background:var(--pro);}
+  .bcard .scale span{color:#7C88A6;}
+
+  /* ---------- BEST PRACTICES (info extra) ---------- */
+  .extra-banner{display:inline-flex;align-items:center;gap:9px;background:var(--amber);color:#3A2A05;font-family:'JetBrains Mono';font-size:11.5px;letter-spacing:.1em;text-transform:uppercase;font-weight:500;padding:7px 14px;border-radius:8px;margin-bottom:18px;}
+  .bp-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:16px;}
+  .bp{background:var(--panel);border:1px solid var(--line-soft);border-radius:14px;padding:22px 22px;border-left:3px solid var(--cobalt);}
+  .bp h4{font-size:16.5px;margin-bottom:9px;display:flex;align-items:center;gap:10px;}
+  .bp h4 .bn{font-family:'JetBrains Mono';font-size:12px;color:var(--cobalt);font-weight:500;}
+  .bp p{font-size:14px;color:var(--ink-soft);line-height:1.58;}
+  .bp p b{color:var(--ink);font-weight:600;}
+  .bp.alt{border-left-color:var(--pro);}
+  .bp.alt h4 .bn{color:var(--pro);}
+  .bp.alt2{border-left-color:var(--starter);}
+  .bp.alt2 h4 .bn{color:var(--starter);}
+
+  /* ---------- ROADMAP ---------- */
+  .road{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;}
+  @media(max-width:820px){.road{grid-template-columns:1fr;}}
+  .stage{background:var(--panel);border:1px solid var(--line-soft);border-radius:16px;padding:26px 24px;position:relative;}
+  .stage .sn{font-family:'Space Grotesk';font-size:46px;font-weight:700;color:var(--line);line-height:1;letter-spacing:-.03em;}
+  .stage h4{font-size:18px;margin:8px 0 14px;}
+  .stage ul{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:9px;}
+  .stage li{font-size:14px;color:var(--ink-soft);display:flex;gap:9px;align-items:flex-start;}
+  .stage li::before{content:"›";color:var(--cobalt);font-weight:700;flex:none;}
+
+  /* ---------- CTA / FOOTER ---------- */
+  .closer{background:var(--ink-bg);color:#fff;text-align:center;}
+  .closer .wrap{padding:72px 28px;}
+  .closer h2{font-size:clamp(26px,4vw,42px);max-width:680px;margin:0 auto;}
+  .closer p{color:#A1ABC6;max-width:520px;margin:18px auto 0;font-size:16.5px;}
+  .closer .next{display:flex;gap:14px;justify-content:center;flex-wrap:wrap;margin-top:30px;}
+  .nbtn{background:var(--ink-bg-2);border:1px solid #2A3654;border-radius:10px;padding:14px 20px;font-family:'JetBrains Mono';font-size:13px;color:#C9D2EA;display:flex;align-items:center;gap:10px;}
+  .nbtn .k{color:var(--cobalt);font-weight:600;}
+
+  footer{background:#080D18;color:#5E6B8E;font-size:13px;}
+  footer .wrap{padding:28px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px;font-family:'JetBrains Mono';}
+
+  .reveal{opacity:0;transform:translateY(18px);transition:opacity .6s ease,transform .6s ease;}
+  .reveal.in{opacity:1;transform:none;}
+  @media(prefers-reduced-motion:reduce){
+    .reveal{opacity:1;transform:none;transition:none;}
+    html{scroll-behavior:auto;}
+  }
+  :focus-visible{outline:2px solid var(--cobalt);outline-offset:3px;border-radius:4px;}
+</style>
+</head>
+<body>
+
+<!-- TOP BAR -->
+<div class="topbar">
+  <div class="wrap">
+    <div class="brand"><span class="dot"></span>Sistema de Producción</div>
+    <nav class="nav">
+      <a href="#como">Cómo funciona</a>
+      <a href="#lineas">Líneas</a>
+      <a href="#servicios">Servicios</a>
+      <a href="#bases">Bases técnicas</a>
+      <a href="#practicas">Buenas prácticas</a>
+      <a href="#ruta">Ruta</a>
+    </nav>
+  </div>
+</div>
+
+<!-- HERO -->
+<header class="hero">
+  <div class="wrap">
+    <div class="hero-tag">Estudio Digital · UX/UI · Desarrollo</div>
+    <h1>Bases que se <span class="accent">arman solas</span><br>con el contexto de cada cliente.</h1>
+    <p class="lead">Un sistema de producción modular: estructuras técnicas sólidas y reutilizables —carrito, menús, auth, dashboards— que tomas, configuras con el contexto del proyecto y conviertes en un producto terminado. Pensado para escalar de freelance a equipo.</p>
+
+    <div class="hero-meta">
+      <div class="m"><b>2</b><span>líneas · pequeñas y grandes</span></div>
+      <div class="m"><b>24+</b><span>bases reutilizables</span></div>
+      <div class="m"><b>1</b><span>flujo de contexto</span></div>
+    </div>
+
+    <!-- SIGNATURE: pipeline machine -->
+    <div class="pipe">
+      <div class="pipe-node ctx"><span class="corner"></span>
+        <div class="k">01 · Entrada</div><h4>Contexto</h4>
+        <p>Rubro, marca, colores, secciones, integraciones y tono del cliente.</p>
+      </div>
+      <div class="pipe-arrow"><svg viewBox="0 0 24 24" fill="none"><path d="M4 12h16M14 6l6 6-6 6" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+      <div class="pipe-node base"><span class="corner"></span>
+        <div class="k">02 · Motor</div><h4>Base técnica</h4>
+        <p>Estructura probada y escalable que ya resuelve la lógica del producto.</p>
+      </div>
+      <div class="pipe-arrow"><svg viewBox="0 0 24 24" fill="none"><path d="M4 12h16M14 6l6 6-6 6" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+      <div class="pipe-node out"><span class="corner"></span>
+        <div class="k">03 · Salida</div><h4>Producto final</h4>
+        <p>Landing, menú o ecommerce listo para entregar y mantener.</p>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- HOW IT WORKS -->
+<section id="como">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <div class="eyebrow">Cómo funciona</div>
+      <h2>El contexto es la materia prima.</h2>
+      <p>Cada base no se construye de cero: se alimenta con una ficha de contexto. Tú llenas la ficha, me la pasas junto con la base, y el producto sale configurado para ese cliente específico.</p>
+    </div>
+
+    <div class="ctx-grid">
+      <div class="steps reveal">
+        <div class="step"><span class="num">01</span><div><h4>Defines el contexto</h4><p>Respondes una ficha corta por tipo de proyecto: marca, rubro, paleta, secciones, integraciones y tono.</p></div></div>
+        <div class="step"><span class="num">02</span><div><h4>Eliges la base</h4><p>Tomas la base técnica que corresponde —menú, carrito, landing— ya con su lógica resuelta y escalable.</p></div></div>
+        <div class="step"><span class="num">03</span><div><h4>Se ensambla</h4><p>Contexto + base = producto configurado. Se respeta la estructura sólida, solo cambia lo que el cliente necesita.</p></div></div>
+        <div class="step"><span class="num">04</span><div><h4>Entregas y mantienes</h4><p>El mismo sistema deja todo listo para soporte mensual: una fuente de ingreso recurrente.</p></div></div>
+      </div>
+
+      <div class="codecard reveal">
+        <div class="bar"><span class="b b1"></span><span class="b b2"></span><span class="b b3"></span><span class="fname">contexto.menu.yml</span></div>
+        <pre><span class="cc2"># Ficha de contexto — Menú digital</span>
+<span class="ck">cliente</span>: <span class="cs">"Café Raíz"</span>
+<span class="ck">rubro</span>: <span class="cs">cafetería</span>
+<span class="ck">base</span>: <span class="cs">menu-qr-panel-admin</span>
+<span class="ck">marca</span>:
+  <span class="ck">primario</span>: <span class="cv">"#1F6B4A"</span>
+  <span class="ck">secundario</span>: <span class="cv">"#F3ECE0"</span>
+  <span class="ck">tipografia</span>: <span class="cs">"Fraunces + Inter"</span>
+<span class="ck">categorias</span>: [<span class="cs">café</span>, <span class="cs">brunch</span>, <span class="cs">postres</span>]
+<span class="ck">integraciones</span>:
+  - <span class="cs">whatsapp_pedidos</span>
+  - <span class="cs">instagram_feed</span>
+<span class="ck">panel</span>: <span class="cv">true</span>     <span class="cc2"># el cliente edita solo</span>
+<span class="ck">idiomas</span>: [<span class="cs">es</span>, <span class="cs">en</span>]
+<span class="ck">tono</span>: <span class="cs">"cercano, artesanal"</span></pre>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- TWO LINES -->
+<section id="lineas" style="background:var(--panel);border-top:1px solid var(--line-soft);border-bottom:1px solid var(--line-soft);">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <div class="eyebrow">Modelo de negocio</div>
+      <h2>Dos líneas, dos promesas distintas.</h2>
+      <p>El mismo motor sirve a un negocio de barrio y a una empresa mediana. Lo que cambia es el alcance, la profundidad técnica y el precio. Cada base indica hasta dónde escala.</p>
+    </div>
+
+    <div class="lines">
+      <div class="line-card starter reveal">
+        <div class="ribbon"></div>
+        <span class="line-tag">● Línea Starter</span>
+        <h3>Pequeños negocios</h3>
+        <p class="who">Cafés, bares, locales, emprendedores, freelancers. Necesitan estar online ya, simple y bien hecho.</p>
+        <ul>
+          <li><svg viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4L19 7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>Velocidad de entrega: días, no meses</li>
+          <li><svg viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4L19 7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>Bases livianas, una sola sucursal/escenario</li>
+          <li><svg viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4L19 7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>Precio de entrada accesible + plan de soporte</li>
+          <li><svg viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4L19 7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>Foco en convertir: contacto, WhatsApp, reserva</li>
+        </ul>
+        <div class="line-foot">// pago único + mantenimiento mensual opcional</div>
+      </div>
+
+      <div class="line-card pro reveal">
+        <div class="ribbon"></div>
+        <span class="line-tag">● Línea Pro</span>
+        <h3>Empresas medianas</h3>
+        <p class="who">Marcas con catálogo, varias sedes o equipo interno. Necesitan plataforma, datos y administración.</p>
+        <ul>
+          <li><svg viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4L19 7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>Paneles de administración y roles de usuario</li>
+          <li><svg viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4L19 7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>Multisucursal, inventario, analítica integrada</li>
+          <li><svg viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4L19 7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>Proceso con UX research y documentación</li>
+          <li><svg viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4L19 7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>Contrato por fases + retainer de evolución</li>
+        </ul>
+        <div class="line-foot">// proyecto por fases + soporte y mejora continua</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SERVICE CATALOG -->
+<section id="servicios">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <div class="eyebrow">Catálogo</div>
+      <h2>Todo lo que el estudio puede ofrecer.</h2>
+      <p>Servicios listos para publicitar. La etiqueta de color indica para qué línea está pensado cada uno: <span class="pill s">Starter</span> <span class="pill p">Pro</span> <span class="pill b">Ambas</span></p>
+    </div>
+
+    <!-- Menus -->
+    <div class="cat-block reveal">
+      <div class="cat-title"><span class="ico" style="background:#FFEFE0;">🍽️</span><h3>Menús digitales</h3><span class="count">5 servicios</span></div>
+      <div class="svc-grid">
+        <div class="svc"><div class="top"><h4>Menú QR Básico</h4><span class="pill s">Starter</span></div><p>Web con QR, diseño a marca, hasta ~50 items. Listo para imprimir y pegar en mesa.</p></div>
+        <div class="svc"><div class="top"><h4>Menú Pro</h4><span class="pill b">Ambas</span></div><p>Categorías, fotos, multidioma y destacados. Para cartas más amplias.</p></div>
+        <div class="svc"><div class="top"><h4>Menú con Panel</h4><span class="pill p">Pro</span></div><p>El cliente edita precios e items solo, sin depender de ti. Suscripción.</p></div>
+        <div class="svc"><div class="top"><h4>Menú con Pedidos</h4><span class="pill p">Pro</span></div><p>Carrito interno + envío del pedido por WhatsApp o pago en línea.</p></div>
+        <div class="svc"><div class="top"><h4>Menú por Industria</h4><span class="pill b">Ambas</span></div><p>Hoteles, clínicas, colegios, retail, eventos. Misma base, otro contenido.</p></div>
+      </div>
+    </div>
+
+    <!-- Web & Landing -->
+    <div class="cat-block reveal">
+      <div class="cat-title"><span class="ico" style="background:#E2ECFF;">🌐</span><h3>Web &amp; Landing</h3><span class="count">5 servicios</span></div>
+      <div class="svc-grid">
+        <div class="svc"><div class="top"><h4>Landing Page</h4><span class="pill s">Starter</span></div><p>Hero, servicios, CTA, contacto. Diseño + desarrollo + deploy.</p></div>
+        <div class="svc"><div class="top"><h4>Presencia Web Básica</h4><span class="pill s">Starter</span></div><p>Landing + dominio + analytics configurado desde el día uno.</p></div>
+        <div class="svc"><div class="top"><h4>Link in Bio Pro</h4><span class="pill s">Starter</span></div><p>Página central tipo Linktree pero a medida y con tu marca.</p></div>
+        <div class="svc"><div class="top"><h4>Carta de Servicios</h4><span class="pill b">Ambas</span></div><p>Para coaches, consultores y freelancers que venden servicios.</p></div>
+        <div class="svc"><div class="top"><h4>Web App a Medida</h4><span class="pill p">Pro</span></div><p>UX research + diseño + desarrollo de una herramienta propia.</p></div>
+      </div>
+    </div>
+
+    <!-- Ecommerce -->
+    <div class="cat-block reveal">
+      <div class="cat-title"><span class="ico" style="background:#E5F6EE;">🛒</span><h3>Ecommerce &amp; Ventas — línea principal</h3><span class="count">7 servicios</span></div>
+      <div class="svc-grid">
+        <div class="svc"><div class="top"><h4>Ecommerce Simple</h4><span class="pill s">Starter</span></div><p>Catálogo + carrito + pago. Para empezar a vender rápido.</p></div>
+        <div class="svc"><div class="top"><h4>Checkout WhatsApp</h4><span class="pill s">Starter</span></div><p>Pedido armado y enviado por WhatsApp con resumen claro.</p></div>
+        <div class="svc"><div class="top"><h4>Ecommerce Completo</h4><span class="pill p">Pro</span></div><p>Inventario, filtros, categorías y panel de administración.</p></div>
+        <div class="svc"><div class="top"><h4>Gestión de Pedidos</h4><span class="pill s">Starter</span><span class="pill p">Pro</span></div><p>Historial guardado, código por pedido y panel de estados: nuevo → confirmado → preparando → enviado → entregado.</p></div>
+        <div class="svc"><div class="top"><h4>Cobro en línea real</h4><span class="pill p">Pro</span></div><p>Wompi con firma de integridad, total recalculado en el servidor y confirmación automática por webhook. Requiere cuenta del cliente.</p></div>
+        <div class="svc"><div class="top"><h4>Marketplace</h4><span class="pill p">Pro</span></div><p>Multi-vendedor, comisiones y dashboards por rol.</p></div>
+        <div class="svc"><div class="top"><h4>Suscripciones</h4><span class="pill p">Pro</span></div><p>Registro de suscriptores por plan. El cobro recurrente automático necesita backend aparte.</p></div>
+      </div>
+    </div>
+
+    <!-- Recurrentes -->
+    <div class="cat-block reveal">
+      <div class="cat-title"><span class="ico" style="background:#F0E9FF;">🔄</span><h3>Servicios recurrentes — ingreso fijo</h3><span class="count">4 servicios</span></div>
+      <div class="svc-grid">
+        <div class="svc"><div class="top"><h4>Mantenimiento Básico</h4><span class="pill b">Ambas</span></div><p>Hosting, actualizaciones y soporte. La base del ingreso mensual.</p></div>
+        <div class="svc"><div class="top"><h4>Plan Crecimiento</h4><span class="pill b">Ambas</span></div><p>+ reporte de analytics y mejoras de UX cada mes.</p></div>
+        <div class="svc"><div class="top"><h4>Plan Marketing</h4><span class="pill b">Ambas</span></div><p>+ piezas de diseño para redes sobre la misma identidad.</p></div>
+        <div class="svc"><div class="top"><h4>Menú Activo</h4><span class="pill s">Starter</span></div><p>Soporte y actualización del menú cuando cambia la carta.</p></div>
+      </div>
+    </div>
+
+    <!-- Marca -->
+    <div class="cat-block reveal">
+      <div class="cat-title"><span class="ico" style="background:#FFEFE0;">🎨</span><h3>Marca &amp; Marketing digital</h3><span class="count">4 servicios</span></div>
+      <div class="svc-grid">
+        <div class="svc"><div class="top"><h4>Identidad Digital</h4><span class="pill b">Ambas</span></div><p>Logo, paleta, tipografía y guía de uso lista para producción.</p></div>
+        <div class="svc"><div class="top"><h4>Kit de Redes</h4><span class="pill b">Ambas</span></div><p>Templates editables en Figma: stories, posts y banners.</p></div>
+        <div class="svc"><div class="top"><h4>Piezas Mensuales</h4><span class="pill b">Ambas</span></div><p>Diseño de contenido recurrente sobre la marca del cliente.</p></div>
+        <div class="svc"><div class="top"><h4>Auditoría UX/UI</h4><span class="pill p">Pro</span></div><p>Análisis, reporte y recomendaciones priorizadas.</p></div>
+      </div>
+    </div>
+
+    <!-- Productos propios -->
+    <div class="cat-block reveal">
+      <div class="cat-title"><span class="ico" style="background:#FBF0DC;">📦</span><h3>Productos digitales propios — a futuro</h3><span class="count">4 ideas</span></div>
+      <div class="svc-grid">
+        <div class="svc"><div class="top"><h4>MenuOS (SaaS)</h4><span class="pill b">Propio</span></div><p>Vendes acceso mensual a tu plataforma de menús. Ingreso pasivo.</p></div>
+        <div class="svc"><div class="top"><h4>LandingKit</h4><span class="pill b">Propio</span></div><p>Templates de landing por industria, vendidos como producto.</p></div>
+        <div class="svc"><div class="top"><h4>UX Audit Template</h4><span class="pill b">Propio</span></div><p>Plantilla Figma para vender auditorías de forma estandarizada.</p></div>
+        <div class="svc"><div class="top"><h4>Starter Pack</h4><span class="pill b">Propio</span></div><p>Bundle Figma + código para arrancar proyectos en minutos.</p></div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- TECH BASES -->
+<section id="bases" class="bases">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <div class="eyebrow">Biblioteca técnica</div>
+      <h2>Las bases reutilizables.</h2>
+      <p>El corazón del sistema. Cada base resuelve una lógica concreta y trae su stack recomendado. El indicador inferior muestra hasta qué línea escala.</p>
+    </div>
+
+    <!-- Web & Landing bases -->
+    <div class="basecat reveal">
+      <div class="bc-head"><span class="n">A</span><h3>Web &amp; Landing</h3><span class="tag">5 bases</span></div>
+      <div class="bgrid">
+        <div class="bcard"><h4>Landing Básica</h4><p class="solves">Hero, servicios, CTA, contacto y footer. La estructura mínima que convierte.</p><div class="row"><span class="chip">HTML/CSS</span><span class="chip">deploy</span></div><div class="scale"><span class="lvl"><span class="ld s"></span></span><span>Starter</span></div></div>
+        <div class="bcard"><h4>Landing con Formulario</h4><p class="solves">Captura de leads con validación y envío a base de datos o correo.</p><div class="row"><span class="chip">Firebase</span><span class="chip">validación</span></div><div class="scale"><span class="lvl"><span class="ld s"></span><span class="ld p"></span></span><span>Starter → Pro</span></div></div>
+        <div class="bcard"><h4>One Page Negocio</h4><p class="solves">Múltiples secciones, scroll suave y animaciones de revelado.</p><div class="row"><span class="chip">HTML/CSS</span><span class="chip">JS</span></div><div class="scale"><span class="lvl"><span class="ld s"></span></span><span>Starter</span></div></div>
+        <div class="bcard"><h4>Link in Bio</h4><p class="solves">Página central con links, redes y CTA, configurable por contexto.</p><div class="row"><span class="chip">HTML/CSS</span></div><div class="scale"><span class="lvl"><span class="ld s"></span></span><span>Starter</span></div></div>
+        <div class="bcard"><h4>Carta de Servicios</h4><p class="solves">Estructura para vender servicios: paquetes, precios y contacto.</p><div class="row"><span class="chip">HTML/CSS</span></div><div class="scale"><span class="lvl"><span class="ld s"></span><span class="ld p"></span></span><span>Ambas</span></div></div>
+      </div>
+    </div>
+
+    <!-- Menus bases -->
+    <div class="basecat reveal">
+      <div class="bc-head"><span class="n">B</span><h3>Menús digitales</h3><span class="tag">5 bases</span></div>
+      <div class="bgrid">
+        <div class="bcard"><h4>Menú QR Básico</h4><p class="solves">Categorías, items, fotos y diseño responsive con la marca del local.</p><div class="row"><span class="chip">HTML/CSS</span><span class="chip">JSON data</span></div><div class="scale"><span class="lvl"><span class="ld s"></span></span><span>Starter</span></div></div>
+        <div class="bcard"><h4>Menú con Panel Admin</h4><p class="solves">El cliente edita su carta solo. Datos separados de la presentación.</p><div class="row"><span class="chip">Supabase</span><span class="chip">auth</span></div><div class="scale"><span class="lvl"><span class="ld s"></span><span class="ld p"></span></span><span>Starter → Pro</span></div></div>
+        <div class="bcard"><h4>Menú con Pedidos</h4><p class="solves">Carrito interno + envío por WhatsApp o pago. Reutiliza la lógica de carrito.</p><div class="row"><span class="chip">Firebase</span><span class="chip">WhatsApp</span></div><div class="scale"><span class="lvl"><span class="ld s"></span><span class="ld p"></span></span><span>Ambas</span></div></div>
+        <div class="bcard"><h4>Menú Multisucursal</h4><p class="solves">Varias sedes sobre la misma plataforma, con menú por ubicación.</p><div class="row"><span class="chip">Supabase</span><span class="chip">roles</span></div><div class="scale"><span class="lvl"><span class="ld p"></span></span><span>Pro</span></div></div>
+        <div class="bcard"><h4>Menú por Evento</h4><p class="solves">Carta temporal con fecha de expiración, ideal para catering y ferias.</p><div class="row"><span class="chip">JSON data</span></div><div class="scale"><span class="lvl"><span class="ld s"></span></span><span>Starter</span></div></div>
+      </div>
+    </div>
+
+    <!-- Ecommerce bases -->
+    <div class="basecat reveal">
+      <div class="bc-head"><span class="n">C</span><h3>Ecommerce &amp; Ventas</h3><span class="tag">7 bases</span></div>
+      <div class="bgrid">
+        <div class="bcard"><h4>Carrito Básico</h4><p class="solves">Productos, carrito, checkout y confirmación. El núcleo reutilizable de toda venta.</p><div class="row"><span class="chip">JS state</span><span class="chip">localStorage</span></div><div class="scale"><span class="lvl"><span class="ld s"></span><span class="ld p"></span></span><span>Ambas</span></div></div>
+        <div class="bcard"><h4>Ecommerce Completo</h4><p class="solves">Inventario, filtros, categorías y panel de administración.</p><div class="row"><span class="chip">Supabase</span><span class="chip">panel</span></div><div class="scale"><span class="lvl"><span class="ld p"></span></span><span>Pro</span></div></div>
+        <div class="bcard"><h4>Marketplace</h4><p class="solves">Multi-vendedor, comisiones y dashboards separados por rol.</p><div class="row"><span class="chip">Supabase</span><span class="chip">multi-rol</span></div><div class="scale"><span class="lvl"><span class="ld p"></span></span><span>Pro</span></div></div>
+        <div class="bcard"><h4>Checkout WhatsApp</h4><p class="solves">Arma el pedido y lo envía formateado por WhatsApp. Sin pasarela.</p><div class="row"><span class="chip">JS</span><span class="chip">WhatsApp API</span></div><div class="scale"><span class="lvl"><span class="ld s"></span></span><span>Starter</span></div></div>
+        <div class="bcard"><h4>Suscripciones</h4><p class="solves">Registro de suscriptores por plan. El cobro recurrente automático necesita backend aparte.</p><div class="row"><span class="chip">Stripe</span><span class="chip">auth</span></div><div class="scale"><span class="lvl"><span class="ld p"></span></span><span>Pro</span></div></div>
+        <div class="bcard"><h4>Pedidos</h4><p class="solves">Guarda el pedido antes de salir a WhatsApp o a la pasarela: historial, código por pedido y panel de estados. Descuento de stock atómico.</p><div class="row"><span class="chip">Supabase RPC</span><span class="chip">RLS</span></div><div class="scale"><span class="lvl"><span class="ld s"></span><span class="ld p"></span></span><span>Ambas</span></div></div>
+        <div class="bcard"><h4>Backend Pro</h4><p class="solves">Cobro real con Wompi: firma de integridad, total recalculado en el servidor y confirmación por webhook aunque el comprador cierre la pestaña.</p><div class="row"><span class="chip">Edge Functions</span><span class="chip">Wompi</span></div><div class="scale"><span class="lvl"><span class="ld p"></span></span><span>Pro</span></div></div>
+      </div>
+    </div>
+
+    <!-- Dashboard & Auth bases -->
+    <div class="basecat reveal">
+      <div class="bc-head"><span class="n">D</span><h3>Paneles, Auth &amp; Datos</h3><span class="tag">7 bases</span></div>
+      <div class="bgrid">
+        <div class="bcard"><h4>Auth Básico</h4><p class="solves">Login, registro y recuperar contraseña. Bloque base de todo lo que requiere usuario.</p><div class="row"><span class="chip">Firebase</span><span class="chip">Supabase</span></div><div class="scale"><span class="lvl"><span class="ld s"></span><span class="ld p"></span></span><span>Ambas</span></div></div>
+        <div class="bcard"><h4>Auth con Roles</h4><p class="solves">Admin, cliente y vendedor con permisos diferenciados.</p><div class="row"><span class="chip">Supabase RLS</span></div><div class="scale"><span class="lvl"><span class="ld p"></span></span><span>Pro</span></div></div>
+        <div class="bcard"><h4>Perfil de Usuario</h4><p class="solves">Editar datos, historial y preferencias sobre el auth.</p><div class="row"><span class="chip">Supabase</span></div><div class="scale"><span class="lvl"><span class="ld p"></span></span><span>Pro</span></div></div>
+        <div class="bcard"><h4>Panel Admin (CRUD)</h4><p class="solves">Crear, leer, editar y borrar contenido o productos. Reutilizable en todo.</p><div class="row"><span class="chip">Supabase</span><span class="chip">tabla+form</span></div><div class="scale"><span class="lvl"><span class="ld s"></span><span class="ld p"></span></span><span>Starter → Pro</span></div></div>
+        <div class="bcard"><h4>Dashboard Analytics</h4><p class="solves">Métricas, gráficas y Google Analytics integrado en un solo lugar.</p><div class="row"><span class="chip">GA4</span><span class="chip">charts</span></div><div class="scale"><span class="lvl"><span class="ld p"></span></span><span>Pro</span></div></div>
+        <div class="bcard"><h4>CRM Simple</h4><p class="solves">Clientes, contactos y seguimiento de oportunidades.</p><div class="row"><span class="chip">Supabase</span></div><div class="scale"><span class="lvl"><span class="ld p"></span></span><span>Pro</span></div></div>
+        <div class="bcard"><h4>Panel Multi-rol</h4><p class="solves">Vistas distintas para admin, editor y viewer sobre los mismos datos.</p><div class="row"><span class="chip">Supabase RLS</span></div><div class="scale"><span class="lvl"><span class="ld p"></span></span><span>Pro</span></div></div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- BEST PRACTICES (info extra) -->
+<section id="practicas" style="background:var(--panel);border-top:1px solid var(--line-soft);">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <span class="extra-banner">★ Información extra</span>
+      <div class="eyebrow">Fundamentos</div>
+      <h2>Buenas prácticas escalables.</h2>
+      <p>Estas reglas son las que hacen que una base sea de verdad reutilizable y crezca de freelance a equipo. Aplican a todos los productos por igual.</p>
+    </div>
+
+    <div class="bp-grid">
+      <div class="bp reveal"><h4><span class="bn">01</span> Separa datos de presentación</h4><p>El contenido (menú, productos, textos) vive en un archivo de datos o tabla, <b>nunca incrustado en el HTML</b>. Así el mismo diseño sirve para cualquier cliente cambiando solo la fuente de datos. Es la base de todo el sistema de contexto.</p></div>
+
+      <div class="bp reveal alt"><h4><span class="bn">02</span> Design tokens, no valores sueltos</h4><p>Colores, tipografías y espacios se definen como variables (<b>CSS custom properties</b>) en un solo lugar. Cambiar la marca de un proyecto es cambiar 6 variables, no buscar y reemplazar en 40 archivos.</p></div>
+
+      <div class="bp reveal alt2"><h4><span class="bn">03</span> Componentes, no páginas</h4><p>Piensa en bloques reutilizables (hero, card, carrito, nav) que se combinan. Un componente bien hecho se usa en menús, landings y ecommerce sin reescribirlo. <b>Construyes una vez, cobras muchas.</b></p></div>
+
+      <div class="bp reveal"><h4><span class="bn">04</span> Estructura de carpetas fija</h4><p>Cada proyecto usa la misma organización (<b>/data, /components, /assets, /styles</b>). Cuando entre otra persona al equipo, sabe dónde está todo sin preguntarte. La consistencia es lo que permite delegar.</p></div>
+
+      <div class="bp reveal alt"><h4><span class="bn">05</span> Reglas de seguridad desde el día uno</h4><p>En Firebase y Supabase, configura las <b>reglas de acceso (RLS)</b> antes de subir datos reales. Nunca dejes una base abierta. Un panel admin sin reglas es una filtración esperando a ocurrir.</p></div>
+
+      <div class="bp reveal alt2"><h4><span class="bn">06</span> Performance como estándar</h4><p>Imágenes optimizadas, carga diferida (<b>lazy load</b>) y lo mínimo de JavaScript. Un menú que carga en 1 segundo se ve más profesional que uno bonito que tarda 6. La velocidad es parte del diseño.</p></div>
+
+      <div class="bp reveal"><h4><span class="bn">07</span> SEO y analytics de entrada</h4><p>Metadatos, títulos correctos y <b>Google Analytics conectado antes de entregar</b>. Le das al cliente datos desde el primer día y a ti un argumento para vender el plan de crecimiento.</p></div>
+
+      <div class="bp reveal alt"><h4><span class="bn">08</span> Versiona con Git</h4><p>Cada proyecto en su repositorio. Te permite volver atrás, trabajar en paralelo con otra persona y tener un historial. <b>Sin Git no hay equipo</b>, solo carpetas con nombres como "final_final_v3".</p></div>
+
+      <div class="bp reveal alt2"><h4><span class="bn">09</span> Documenta el contexto</h4><p>Cada proyecto guarda su ficha de contexto (el YAML). Es el manual para mantenerlo, el punto de partida si lo replicas, y lo que permite que otra persona lo retome sin ti presente.</p></div>
+
+      <div class="bp reveal"><h4><span class="bn">10</span> Accesibilidad mínima garantizada</h4><p>Contraste suficiente, foco visible por teclado y textos alternativos. No es opcional: amplía el público del cliente y eleva la percepción de calidad de tu trabajo.</p></div>
+
+      <div class="bp reveal alt"><h4><span class="bn">11</span> Pensar en mantenimiento = ingreso</h4><p>Construye cada base sabiendo que tú la vas a mantener. Lo limpio y documentado hoy es el <b>plan mensual rentable</b> de mañana, en vez de un dolor de cabeza no cobrado.</p></div>
+
+      <div class="bp reveal alt2"><h4><span class="bn">12</span> Una base, dos profundidades</h4><p>Diseña cada base con un núcleo Starter y una extensión Pro. No mantienes dos productos: mantienes uno que <b>escala según el cliente</b>. Menos código, más oferta.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ROADMAP -->
+<section id="ruta">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <div class="eyebrow">Ruta de construcción</div>
+      <h2>En qué orden construirlo.</h2>
+      <p>De lo más usado a lo más avanzado, para que cada pieza ya genere valor mientras armas la siguiente.</p>
+    </div>
+
+    <div class="road">
+      <div class="stage reveal">
+        <div class="sn">01</div>
+        <h4>Bases core</h4>
+        <ul>
+          <li>Landing básica</li>
+          <li>Menú QR con panel admin</li>
+          <li>Carrito reutilizable</li>
+          <li>Auth con Firebase / Supabase</li>
+        </ul>
+      </div>
+      <div class="stage reveal">
+        <div class="sn">02</div>
+        <h4>Bases avanzadas</h4>
+        <ul>
+          <li>Ecommerce completo</li>
+          <li>Marketplace</li>
+          <li>Dashboard analytics</li>
+          <li>Suscripciones &amp; CRM</li>
+        </ul>
+      </div>
+      <div class="stage reveal">
+        <div class="sn">03</div>
+        <h4>Sistema de contexto</h4>
+        <ul>
+          <li>Fichas de contexto por tipo</li>
+          <li>Prompts maestros por base</li>
+          <li>Documentación del sistema</li>
+          <li>Kit para sumar al equipo</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CLOSER -->
+<section class="closer">
+  <div class="wrap">
+    <h2>El catálogo está definido. Ahora construimos las bases.</h2>
+    <p>Empezamos por la base del menú con panel admin para validar el patrón, y lo replicamos al resto — incluyendo ecommerce, tu línea principal de negocio.</p>
+    <div class="next">
+      <div class="nbtn"><span class="k">A ›</span> Construir base: Menú + Panel</div>
+      <div class="nbtn"><span class="k">B ›</span> Construir base: Carrito reutilizable</div>
+      <div class="nbtn"><span class="k">C ›</span> Diseñar la ficha de contexto</div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <span>// Sistema de Producción · Estudio Digital</span>
+    <span>v1.0 · documento maestro</span>
+  </div>
+</footer>
+
+<script>
+  const io = new IntersectionObserver((entries)=>{
+    entries.forEach(e=>{ if(e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target);} });
+  },{threshold:0.12});
+  document.querySelectorAll('.reveal').forEach(el=>io.observe(el));
+</script>
+
+</body>
+</html>

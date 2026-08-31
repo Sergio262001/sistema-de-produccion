@@ -1,0 +1,71 @@
+# ════════════════════════════════════════════════════════════
+#  FICHA DE CONTEXTO — Rubro: Restaurante / Café / Bar
+#  Punto de partida para cotizar y arrancar este tipo de cliente
+#  rápido. Cópiala, renómbrala con el nombre del cliente real y
+#  ajusta marca, productos y claves antes de entregar.
+#  NO pongas claves reales aquí (van en .env de cada base).
+# ════════════════════════════════════════════════════════════
+
+proyecto:   "Asados El Fogón — menú digital"
+cliente:    "Asados El Fogón"
+rubro:      restaurante
+linea:      starter            # starter | pro
+
+# ── BASES QUE COMPONEN ESTE PROYECTO ─────────────────────────
+# El producto estrella del estudio: menú QR con panel para que
+# el dueño edite la carta solo. Auth solo si linea: pro (multi-
+# sucursal o varios roles editando).
+bases:
+  - menu-con-panel-admin
+  # - auth                     # descomenta si linea: pro
+
+# ── BASE DE DATOS (para menu-con-panel-admin) ────────────────
+base_de_datos:
+  motor:        supabase       # firebase | supabase | local
+  necesita_auth: true          # el admin requiere login
+  tablas:       [categorias, items]
+  acceso:       rls_por_rol
+
+# ── AUTH (login del panel admin) ─────────────────────────────
+auth:
+  motor:          supabase
+  rol_requerido:  admin
+
+# ── APIs / CONECTORES ───────────────────────────────────────
+apis:
+  mensajeria:   whatsapp       # pedidos por WhatsApp, sin pasarela
+  whatsapp_num: "573012345678"
+  pagos:        ninguno        # wompi | mercadopago | stripe | ninguno
+  analitica:    ga4
+
+# ── VARIABLES (solo nombres; valores reales en .env) ────────
+env:
+  - SUPABASE_URL
+  - SUPABASE_ANON_KEY
+  - GA4_ID
+
+# ── MARCA (alimenta los tokens de diseño) ───────────────────
+marca:
+  inicial:    "F"
+  primario:   "#7A1F1F"
+  secundario: "#FBF3E7"
+  acento:     "#D98E2B"
+  display:    "Fraunces"
+  body:       "Inter"
+  subtitulo:  "Parrilla y asados a la leña • Medellín"
+  tono:       "casero, contundente"
+
+# ── ENTREGA ─────────────────────────────────────────────────
+entrega:
+  dominio:  "asadoselfogon.co"
+  hosting:  vercel
+  moneda:   "$"
+  idiomas:  [es]
+  soporte:  plan_mensual        # actualización de carta cuando cambie
+
+# ── NOTAS PARA COTIZAR ───────────────────────────────────────
+notas: >
+  Catálogo: "Menú QR Básico" o "Menú con Panel" (linea pro si pide
+  multisucursal). Si además quiere recibir pedidos con carrito interno
+  en vez de solo WhatsApp, sumar la base carrito-reutilizable y el
+  servicio "Menú con Pedidos".

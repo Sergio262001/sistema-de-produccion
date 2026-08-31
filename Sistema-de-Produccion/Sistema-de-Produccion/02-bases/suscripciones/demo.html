@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Base: Suscripciones · Demo</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --brand:#6A3CF0;--bg:#F5F7FB;--accent:#E8A02C;--surface:#fff;--ink:#0F1626;
+    --ink-soft:#454F66;--line:#E2E7F0;--danger:#E5484D;--good:#0FA56C;--radius:14px;
+    --display:'Space Grotesk',sans-serif;--body:'Inter',sans-serif;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--body);-webkit-font-smoothing:antialiased;}
+  h1,h2,h3{font-family:var(--display);margin:0;}
+  button{font-family:inherit;cursor:pointer;}
+
+  .sysbar{background:#0C1322;color:#C9D2EA;font-family:monospace;font-size:12.5px;}
+  .sysbar .in{max-width:880px;margin:0 auto;padding:11px 20px;display:flex;align-items:center;gap:14px;flex-wrap:wrap;}
+  .sysbar .tag{background:#1B2438;border:1px solid #2A3654;border-radius:6px;padding:3px 9px;color:#9BB0E0;}
+  .sysbar b{color:#fff;}
+  .sysbar .warn{margin-left:auto;color:#E8B86A;}
+
+  .wrap{max-width:880px;margin:0 auto;padding:36px 20px 60px;}
+  .wrap h1{font-size:26px;text-align:center;}
+  .wrap > p.lead{text-align:center;color:var(--ink-soft);font-size:14.5px;margin:10px 0 32px;}
+
+  .planes{display:grid;grid-template-columns:1fr 1fr;gap:18px;}
+  @media(max-width:600px){.planes{grid-template-columns:1fr;}}
+  .plan{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:24px;}
+  .plan.destacado{border-color:var(--brand);box-shadow:0 0 0 3px color-mix(in srgb, var(--brand) 15%, transparent);}
+  .plan h3{font-size:19px;}
+  .plan .precio{font-family:var(--display);font-size:30px;font-weight:600;color:var(--brand);margin:10px 0 2px;}
+  .plan .ciclo{font-size:12.5px;color:var(--ink-soft);margin-bottom:16px;}
+  .plan ul{list-style:none;padding:0;margin:0 0 18px;font-size:13.5px;color:var(--ink-soft);}
+  .plan li{padding:5px 0;display:flex;gap:8px;}
+  .plan li::before{content:"✓";color:var(--good);font-weight:700;}
+  .plan button{width:100%;background:var(--brand);color:#fff;border:0;border-radius:10px;padding:12px;font-weight:600;font-size:14px;}
+
+  .estado{margin-top:30px;background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:22px;text-align:center;}
+  .estado .pill{font-family:monospace;font-size:11px;background:#E5F6EE;color:var(--good);padding:3px 10px;border-radius:6px;}
+  .estado.cancelada .pill{background:#FBE6E7;color:var(--danger);}
+  .estado .cancelbtn{margin-top:14px;background:var(--bg);border:1px solid var(--line);border-radius:9px;padding:10px 16px;font-size:13px;font-weight:600;color:var(--ink-soft);}
+  .estado.hide{display:none;}
+  .estado h3{margin-top:10px;}
+  .estado .desde{color:var(--ink-soft);font-size:13.5px;margin-top:4px;}
+</style>
+</head>
+<body>
+
+<div class="sysbar"><div class="in">
+  <span class="tag">base: suscripciones</span>
+  <span>contexto: <b id="sysClient">Casa Tela</b></span>
+  <span class="warn">cobro recurrente automático no incluido — necesita backend (ver README)</span>
+</div></div>
+
+<div class="wrap">
+  <h1>Elige tu plan</h1>
+  <p class="lead">Demo: el registro de la suscripción es real (en memoria); el cobro mes a mes automático requiere conectar un backend con un proveedor de pagos recurrentes.</p>
+
+  <div class="planes" id="planes"></div>
+  <div class="estado hide" id="estado"></div>
+</div>
+
+<script>
+/* ── CONTEXTO ── */
+const CONTEXT = {
+  cliente: "Casa Tela",
+  clienteEmail: "demo@cliente.co",   // en real, viene del usuario logueado (base: auth)
+  base_de_datos: { motor: "local" },  // firebase | supabase | local
+};
+
+/* ── DATOS (idéntico a src/data/local.adapter.js) ── */
+let DATA = {
+  planes: [
+    { id:'basico', nombre:'Básico', precio:29000, ciclo:'mensual', beneficios:['Acceso al contenido base','Soporte por correo'] },
+    { id:'pro', nombre:'Pro', precio:59000, ciclo:'mensual', beneficios:['Todo lo del plan Básico','Contenido exclusivo','Soporte prioritario'], destacado:true },
+  ],
+  suscripciones: [],
+};
+const localAdapter = {
+  async load(){ return DATA; },
+  async suscribir(email,planId){
+    const id='s'+Date.now();
+    DATA.suscripciones.push({id,clienteEmail:email,planId,estado:'activa',inicio:new Date().toISOString().slice(0,10)});
+    return {ok:true,id};
+  },
+  async cancelar(id){ const s=DATA.suscripciones.find(s=>s.id===id); if(s) s.estado='cancelada'; return {ok:true}; },
+};
+const db = { local: localAdapter }[CONTEXT.base_de_datos.motor] || localAdapter;
+
+function money(n){ return '$'+(n||0).toLocaleString('es-CO'); }
+
+/* ---- SEGURIDAD (ver 03-componentes-ui/seguridad.js) ----
+   Todo dato escrito por alguien que no seas tú pasa por esc()
+   antes de tocar innerHTML. Sin esto, un nombre como
+   <img src=x onerror=...> se ejecuta en la sesión de quien lo vea. */
+function esc(v){
+  if(v===null||v===undefined) return '';
+  return String(v).replace(/&/g,'&amp;').replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+}
+
+
+function miSuscripcionActiva(){
+  return DATA.suscripciones.find(s=>s.clienteEmail===CONTEXT.clienteEmail && s.estado==='activa');
+}
+
+function render(){
+  const activa = miSuscripcionActiva();
+  document.getElementById('planes').innerHTML = DATA.planes.map(p=>`
+    <div class="plan ${p.destacado?'destacado':''}">
+      <h3>${esc(p.nombre)}</h3>
+      <div class="precio">${money(p.precio)}</div>
+      <div class="ciclo">por mes</div>
+      <ul>${p.beneficios.map(b=>`<li>${esc(b)}</li>`).join('')}</ul>
+      <button type="button" data-plan="${p.id}" ${activa&&activa.planId===p.id?'disabled':''}>
+        ${activa&&activa.planId===p.id?'Plan actual':'Suscribirme'}
+      </button>
+    </div>`).join('');
+
+  document.querySelectorAll('.plan button').forEach(b=>{
+    b.onclick=async()=>{ await db.suscribir(CONTEXT.clienteEmail, b.dataset.plan); render(); };
+  });
+
+  const estadoBox=document.getElementById('estado');
+  if(!activa){ estadoBox.classList.add('hide'); return; }
+  const plan = DATA.planes.find(p=>p.id===activa.planId);
+  estadoBox.classList.remove('hide');
+  estadoBox.innerHTML=`
+    <span class="pill">activa</span>
+    <h3>Estás suscrito al plan ${esc(plan?.nombre)}</h3>
+    <p class="desde">Desde el ${activa.inicio}</p>
+    <button type="button" class="cancelbtn" id="cancelBtn">Cancelar suscripción</button>`;
+  document.getElementById('cancelBtn').onclick=async()=>{ await db.cancelar(activa.id); render(); };
+}
+
+document.getElementById('sysClient').textContent = CONTEXT.cliente;
+(async function init(){ DATA = await db.load(); render(); })();
+</script>
+</body>
+</html>

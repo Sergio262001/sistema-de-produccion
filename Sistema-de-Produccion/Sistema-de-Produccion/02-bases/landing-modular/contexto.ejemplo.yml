@@ -1,0 +1,56 @@
+# ════════════════════════════════════════════════════════════
+#  FICHA DE CONTEXTO — Base: landing-modular
+#  Copia este archivo por proyecto, llénalo, y pásamelo junto
+#  con la base. NO pongas claves reales aquí (van en .env).
+# ════════════════════════════════════════════════════════════
+
+proyecto:   "Estudio Lumen — landing"
+cliente:    "Estudio Lumen"
+linea:      starter            # starter | pro
+base:       landing-modular
+
+# ── BASE DE DATOS (para los leads del formulario) ───────────
+base_de_datos:
+  motor:  local                # firebase | supabase | local
+  tabla:  leads
+
+# ── APIs / CONECTORES ───────────────────────────────────────
+apis:
+  mensajeria:   whatsapp       # link | api | ninguno
+  whatsapp_num: "573001234567"
+  analitica:    ga4
+  correo:       resend         # notificación de nuevo lead (opcional)
+
+# ── VARIABLES (solo nombres; valores reales en .env) ────────
+env:
+  - SUPABASE_URL
+  - SUPABASE_ANON_KEY
+  - GA4_ID
+  - RESEND_API_KEY
+
+# ── MARCA (alimenta los tokens de diseño) ───────────────────
+marca:
+  primario:   "#2F54FF"
+  secundario: "#F5F7FB"
+  display:    "Space Grotesk"
+  body:       "Inter"
+  tono:       "directo, profesional"
+
+# ── CONTENIDO (secciones de la landing) ─────────────────────
+contenido:
+  hero:
+    titulo:     "Diseño y desarrollo web que convierte"
+    subtitulo:  "Landing pages, menús digitales y ecommerce listos en días."
+    cta:        "Cuéntame tu proyecto"
+  servicios_titulo: "Lo que hacemos"
+  servicios:
+    - { icono: "🎨", titulo: "UX/UI", desc: "Diseño centrado en el usuario." }
+    - { icono: "🌐", titulo: "Landing pages", desc: "Páginas que convierten." }
+  leads_titulo: "Hablemos de tu proyecto"
+  footer_nota:  "Respuesta en menos de 24h"
+
+# ── ENTREGA ─────────────────────────────────────────────────
+entrega:
+  dominio:  "estudiolumen.co"
+  hosting:  vercel
+  idiomas:  [es]

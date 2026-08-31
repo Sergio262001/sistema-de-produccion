@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Base: Carrito Reutilizable · Demo</title>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --brand:#1F6B4A;--bg:#F3ECE0;--surface:#fff;--ink:#23201A;--ink-soft:#6B6359;
+    --line:#E4DACA;--accent:#C2703D;--radius:16px;--sys-bg:#0C1322;--sys:#2F54FF;
+    --display:'Fraunces',serif;--body:'Inter',sans-serif;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--body);-webkit-font-smoothing:antialiased;}
+  h1,h2,h3{font-family:var(--display);margin:0;line-height:1.1;}
+  button{font-family:inherit;cursor:pointer;}
+
+  .sysbar{background:var(--sys-bg);color:#C9D2EA;font-family:'JetBrains Mono',monospace;font-size:12.5px;}
+  .sysbar .in{max-width:1000px;margin:0 auto;padding:11px 20px;display:flex;gap:14px;align-items:center;flex-wrap:wrap;}
+  .sysbar .tag{background:#1B2438;border:1px solid #2A3654;border-radius:6px;padding:3px 9px;color:#9BB0E0;}
+  .sysbar b{color:#fff;}
+  .sysbar .pay{margin-left:auto;color:#8E9AB8;}
+  .sysbar .pay b{color:#5FD0A6;}
+
+  .app{max-width:1000px;margin:0 auto;padding:0 20px;}
+  .head{display:flex;align-items:center;gap:14px;padding:28px 0 6px;}
+  .logo{width:46px;height:46px;border-radius:12px;background:var(--brand);color:#fff;display:grid;place-items:center;font-family:var(--display);font-weight:700;font-size:22px;}
+  .head h1{font-size:26px;}
+  .head .cartbtn{margin-left:auto;position:relative;background:var(--surface);border:1px solid var(--line);border-radius:30px;padding:11px 18px;font-weight:600;font-size:14px;display:flex;align-items:center;gap:9px;color:var(--ink);}
+  .head .cartbtn .badge{background:var(--brand);color:#fff;border-radius:20px;min-width:20px;height:20px;font-size:11px;display:grid;place-items:center;padding:0 5px;font-family:'JetBrains Mono';}
+
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:16px;padding:24px 0 60px;}
+  .card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;display:flex;flex-direction:column;}
+  .card .ph{height:120px;display:grid;place-items:center;font-size:46px;background:linear-gradient(135deg,#fff,var(--line));}
+  .card .b{padding:14px 15px 15px;display:flex;flex-direction:column;flex:1;}
+  .card h3{font-size:16px;font-family:var(--body);font-weight:600;}
+  .card .d{font-size:12.5px;color:var(--ink-soft);margin:3px 0 12px;line-height:1.4;flex:1;}
+  .card .row{display:flex;align-items:center;justify-content:space-between;gap:10px;}
+  .card .pr{font-family:var(--display);font-weight:600;font-size:18px;color:var(--brand);}
+  .add{background:var(--brand);color:#fff;border:0;border-radius:10px;padding:9px 14px;font-weight:600;font-size:13px;}
+  .add:active{transform:scale(.96);}
+
+  /* drawer */
+  .overlay{position:fixed;inset:0;background:rgba(20,16,10,.4);opacity:0;pointer-events:none;transition:.25s;z-index:30;}
+  .overlay.show{opacity:1;pointer-events:auto;}
+  .drawer{position:fixed;top:0;right:0;height:100%;width:380px;max-width:90vw;background:var(--bg);z-index:40;transform:translateX(100%);transition:.28s cubic-bezier(.4,0,.2,1);display:flex;flex-direction:column;box-shadow:-20px 0 50px -20px rgba(0,0,0,.3);}
+  .drawer.show{transform:none;}
+  .drawer .dh{padding:22px 22px 16px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--line);}
+  .drawer .dh h2{font-size:21px;}
+  .drawer .close{background:none;border:0;font-size:24px;color:var(--ink-soft);line-height:1;}
+  .lines{flex:1;overflow-y:auto;padding:8px 22px;}
+  .empty{text-align:center;color:var(--ink-soft);padding:60px 20px;font-size:14px;}
+  .line{display:flex;gap:12px;padding:15px 0;border-bottom:1px solid var(--line);align-items:center;}
+  .line .em{width:46px;height:46px;border-radius:10px;background:var(--surface);border:1px solid var(--line);display:grid;place-items:center;font-size:22px;flex:none;}
+  .line .li{flex:1;min-width:0;}
+  .line .nm{font-weight:600;font-size:14px;}
+  .line .lp{font-size:12.5px;color:var(--ink-soft);}
+  .qty{display:flex;align-items:center;gap:8px;}
+  .qty button{width:26px;height:26px;border-radius:7px;border:1px solid var(--line);background:var(--surface);font-size:15px;color:var(--ink);display:grid;place-items:center;}
+  .qty span{font-family:'JetBrains Mono';font-size:13px;min-width:16px;text-align:center;}
+  .foot{padding:18px 22px 22px;border-top:1px solid var(--line);background:var(--surface);}
+  .totrow{display:flex;justify-content:space-between;font-size:13.5px;color:var(--ink-soft);margin-bottom:7px;}
+  .totrow.big{font-size:18px;color:var(--ink);font-weight:600;margin:12px 0 16px;font-family:var(--display);}
+  .pay-btn{width:100%;border:0;border-radius:12px;padding:15px;font-weight:600;font-size:15px;color:#fff;background:var(--brand);display:flex;align-items:center;justify-content:center;gap:9px;}
+  .pay-btn.wa{background:#25D366;}
+  .pay-btn svg{width:18px;height:18px;}
+  .paynote{font-family:'JetBrains Mono';font-size:11px;color:var(--ink-soft);text-align:center;margin-top:10px;}
+  @media(prefers-reduced-motion:reduce){.drawer,.overlay{transition:none;}}
+</style>
+</head>
+<body>
+
+<div class="sysbar"><div class="in">
+  <span class="tag">base: carrito-reutilizable</span>
+  <span>contexto: <b id="sysClient">Café Raíz</b></span>
+  <span class="pay">checkout: <b id="sysPay">whatsapp</b></span>
+</div></div>
+
+<div class="app">
+  <div class="head">
+    <div class="logo" id="logo">R</div>
+    <h1 id="biz">Café Raíz</h1>
+    <button type="button" class="cartbtn" onclick="openCart()">
+      🛒 Carrito <span class="badge" id="count">0</span>
+    </button>
+  </div>
+  <div class="grid" id="grid"></div>
+</div>
+
+<div class="overlay" id="overlay" onclick="closeCart()"></div>
+<aside class="drawer" id="drawer" aria-label="Carrito">
+  <div class="dh"><h2>Tu pedido</h2><button type="button" class="close" onclick="closeCart()" aria-label="Cerrar">×</button></div>
+  <div class="lines" id="lines"></div>
+  <div class="foot" id="foot"></div>
+</aside>
+
+<script>
+/* ── Motor de carrito (idéntico a src/core/cart.js, en línea para la demo) ── */
+function createCart(opts={}){
+  const config={moneda:opts.moneda||'$',envio:opts.envio||0,impuesto:opts.impuesto||0,maxPorItem:opts.maxPorItem||99};
+  let items=[]; const listeners=new Set();
+  function compute(){
+    const count=items.reduce((n,i)=>n+i.qty,0);
+    const subtotal=items.reduce((n,i)=>n+i.precio*i.qty,0);
+    const impuesto=Math.round(subtotal*(config.impuesto/100));
+    const envio=items.length?config.envio:0;
+    return {items:[...items],count,subtotal,impuesto,envio,total:subtotal+impuesto+envio,config};
+  }
+  function emit(){const s=compute();listeners.forEach(fn=>fn(s));}
+  function add(p,qty=1){const e=items.find(i=>i.id===p.id);if(e){e.qty=Math.min(e.qty+qty,config.maxPorItem);}else{items.push({...p,qty:Math.min(qty,config.maxPorItem)});}emit();}
+  function setQty(id,qty){const it=items.find(i=>i.id===id);if(!it)return;it.qty=Math.max(0,Math.min(qty,config.maxPorItem));if(it.qty===0)remove(id);else emit();}
+  function increment(id){const it=items.find(i=>i.id===id);if(it)setQty(id,it.qty+1);}
+  function decrement(id){const it=items.find(i=>i.id===id);if(it)setQty(id,it.qty-1);}
+  function remove(id){items=items.filter(i=>i.id!==id);emit();}
+  function clear(){items=[];emit();}
+  function subscribe(fn){listeners.add(fn);fn(compute());return()=>listeners.delete(fn);}
+  return {add,remove,setQty,increment,decrement,clear,subscribe,get:compute};
+}
+function money(n,moneda='$'){return moneda+(n||0).toLocaleString('es-CO');}
+
+/* ---- SEGURIDAD (ver 03-componentes-ui/seguridad.js) ----
+   Todo dato escrito por alguien que no seas tú pasa por esc()
+   antes de tocar innerHTML. Sin esto, un nombre como
+   <img src=x onerror=...> se ejecuta en la sesión de quien lo vea. */
+function esc(v){
+  if(v===null||v===undefined) return '';
+  return String(v).replace(/&/g,'&amp;').replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+}
+
+
+/* ── Checkout (idéntico a src/core/checkout.js) ── */
+function resumenTexto(state,cliente,ctx){
+  const lineas=state.items.map(i=>`• ${i.qty}× ${esc(i.nombre)} — ${money(i.precio*i.qty,state.config.moneda)}`).join('\n');
+  return [`Hola ${ctx.cliente}, quiero hacer un pedido 🙌`,'',lineas,'',`Total: ${money(state.total,state.config.moneda)}`].join('\n');
+}
+function checkout(state,cliente,ctx){
+  const metodo=ctx.apis?.pagos||'whatsapp';
+  if(metodo==='whatsapp'){
+    const num=ctx.apis?.whatsapp_num||'';
+    return {tipo:'redirect',url:`https://wa.me/${num}?text=${encodeURIComponent(resumenTexto(state,cliente,ctx))}`};
+  }
+  if(metodo==='wompi'){
+    return {tipo:'widget',proveedor:'wompi'};
+  }
+  return {tipo:'pago',proveedor:metodo,monto:state.total,nota:'Crear preferencia/sesión en tu backend con las claves del .env, luego redirigir al cliente a la URL que devuelva el proveedor.'};
+}
+
+/* ── Conector Wompi (idéntico a src/core/wompi.adapter.js) ──
+   Widget oficial de Wompi: funciona en sandbox solo con la public key.
+   Producción exige firma de integridad calculada en tu backend — ver
+   el comentario completo en wompi.adapter.js. Aquí, si no hay
+   public_key configurada, se explica en vez de fallar en silencio. */
+let wompiWidgetReady=null;
+function cargarWidgetWompi(){
+  if(window.WidgetCheckout) return Promise.resolve();
+  if(wompiWidgetReady) return wompiWidgetReady;
+  wompiWidgetReady=new Promise((resolve,reject)=>{
+    const s=document.createElement('script');
+    s.src='https://checkout.wompi.co/widget.js';
+    s.onload=resolve; s.onerror=()=>reject(new Error('No se pudo cargar el widget de Wompi'));
+    document.head.appendChild(s);
+  });
+  return wompiWidgetReady;
+}
+async function abrirWompi(state,ctx){
+  await cargarWidgetWompi();
+  const checkout=new window.WidgetCheckout({
+    currency:'COP',
+    amountInCents:Math.round(state.total*100),
+    reference:`${ctx.cliente||'pedido'}-${Date.now()}`,
+    publicKey:ctx.apis.wompi_public_key,
+    redirectUrl:window.location.href,
+  });
+  checkout.open(result=>console.log('Resultado Wompi:',result));
+}
+
+/* CONTEXTO — vendría de la ficha del proyecto */
+const CONTEXT = {
+  cliente: "Café Raíz",
+  marca:{ primario:"#1F6B4A", secundario:"#F3ECE0", inicial:"R" },
+  apis:{ pagos:"whatsapp", whatsapp_num:"573001234567", wompi_public_key:"" },  // prueba: cambia pagos a "wompi" y pon tu public key sandbox
+  moneda:"$"
+};
+
+/* CATÁLOGO de ejemplo (en real viene de la base de datos) */
+const PRODUCTOS = [
+  { id:'c2', nombre:'Latte de la casa', desc:'Leche texturizada, arte latte', precio:8500, emoji:'🥛' },
+  { id:'b1', nombre:'Huevos benedictinos', desc:'Pan de masa madre', precio:18500, emoji:'🍳' },
+  { id:'b2', nombre:'Avo toast', desc:'Aguacate, tomate, sésamo', precio:15000, emoji:'🥑' },
+  { id:'p1', nombre:'Cheesecake', desc:'Frutos del bosque', precio:11000, emoji:'🍰' },
+  { id:'c3', nombre:'Cold brew', desc:'Extracción en frío 18h', precio:9000, emoji:'🧊' },
+  { id:'p2', nombre:'Brownie', desc:'Chocolate 70%, nuez', precio:9500, emoji:'🍫' },
+];
+
+/* tema desde contexto */
+const r=document.documentElement.style;
+r.setProperty('--brand',CONTEXT.marca.primario);
+r.setProperty('--bg',CONTEXT.marca.secundario);
+document.getElementById('logo').textContent=CONTEXT.marca.inicial;
+document.getElementById('biz').textContent=CONTEXT.cliente;
+document.getElementById('sysClient').textContent=CONTEXT.cliente;
+document.getElementById('sysPay').textContent=CONTEXT.apis.pagos;
+
+/* crea el carrito */
+const cart = createCart({ moneda:CONTEXT.moneda, envio:0 });
+const M = CONTEXT.moneda;
+
+/* pinta catálogo */
+const grid=document.getElementById('grid');
+PRODUCTOS.forEach(p=>{
+  const el=document.createElement('div'); el.className='card';
+  el.innerHTML=`<div class="ph">${esc(p.emoji)}</div><div class="b">
+    <h3>${esc(p.nombre)}</h3><div class="d">${esc(p.desc)}</div>
+    <div class="row"><span class="pr">${money(p.precio,M)}</span>
+    <button type="button" class="add">Agregar</button></div></div>`;
+  el.querySelector('.add').onclick=()=>{ cart.add(p,1); pulse(); };
+  grid.appendChild(el);
+});
+
+/* la UI se redibuja sola al cambiar el carrito (patrón reactivo) */
+cart.subscribe(state=>{
+  document.getElementById('count').textContent=state.count;
+  renderLines(state);
+  renderFoot(state);
+});
+
+function renderLines(state){
+  const c=document.getElementById('lines');
+  if(!state.items.length){ c.innerHTML='<div class="empty">Tu carrito está vacío.<br>Agrega algo del menú 🙂</div>'; return; }
+  c.innerHTML='';
+  state.items.forEach(i=>{
+    const row=document.createElement('div'); row.className='line';
+    row.innerHTML=`<div class="em">${esc(i.emoji||'🍽️')}</div>
+      <div class="li"><div class="nm">${esc(i.nombre)}</div><div class="lp">${money(i.precio,M)} c/u</div></div>
+      <div class="qty"><button type="button" aria-label="menos">−</button><span>${i.qty}</span><button type="button" aria-label="más">+</button></div>`;
+    const [minus,,plus]=row.querySelectorAll('.qty *');
+    minus.onclick=()=>cart.decrement(i.id);
+    plus.onclick=()=>cart.increment(i.id);
+    c.appendChild(row);
+  });
+}
+
+function renderFoot(state){
+  const f=document.getElementById('foot');
+  if(!state.items.length){ f.innerHTML=''; return; }
+  const wa = CONTEXT.apis.pagos==='whatsapp';
+  f.innerHTML=`
+    <div class="totrow"><span>Subtotal</span><span>${money(state.subtotal,M)}</span></div>
+    ${state.envio?`<div class="totrow"><span>Envío</span><span>${money(state.envio,M)}</span></div>`:''}
+    <div class="totrow big"><span>Total</span><span>${money(state.total,M)}</span></div>
+    <button type="button" class="pay-btn ${wa?'wa':''}" id="payBtn">
+      ${wa?'<svg viewBox="0 0 24 24" fill="currentColor"><path d="M17.5 14.4c-.3-.2-1.7-.8-2-.9-.3-.1-.5-.2-.6.2-.2.3-.7.8-.8 1-.2.2-.3.2-.6.1-1.5-.8-2.6-1.4-3.6-3.2-.3-.5.3-.5.8-1.5.1-.2 0-.3 0-.5 0-.1-.6-1.5-.8-2.1-.2-.5-.4-.4-.6-.4h-.5c-.2 0-.5.1-.7.3-1 1-1 2.4-.1 3.9 1.3 2 2.3 3.1 4.4 4 1.3.5 1.8.6 2.5.5.4-.1 1.3-.5 1.5-1 .2-.5.2-1 .1-1.1z"/></svg>Pedir por WhatsApp':'Pagar con '+CONTEXT.apis.pagos}
+    </button>
+    <div class="paynote">checkout activo: ${CONTEXT.apis.pagos}</div>`;
+  document.getElementById('payBtn').onclick=()=>doCheckout(state);
+}
+
+function doCheckout(state){
+  const res = checkout(state, {}, CONTEXT);
+  if(res.tipo==='redirect') window.open(res.url,'_blank');
+  else if(res.tipo==='widget' && res.proveedor==='wompi'){
+    if(!CONTEXT.apis.wompi_public_key){
+      alert('Para probar el widget real de Wompi: crea una cuenta sandbox en wompi.co, copia tu "public key" de pruebas en CONTEXT.apis.wompi_public_key (dentro de este archivo) y vuelve a intentar.');
+      return;
+    }
+    abrirWompi(state, CONTEXT);
+  }
+  else if(res.tipo==='pago') alert(`→ Iría a ${res.proveedor}\nMonto: ${money(res.monto,M)}\n(${res.nota})`);
+}
+
+/* helpers de UI */
+function openCart(){ document.getElementById('drawer').classList.add('show'); document.getElementById('overlay').classList.add('show'); }
+function closeCart(){ document.getElementById('drawer').classList.remove('show'); document.getElementById('overlay').classList.remove('show'); }
+function pulse(){ const b=document.getElementById('count'); b.animate([{transform:'scale(1)'},{transform:'scale(1.4)'},{transform:'scale(1)'}],{duration:250}); }
+window.openCart=openCart; window.closeCart=closeCart;
+</script>
+</body>
+</html>

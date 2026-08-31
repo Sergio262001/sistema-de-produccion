@@ -1,0 +1,81 @@
+# ════════════════════════════════════════════════════════════
+#  FICHA DE CONTEXTO — Rubro: Clínica / Consultorio
+#  Punto de partida para cotizar y arrancar este tipo de cliente
+#  rápido. Cópiala, renómbrala con el nombre del cliente real y
+#  ajusta marca, servicios y claves antes de entregar.
+#  NO pongas claves reales aquí (van en .env de cada base).
+# ════════════════════════════════════════════════════════════
+
+proyecto:   "Clínica Vitalis — agendamiento de citas"
+cliente:    "Clínica Vitalis"
+rubro:      clinica
+linea:      pro                # casi siempre pro: roles + datos sensibles
+
+# ── BASES QUE COMPONEN ESTE PROYECTO ─────────────────────────
+# Landing con servicios + formulario de leads como solicitud de
+# cita, y auth para que recepción/doctores entren a ver mensajes.
+# (Agenda con calendario real es backlog futuro, no una base hoy.)
+bases:
+  - landing-modular
+  - auth
+
+# ── AUTH (acceso al panel de solicitudes) ────────────────────
+auth:
+  motor:          supabase     # firebase | supabase | local
+  roles:          [admin, recepcion]
+  rol_requerido:  recepcion
+
+# ── BASE DE DATOS (leads = solicitudes de cita) ──────────────
+base_de_datos:
+  motor:  supabase             # firebase | supabase | local
+  tabla:  leads
+  acceso: rls_por_rol          # solo recepcion/admin leen los datos del paciente
+
+# ── APIs / CONECTORES ───────────────────────────────────────
+apis:
+  mensajeria:   whatsapp       # confirmación de solicitud de cita
+  whatsapp_num: "573109876543"
+  analitica:    ga4
+  correo:       resend         # notificación a recepción por cada solicitud
+
+# ── VARIABLES (solo nombres; valores reales en .env) ────────
+env:
+  - SUPABASE_URL
+  - SUPABASE_ANON_KEY
+  - GA4_ID
+  - RESEND_API_KEY
+
+# ── MARCA (alimenta los tokens de diseño) ───────────────────
+marca:
+  primario:   "#0E7C86"
+  secundario: "#F2F8F8"
+  display:    "Space Grotesk"
+  body:       "Inter"
+  tono:       "claro, profesional, tranquilizador"
+
+# ── CONTENIDO (landing) ──────────────────────────────────────
+contenido:
+  hero:
+    titulo:     "Atención médica con cita el mismo día"
+    subtitulo:  "Agenda tu consulta en minutos. Te confirmamos por WhatsApp."
+    cta:        "Solicitar cita"
+  servicios_titulo: "Especialidades"
+  servicios:
+    - { icono: "🩺", titulo: "Medicina general", desc: "Consulta y chequeo preventivo." }
+    - { icono: "🦷", titulo: "Odontología", desc: "Limpieza, valoración y tratamientos." }
+  leads_titulo: "Solicita tu cita"
+  footer_nota:  "Respondemos en menos de 2 horas hábiles"
+
+# ── ENTREGA ─────────────────────────────────────────────────
+entrega:
+  dominio:  "clinicavitalis.co"
+  hosting:  vercel
+  idiomas:  [es]
+
+# ── NOTAS PARA COTIZAR ───────────────────────────────────────
+notas: >
+  Maneja datos sensibles de pacientes (nombre, contacto, motivo de
+  consulta) → linea: pro por defecto, RLS estricto en la tabla leads,
+  y revisar con el cliente requisitos de habeas data antes de entregar.
+  Si más adelante pide agenda con calendario y recordatorios automáticos,
+  eso es una base nueva (no existe aún en 02-bases/).

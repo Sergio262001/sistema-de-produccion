@@ -1,0 +1,21 @@
+/* ════════════════════════════════════════════════════════════
+   DESIGN TOKENS
+   Valores por defecto. En el arranque se sobrescriben con los
+   de la ficha de contexto (marca.*) vía JS, igual que en demo.html.
+   Cambiar la marca de un cliente = editar la ficha, no este archivo.
+   ════════════════════════════════════════════════════════════ */
+:root{
+  --brand:#1B36C9;
+  --bg:#F5F7FB;
+  --surface:#FFFFFF;
+  --ink:#0F1626;
+  --ink-soft:#454F66;
+  --line:#E2E7F0;
+  --danger:#E5484D;
+
+  --display:'Space Grotesk',sans-serif;
+  --body:'Inter',sans-serif;
+
+  --radius:14px;
+  --space:16px;
+}

@@ -1,0 +1,30 @@
+/* ════════════════════════════════════════════════════════════
+   CONTRATO DE TOKENS — nombres que toda base debe respetar
+   Estos son los valores NEUTROS por defecto. Cada base sigue
+   trayendo su propio src/styles/tokens.css con los valores que
+   mejor le quedan a su producto (ver menu-con-panel-admin,
+   carrito-reutilizable, landing-modular, auth) — lo importante
+   es que las 4 usan exactamente estos NOMBRES, así que un
+   componente de este kit funciona en cualquier base sin tocarlo.
+   Cambiar la marca de un cliente = editar la ficha de contexto,
+   nunca este archivo ni el del componente.
+   ════════════════════════════════════════════════════════════ */
+:root{
+  /* color */
+  --brand:#2F54FF;          /* marca.primario   */
+  --bg:#F5F7FB;             /* marca.secundario */
+  --accent:#E8A02C;         /* marca.acento     */
+  --surface:#FFFFFF;
+  --ink:#0F1626;
+  --ink-soft:#454F66;
+  --line:#E2E7F0;
+  --danger:#E5484D;
+
+  /* tipografía */
+  --display:'Space Grotesk',sans-serif;   /* marca.display */
+  --body:'Inter',sans-serif;              /* marca.body    */
+
+  /* forma y ritmo */
+  --radius:14px;
+  --space:16px;
+}

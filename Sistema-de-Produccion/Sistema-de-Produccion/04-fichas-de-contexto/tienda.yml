@@ -1,0 +1,81 @@
+# ════════════════════════════════════════════════════════════
+#  FICHA DE CONTEXTO — Rubro: Tienda / Retail pequeño
+#  Punto de partida para cotizar y arrancar este tipo de cliente
+#  rápido. Cópiala, renómbrala con el nombre del cliente real y
+#  ajusta marca, catálogo y claves antes de entregar.
+#  NO pongas claves reales aquí (van en .env de cada base).
+# ════════════════════════════════════════════════════════════
+
+proyecto:   "Casa Tela — tienda online"
+cliente:    "Casa Tela"
+rubro:      tienda
+linea:      starter            # starter | pro
+
+# ── BASES QUE COMPONEN ESTE PROYECTO ─────────────────────────
+# Landing con el catálogo + carrito reutilizable para el checkout.
+# Auth solo si linea: pro (panel de inventario con varios usuarios).
+bases:
+  - landing-modular
+  - carrito-reutilizable
+  # - auth                     # descomenta si linea: pro
+
+# ── CARRITO (reglas de negocio) ──────────────────────────────
+carrito:
+  moneda:       "$"
+  envio:        8000
+  impuesto:     0
+  max_por_item: 10
+
+# ── BASE DE DATOS (para los leads del formulario de landing) ─
+base_de_datos:
+  motor:  local                # firebase | supabase | local
+  tabla:  leads
+
+# ── APIs / CONECTORES ───────────────────────────────────────
+apis:
+  pagos:        wompi          # whatsapp | wompi | mercadopago | stripe
+  mensajeria:   whatsapp       # confirmación de pedido
+  whatsapp_num: "573098765432"
+  analitica:    ga4
+
+# ── VARIABLES (solo nombres; valores reales en .env) ────────
+env:
+  - WOMPI_PUBLIC_KEY
+  - WOMPI_PRIVATE_KEY
+  - WHATSAPP_NUM
+  - GA4_ID
+
+# ── MARCA (alimenta los tokens de diseño) ───────────────────
+marca:
+  primario:   "#1F6B4A"
+  secundario: "#F3ECE0"
+  display:    "Fraunces"
+  body:       "Inter"
+  tono:       "cálido, artesanal"
+
+# ── CONTENIDO (landing) ──────────────────────────────────────
+contenido:
+  hero:
+    titulo:     "Telas y accesorios hechos a mano"
+    subtitulo:  "Catálogo curado, envíos a toda Colombia."
+    cta:        "Ver catálogo"
+  servicios_titulo: "Lo que encuentras"
+  servicios:
+    - { icono: "🧵", titulo: "Telas naturales", desc: "Algodón y lino de origen." }
+    - { icono: "👜", titulo: "Accesorios", desc: "Bolsos y carteras hechos a mano." }
+  leads_titulo: "¿Buscas algo a medida?"
+  footer_nota:  "Envíos en 3-5 días hábiles"
+
+# ── ENTREGA ─────────────────────────────────────────────────
+entrega:
+  dominio:  "casatela.co"
+  hosting:  vercel
+  moneda:   "$"
+  idiomas:  [es]
+
+# ── NOTAS PARA COTIZAR ───────────────────────────────────────
+notas: >
+  Catálogo: "Ecommerce Simple" o "Checkout WhatsApp" si el cliente
+  prefiere no usar pasarela. Si pide inventario, filtros y panel de
+  administración, subir a linea: pro y cotizar "Ecommerce Completo"
+  (base aún no construida — ver backlog E2).

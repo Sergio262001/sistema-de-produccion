@@ -1,0 +1,38 @@
+# ════════════════════════════════════════════════════════════
+#  Ficha de contexto · backend-pro
+#  Se suma a la ficha de la base principal, no la reemplaza.
+# ════════════════════════════════════════════════════════════
+
+cliente: Casa Tela
+linea: pro                    # esta extensión SOLO existe en Pro
+
+base_principal: ecommerce-completo   # a qué base se le monta encima
+
+base_de_datos:
+  motor: supabase             # obligatorio: las Edge Functions son de Supabase
+  proyecto_ref: xxxxxxxx      # el ref del proyecto (sale de la URL del panel)
+
+apis:
+  pagos: wompi                # wompi (único implementado hoy)
+  moneda: COP
+
+pagos:
+  # De quién es la cuenta. No es un detalle: el dinero le llega a quien
+  # figure aquí, y debe ser el cliente, con su NIT y su cuenta bancaria.
+  titular_cuenta: Casa Tela S.A.S.
+  nit: 900123456-7
+  ambiente: sandbox           # sandbox | produccion
+  confirmar_por_webhook: true # despachar solo con confirmación de Wompi
+
+# Solo NOMBRES de variables. Los valores van en los secretos de
+# Supabase (supabase secrets set), nunca aquí ni en el repositorio.
+env:
+  - WOMPI_PUBLIC_KEY
+  - WOMPI_INTEGRITY_SECRET
+  - WOMPI_EVENTS_SECRET
+  - SITIO_URL
+
+entrega:
+  dominio: https://tienda-del-cliente.com
+  webhook_registrado: false   # ponlo en true cuando la URL esté en el panel de Wompi
+  probado_en_sandbox: false   # no pases a produccion con esto en false
