@@ -131,21 +131,42 @@ export async function correrAgente(
 
   emitir({ tipo: 'inicio', modelo: m.id, presupuesto: techo, soloLectura });
 
+  // Los tipos que emite el SDK, comprobados contra el paquete real (la
+  // documentación resumida no coincide): `assistant` trae bloques dentro de
+  // message.content, `user` trae los resultados de herramienta, y `result`
+  // cierra con el costo total y el número de turnos.
   try {
     for await (const msg of query({ prompt: mensaje, options: opciones })) {
-      if (msg.type === 'text' && msg.text) {
-        emitir({ tipo: 'texto', texto: msg.text });
-      } else if (msg.type === 'tool_use') {
-        turnos++;
-        emitir({ tipo: 'herramienta', nombre: msg.name, entrada: resumirEntrada(msg.input) });
-      } else if (msg.type === 'tool_result') {
-        emitir({ tipo: 'resultado', texto: recortar(textoDe(msg)) });
-      } else if (msg.type === 'usage') {
+      if (msg.type === 'assistant') {
+        for (const b of msg.message?.content || []) {
+          if (b.type === 'text' && b.text) {
+            emitir({ tipo: 'texto', texto: b.text });
+          } else if (b.type === 'tool_use') {
+            turnos++;
+            emitir({ tipo: 'herramienta', nombre: b.name, entrada: resumirEntrada(b.input) });
+          }
+          // Los bloques `thinking` no se muestran: es razonamiento interno,
+          // no algo que el dueño necesite leer para decidir.
+        }
+      } else if (msg.type === 'user') {
+        for (const b of msg.message?.content || []) {
+          if (b.type === 'tool_result') {
+            emitir({ tipo: 'resultado', texto: recortar(textoDe(b)) });
+          }
+        }
+      } else if (msg.type === 'result') {
         if (typeof msg.total_cost_usd === 'number') costo = msg.total_cost_usd;
-        emitir({ tipo: 'gasto', costo: Math.round(costo * 10000) / 10000 });
+        const redondo = Math.round(costo * 10000) / 10000;
+        emitir({ tipo: 'gasto', costo: redondo });
+        if (msg.is_error) {
+          emitir({ tipo: 'error',
+            mensaje: msg.result || msg.subtype || 'el agente terminó con error',
+            costo: redondo });
+        } else {
+          emitir({ tipo: 'fin', costo: redondo, turnos: msg.num_turns ?? turnos });
+        }
       }
     }
-    emitir({ tipo: 'fin', costo: Math.round(costo * 10000) / 10000, turnos });
   } catch (e) {
     emitir({ tipo: 'error', mensaje: e.message, costo: Math.round(costo * 10000) / 10000 });
     throw e;
@@ -165,8 +186,9 @@ function resumirEntrada(entrada) {
   return recortar(JSON.stringify(entrada), 140);
 }
 
-function textoDe(msg) {
-  const c = msg.content;
+/** El contenido de un tool_result llega como texto o como lista de bloques */
+function textoDe(bloque) {
+  const c = bloque?.content;
   if (typeof c === 'string') return c;
   if (Array.isArray(c)) return c.map((b) => b?.text || '').join('');
   return '';
