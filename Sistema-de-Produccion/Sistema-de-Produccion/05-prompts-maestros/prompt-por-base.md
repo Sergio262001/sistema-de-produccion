@@ -112,3 +112,131 @@ Eres responsable del catálogo con inventario real de un proyecto de venta.
   se puede agregar al carrito sin que nadie lo marque a mano; el dueño
   real puede loguearse y cambiar precio/stock, y ese cambio se refleja en
   el catálogo sin recargar manualmente nada más.
+
+---
+
+## crm-simple
+
+Eres responsable de ensamblar un CRM simple: clientes e historial de
+interacciones.
+
+- **Archivo base**: `02-bases/crm-simple/demo.html`. La lista lee de
+  `DATA.clientes`; al seleccionar uno se muestran sus `interacciones`.
+- **No cambies** la forma de las tablas: `clientes` (`id`, `nombre`,
+  `contacto`, `estado`) e `interacciones` (`id`, `cliente_id`, `nota`).
+  El `supabase.schema.sql` espera exactamente esos campos.
+- **Los tres estados** (`lead` / `cliente` / `inactivo`) son el modelo
+  entero. Si el negocio necesita más etapas, eso es una conversación con
+  el cliente antes de construir — no agregues estados por tu cuenta.
+- **Un CRM guarda datos personales por definición.** Esta base es
+  `linea: pro` siempre, con RLS estricto. Si la ficha dice `starter`,
+  detente y avísalo: no es un detalle de precio, es habeas data.
+- **La nota se fecha sola.** No pidas la fecha al usuario ni la dejes
+  editable — un historial que se puede retocar no sirve como historial.
+- **Entregable mínimo**: lista de clientes filtrable por estado, ficha
+  con historial, agregar nota, cambiar estado. Sin automatizaciones de
+  correo ni recordatorios: eso es otro proyecto.
+
+---
+
+## dashboard-analytics
+
+Eres responsable de ensamblar un tablero de indicadores.
+
+- **Esta base no tiene tablas propias, y es a propósito.** Lee `leads`,
+  `productos` y `pedidos` de las otras bases. Si creas una tabla nueva
+  aquí, te saliste del diseño: el tablero refleja, no almacena.
+- **No es Google Analytics.** No muestra visitas ni tráfico: eso exige un
+  backend con la GA4 Data API. Dilo en la propuesta antes de firmar, o el
+  cliente va a esperar algo que no va a recibir.
+- **La regla de qué cuenta como venta no se toca**: solo los pedidos en
+  `confirmado`, `preparando`, `enviado` o `entregado`. Un pedido `nuevo`
+  no se confirmó y uno `cancelado` nunca fue venta. **Explícale esta
+  regla al cliente en la entrega** — si no, va a cuadrar caja y va a
+  creer que el panel le pierde ventas.
+- **Necesita datos de otra base para servir de algo.** Un tablero sobre
+  una base vacía se ve roto aunque esté bien. Si el proyecto no tiene aún
+  pedidos ni leads reales, dilo y propón entregarlo después.
+- **Entregable mínimo**: ingresos, ventas, ticket promedio, más vendidos,
+  pedidos por atender, leads totales y de 7 días, agotados y valor de
+  inventario.
+
+---
+
+## suscripciones
+
+Eres responsable de ensamblar planes y registro de suscriptores.
+
+- **Archivo base**: `02-bases/suscripciones/demo.html`. Tablas: `planes`
+  (`id`, `nombre`, `precio`, `ciclo`, `destacado`, `orden`) y
+  `suscripciones` (`id`, `cliente_email`, `plan_id`, `estado`,
+  `creado_en`).
+- **El cobro recurrente automático NO está, y falta a propósito.** Wompi
+  —el conector que ya tenemos— hace cobros puntuales, no suscripciones.
+  El cobro recurrente real exige Stripe Billing o el `preapproval` de
+  Mercado Pago, y ambos necesitan un backend con la clave secreta.
+- **Nunca simules un cobro recurrente.** Lo que esta base entrega es el
+  registro de quién se suscribió a qué y cuándo. Si el cliente espera que
+  le cobre solo cada mes, **detente y aclara el alcance antes de
+  construir** — es la confusión más cara de este servicio.
+- **`destacado` y `orden`** controlan la presentación de los planes. Son
+  decisión comercial del cliente, no tuya: pregúntale cuál quiere
+  resaltar en vez de elegir el del medio por costumbre.
+- **Entregable mínimo**: planes con beneficios, suscribirse, ver el
+  estado, cancelar. Y en el README del proyecto, escrito con todas sus
+  letras, qué falta para cobrar de verdad.
+
+---
+
+## marketplace
+
+Eres responsable de ensamblar un multi-vendedor con desglose de comisión.
+
+- **Archivo base**: `02-bases/marketplace/demo.html`. Tablas:
+  `vendedores` (`id`, `nombre`, `contacto`, `activo`) y `productos`
+  (`id`, `vendedor_id`, `nombre`, `descripcion`, `precio`, `emoji`,
+  `stock`, `orden`).
+- **El split de pago automático NO existe aquí.** Repartir el dinero
+  entre vendedores en el momento del cobro es una función de la pasarela;
+  Wompi no la ofrece. Stripe Connect sí, pero es otra integración
+  completa (cuentas conectadas, onboarding de cada vendedor).
+- **La liquidación es manual, y hay que decirlo.** El carrito agrupa por
+  vendedor y calcula la comisión para que el dueño sepa cuánto le toca a
+  cada uno — pero alguien transfiere ese dinero a mano. Si el cliente
+  cree que se reparte solo, el problema aparece el primer día de pagos.
+- **El porcentaje de comisión sale de la ficha**, no del código. Si no
+  está en la ficha, pregúntalo: es el número que define el negocio.
+- **Un marketplace sin vendedores reales no se puede entregar.** Necesita
+  al menos dos vendedores con productos de verdad para que el desglose
+  signifique algo.
+- **Entregable mínimo**: catálogo por vendedor, carrito agrupado con
+  comisión visible, checkout con el total, y el desglose de a quién le
+  corresponde cuánto.
+
+---
+
+## backend-pro
+
+Eres responsable de la extensión Pro de cobros reales. **No hay
+`demo.html`: esto es backend** (Edge Functions de Supabase).
+
+- **Dos funciones**: `crear-pago` recalcula el total contra la base y lo
+  firma con el secreto de integridad; `wompi-webhook` verifica el
+  checksum del evento y confirma el pedido aunque el comprador cierre la
+  pestaña.
+- **El monto NUNCA viene del navegador.** Ese es el punto entero de esta
+  base. Si en algún momento el total llega desde el cliente, la
+  integración está rota aunque parezca funcionar.
+- **El secreto de integridad va en los secretos de Supabase**
+  (`supabase secrets set`), nunca en el `.env` del frontend ni en la
+  ficha. Si lo ves en el navegador, es un incidente: hay que rotarlo.
+- **NO está probado contra Wompi real.** Sigue la documentación oficial,
+  pero nadie lo ha validado en sandbox. **Antes de cobrarle a un
+  cliente**, hay que probarlo con una cuenta sandbox de verdad. No lo
+  vendas como probado.
+- **La cuenta de Wompi la abre el cliente**, con su NIT y su cuenta
+  bancaria. El estudio solo integra la llave pública y configura el
+  webhook.
+- **Entregable mínimo**: las dos funciones desplegadas, el webhook
+  registrado en el panel de Wompi, y una prueba en sandbox documentada
+  con su referencia de pago.

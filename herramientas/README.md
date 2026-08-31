@@ -217,10 +217,10 @@ elijas. Copias y pegas.
 Al de **Revisión** se le añade una nota para que **no repita** lo que el
 validador gratis ya cubre — si no, pagarías por los mismos hallazgos dos veces.
 
-> **Ojo:** `prompt-por-base.md` solo tiene bloque para 5 de las 10 bases
-> (faltan `crm-simple`, `dashboard-analytics`, `suscripciones`,
-> `marketplace` y `backend-pro`), aunque su README diga que hay uno por cada
-> una. El panel te lo dice al elegirlas en vez de dar un prompt a medias.
+> Las 10 bases tienen bloque. Los 5 últimos (`crm-simple`, `dashboard-analytics`,
+> `suscripciones`, `marketplace`, `backend-pro`) son **borradores** escritos a
+> partir del código y el README de cada base: revísalos, porque codifican
+> criterio tuyo sobre esas bases.
 
 ## Pruebas
 
