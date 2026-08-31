@@ -6,370 +6,681 @@
 <title>Panel del estudio</title>
 <style>
   :root{
-    --bg:#12160F; --surface:#1A1F16; --surface-2:#222820;
-    --ink:#EDF0E8; --ink-soft:#98A18C; --line:#2E3628;
-    --arcilla:#C96F4A;   /* acción */
-    --jade:#5FA37A;      /* sistema / gratis */
-    --laton:#C9A227;     /* datos / costo */
-    --rojo:#D9584E;
+    --bg:#12160F; --sup:#1A1F16; --sup2:#222820; --sup3:#2A3227;
+    --ink:#EDF0E8; --soft:#98A18C; --line:#2E3628;
+    --arcilla:#C96F4A; --jade:#5FA37A; --laton:#C9A227; --rojo:#D9584E;
     --mono:'JetBrains Mono',ui-monospace,'Cascadia Code',Consolas,monospace;
-    --sans:system-ui,-apple-system,'Segoe UI',sans-serif;
-    --radio:10px;
+    --sans:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
+    --r:10px;
   }
   @media (prefers-color-scheme:light){
     :root:not([data-tema="oscuro"]){
-      --bg:#F4F5F1; --surface:#FFFFFF; --surface-2:#EDEFE8;
-      --ink:#171C12; --ink-soft:#5B6553; --line:#DDE1D6;
+      --bg:#F4F5F1; --sup:#FFF; --sup2:#EDEFE8; --sup3:#E3E7DC;
+      --ink:#171C12; --soft:#5B6553; --line:#DDE1D6;
     }
   }
   *{box-sizing:border-box;}
+  html,body{height:100%;}
   body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);
        font-size:14px;line-height:1.5;-webkit-font-smoothing:antialiased;}
-  a{color:var(--arcilla);}
   :focus-visible{outline:2px solid var(--arcilla);outline-offset:2px;border-radius:4px;}
-  .salta{position:absolute;left:-9999px;}
-  .salta:focus{left:8px;top:8px;z-index:99;background:var(--arcilla);color:#fff;padding:8px 14px;border-radius:6px;}
+  button,input,select,textarea{font-family:inherit;font-size:inherit;color:inherit;}
+  .oculto{display:none !important;}
 
-  .marco{max-width:1080px;margin:0 auto;padding:0 20px 80px;}
+  /* ══ ACCESO ══ */
+  #acceso{min-height:100vh;display:grid;place-items:center;padding:24px;}
+  .caja{width:100%;max-width:400px;background:var(--sup);border:1px solid var(--line);
+        border-radius:14px;padding:30px;}
+  .caja h1{font-size:19px;margin:0 0 6px;}
+  .caja .sub{font-family:var(--mono);font-size:11.5px;color:var(--soft);margin-bottom:22px;}
+  .caja label{display:block;font-size:12px;color:var(--soft);margin-bottom:6px;}
+  .caja input{width:100%;background:var(--bg);border:1px solid var(--line);
+              border-radius:8px;padding:11px 13px;}
+  .nota{font-size:11.5px;color:var(--soft);line-height:1.6;margin-top:16px;
+        padding-top:14px;border-top:1px solid var(--line);}
+  .nota b{color:var(--ink);}
 
-  /* ─ Cabecera ─ */
-  header{border-bottom:1px solid var(--line);padding:26px 0 20px;margin-bottom:26px;}
-  .titulo{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap;}
-  h1{font-size:20px;margin:0;letter-spacing:-.01em;}
-  .meta{font-family:var(--mono);font-size:11.5px;color:var(--ink-soft);}
+  /* ══ ARMAZÓN ══ */
+  #app{display:grid;grid-template-columns:216px 1fr;min-height:100vh;}
+  @media(max-width:800px){#app{grid-template-columns:1fr;}}
 
-  /* ─ Conmutador de modo ─ */
-  .modos{display:flex;gap:0;margin-top:20px;border:1px solid var(--line);
-         border-radius:var(--radio);overflow:hidden;max-width:520px;}
-  .modos button{flex:1;background:var(--surface);border:0;padding:13px 16px;
-                font-family:var(--sans);font-size:13px;color:var(--ink-soft);
-                cursor:pointer;text-align:left;transition:background .12s;}
-  .modos button:hover{background:var(--surface-2);}
-  .modos button+button{border-left:1px solid var(--line);}
-  .modos button .n{display:block;font-weight:600;color:var(--ink);margin-bottom:2px;}
-  .modos button .p{display:block;font-family:var(--mono);font-size:11px;}
-  .modos button[aria-pressed="true"]{background:var(--surface-2);
-       box-shadow:inset 0 2px 0 var(--jade);}
-  .modos button[aria-pressed="true"].pago{box-shadow:inset 0 2px 0 var(--laton);}
-  .modos button[aria-pressed="true"] .p{color:var(--jade);}
-  .modos button[aria-pressed="true"].pago .p{color:var(--laton);}
+  nav{background:var(--sup);border-right:1px solid var(--line);padding:22px 14px;
+      display:flex;flex-direction:column;gap:3px;}
+  @media(max-width:800px){nav{flex-direction:row;overflow-x:auto;border-right:0;
+      border-bottom:1px solid var(--line);padding:12px;}}
+  .marca{padding:0 10px 18px;}
+  .marca b{font-size:14px;display:block;}
+  .marca span{font-family:var(--mono);font-size:10.5px;color:var(--soft);}
+  @media(max-width:800px){.marca{display:none;}}
+  nav button{background:transparent;border:0;text-align:left;padding:9px 11px;
+             border-radius:7px;color:var(--soft);cursor:pointer;white-space:nowrap;
+             font-size:13.5px;}
+  nav button:hover{background:var(--sup2);color:var(--ink);}
+  nav button[aria-current="page"]{background:var(--sup2);color:var(--ink);font-weight:600;
+             box-shadow:inset 2px 0 0 var(--arcilla);}
+  nav .fin{margin-top:auto;}
+  @media(max-width:800px){nav .fin{margin-top:0;margin-left:auto;}}
 
-  /* ─ Rejilla ─ */
-  .cols{display:grid;grid-template-columns:300px 1fr;gap:22px;align-items:start;}
-  @media (max-width:820px){.cols{grid-template-columns:1fr;}}
+  main{padding:26px 30px 70px;max-width:1000px;}
+  @media(max-width:800px){main{padding:20px 16px 60px;}}
+  h2.tit{font-size:20px;margin:0 0 4px;}
+  p.des{color:var(--soft);font-size:13px;margin:0 0 22px;max-width:62ch;}
 
-  .tarj{background:var(--surface);border:1px solid var(--line);
-        border-radius:var(--radio);padding:18px;margin-bottom:16px;}
-  .tarj h2{font-size:12px;font-family:var(--mono);text-transform:uppercase;
-           letter-spacing:.07em;color:var(--ink-soft);margin:0 0 14px;font-weight:500;}
+  .tarj{background:var(--sup);border:1px solid var(--line);border-radius:var(--r);
+        padding:20px;margin-bottom:16px;}
+  .tarj h3{font-family:var(--mono);font-size:11.5px;text-transform:uppercase;
+           letter-spacing:.07em;color:var(--soft);margin:0 0 14px;font-weight:500;}
 
-  label{display:block;font-size:12px;color:var(--ink-soft);margin:12px 0 5px;}
-  label:first-of-type{margin-top:0;}
-  select,input[type=text]{width:100%;background:var(--bg);color:var(--ink);
-        border:1px solid var(--line);border-radius:7px;padding:9px 11px;
-        font-family:var(--sans);font-size:13px;}
-  input[type=color]{width:100%;height:38px;background:var(--bg);
-        border:1px solid var(--line);border-radius:7px;padding:3px;cursor:pointer;}
+  label.c{display:block;font-size:12.5px;color:var(--soft);margin:14px 0 6px;}
+  label.c:first-child{margin-top:0;}
+  input[type=text],input[type=password],select,textarea{
+      width:100%;background:var(--bg);border:1px solid var(--line);
+      border-radius:8px;padding:10px 12px;}
+  textarea{min-height:150px;resize:vertical;font-family:var(--mono);font-size:12.5px;}
+  input[type=color]{width:100%;height:40px;background:var(--bg);border:1px solid var(--line);
+      border-radius:8px;padding:3px;cursor:pointer;}
 
-  .btn{width:100%;margin-top:16px;padding:12px;border:0;border-radius:8px;
-       background:var(--arcilla);color:#fff;font-family:var(--sans);
-       font-size:13.5px;font-weight:600;cursor:pointer;}
-  .btn:hover{filter:brightness(1.08);}
+  .btn{padding:11px 18px;border:0;border-radius:8px;background:var(--arcilla);
+       color:#fff;font-weight:600;font-size:13.5px;cursor:pointer;}
+  .btn:hover{filter:brightness(1.09);}
   .btn:disabled{opacity:.45;cursor:not-allowed;filter:none;}
-  .btn.sec{background:var(--surface-2);color:var(--ink);border:1px solid var(--line);}
+  .btn.sec{background:var(--sup2);color:var(--ink);border:1px solid var(--line);}
+  .btn.full{width:100%;}
+  .fila{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px;}
 
-  /* ─ Aviso de costo ─ */
-  .costo{margin-top:14px;border:1px dashed var(--laton);border-radius:8px;
-         padding:13px;font-family:var(--mono);font-size:12px;color:var(--ink-soft);}
-  .costo b{color:var(--laton);font-size:15px;}
-  .costo.gratis{border-color:var(--jade);border-style:solid;}
-  .costo.gratis b{color:var(--jade);}
+  /* ══ MODOS ══ */
+  .modos{display:flex;border:1px solid var(--line);border-radius:var(--r);
+         overflow:hidden;margin-bottom:16px;}
+  .modos button{flex:1;background:var(--sup);border:0;padding:13px 15px;
+                text-align:left;cursor:pointer;color:var(--soft);}
+  .modos button+button{border-left:1px solid var(--line);}
+  .modos button:hover{background:var(--sup2);}
+  .modos button .n{display:block;font-weight:600;color:var(--ink);margin-bottom:2px;font-size:13.5px;}
+  .modos button .p{display:block;font-family:var(--mono);font-size:10.5px;}
+  .modos button[aria-pressed="true"]{background:var(--sup2);box-shadow:inset 0 2px 0 var(--jade);}
+  .modos button[aria-pressed="true"].pg{box-shadow:inset 0 2px 0 var(--laton);}
+  .modos button[aria-pressed="true"] .p{color:var(--jade);}
+  .modos button[aria-pressed="true"].pg .p{color:var(--laton);}
 
-  /* ─ Resultados ─ */
-  #salida:empty::after{content:'Elige un modo y una acción. Nada corre solo.';
-       color:var(--ink-soft);font-family:var(--mono);font-size:12px;}
-  .arch{border-bottom:1px solid var(--line);padding:13px 0;}
+  .costo{border:1px solid var(--jade);border-radius:8px;padding:12px 14px;
+         font-family:var(--mono);font-size:11.5px;color:var(--soft);margin-top:14px;}
+  .costo b{font-size:15px;color:var(--jade);}
+  .costo.pg{border-style:dashed;border-color:var(--laton);}
+  .costo.pg b{color:var(--laton);}
+
+  /* ══ PASOS ══ */
+  .barra{display:flex;gap:5px;margin-bottom:22px;}
+  .barra i{flex:1;height:3px;background:var(--sup3);border-radius:2px;}
+  .barra i.on{background:var(--arcilla);}
+  .barra i.ok{background:var(--jade);}
+  .pasoNum{font-family:var(--mono);font-size:11px;color:var(--soft);margin-bottom:6px;}
+  .aviso{border-left:2px solid var(--laton);padding:8px 0 8px 12px;margin:14px 0;
+         font-size:12.5px;color:var(--soft);}
+  .ayuda{font-size:11.5px;color:var(--soft);margin-top:5px;}
+  .ops{display:flex;flex-direction:column;gap:7px;}
+  .op{display:flex;align-items:flex-start;gap:10px;padding:11px 13px;border:1px solid var(--line);
+      border-radius:8px;cursor:pointer;background:var(--bg);}
+  .op:hover{border-color:var(--soft);}
+  .op input{margin:2px 0 0;accent-color:var(--arcilla);}
+  .op.sel{border-color:var(--arcilla);background:var(--sup2);}
+  .dosc{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+  @media(max-width:600px){.dosc{grid-template-columns:1fr;}}
+
+  /* ══ RESULTADOS ══ */
+  .arch{border-bottom:1px solid var(--line);padding:12px 0;}
   .arch:last-child{border-bottom:0;}
-  .arch .r{font-family:var(--mono);font-size:12px;color:var(--ink);
-           word-break:break-all;margin-bottom:7px;}
-  .h{display:flex;gap:9px;padding:5px 0;font-size:12.5px;align-items:baseline;}
-  .h .pt{font-family:var(--mono);font-size:11px;color:var(--ink-soft);
-         min-width:38px;text-align:right;flex-shrink:0;}
-  .h .d{flex:1;}
-  .h .pista{display:block;color:var(--ink-soft);font-size:11.5px;margin-top:3px;}
-  .pin{display:inline-block;width:7px;height:7px;border-radius:50%;flex-shrink:0;
-       margin-top:5px;}
+  .arch .r{font-family:var(--mono);font-size:11.5px;word-break:break-all;margin-bottom:6px;}
+  .h{display:flex;gap:9px;padding:5px 0;font-size:12.5px;align-items:flex-start;}
+  .h .pt{font-family:var(--mono);font-size:10.5px;color:var(--soft);min-width:34px;
+         text-align:right;flex-shrink:0;padding-top:1px;}
+  .pin{width:7px;height:7px;border-radius:50%;flex-shrink:0;margin-top:6px;}
   .pin.error,.pin.alto{background:var(--rojo);}
   .pin.aviso,.pin.medio{background:var(--laton);}
-  .pin.bajo{background:var(--ink-soft);}
-  .regla{font-family:var(--mono);font-size:10.5px;color:var(--ink-soft);
-         border:1px solid var(--line);border-radius:4px;padding:1px 5px;}
-
-  .resumen{display:flex;gap:18px;flex-wrap:wrap;font-family:var(--mono);
-           font-size:12px;padding:13px 0 3px;border-top:1px solid var(--line);
-           margin-top:8px;}
+  .pin.bajo{background:var(--soft);}
+  .pista{display:block;color:var(--soft);font-size:11.5px;margin-top:3px;}
+  .etq{font-family:var(--mono);font-size:10px;color:var(--soft);border:1px solid var(--line);
+       border-radius:4px;padding:1px 5px;margin-left:5px;}
+  .resumen{display:flex;gap:16px;flex-wrap:wrap;font-family:var(--mono);font-size:11.5px;
+           padding-top:13px;margin-top:10px;border-top:1px solid var(--line);}
   .ok{color:var(--jade);font-family:var(--mono);font-size:13px;}
-  .err{color:var(--rojo);font-family:var(--mono);font-size:12.5px;
-       border:1px solid var(--rojo);border-radius:8px;padding:12px;}
-  .cargando{font-family:var(--mono);font-size:12px;color:var(--ink-soft);}
-  .oculto{display:none;}
+  .err{color:var(--rojo);border:1px solid var(--rojo);border-radius:8px;padding:12px;
+       font-size:12.5px;}
+  .cargando{font-family:var(--mono);font-size:12px;color:var(--soft);}
+
+  table{width:100%;border-collapse:collapse;font-size:13px;}
+  th{text-align:left;font-family:var(--mono);font-size:10.5px;text-transform:uppercase;
+     letter-spacing:.06em;color:var(--soft);font-weight:500;padding:0 10px 9px 0;
+     border-bottom:1px solid var(--line);}
+  td{padding:11px 10px 11px 0;border-bottom:1px solid var(--line);}
+  tr:last-child td{border-bottom:0;}
+  .chip{font-family:var(--mono);font-size:10.5px;padding:2px 8px;border-radius:20px;
+        background:var(--sup2);border:1px solid var(--line);}
+  .vacio{color:var(--soft);font-family:var(--mono);font-size:12px;padding:8px 0;}
+  .kv{font-family:var(--mono);font-size:12px;white-space:pre-wrap;color:var(--soft);
+      background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:14px;
+      max-height:280px;overflow:auto;}
 </style>
 </head>
 <body>
-<a class="salta" href="#trabajo">Saltar al contenido</a>
 
-<div class="marco">
-  <header>
-    <div class="titulo">
-      <h1>Panel del estudio</h1>
-      <span class="meta" id="metaCabecera">cargando…</span>
-    </div>
-
-    <div class="modos" role="group" aria-label="Modo de operación">
-      <button type="button" id="mGratis" aria-pressed="true">
-        <span class="n">Modo gratis</span>
-        <span class="p">reglas deterministas · $0 · 0 tokens</span>
-      </button>
-      <button type="button" id="mPago" class="pago" aria-pressed="false">
-        <span class="n">Modo con IA</span>
-        <span class="p">criterio UX/UI · costo estimado antes</span>
-      </button>
-    </div>
-  </header>
-
-  <div class="cols" id="trabajo">
-    <!-- ── Columna de control ── -->
-    <div>
-      <div class="tarj">
-        <h2>Revisar calidad</h2>
-        <label for="objetivo">Qué revisar</label>
-        <select id="objetivo"></select>
-
-        <div id="zonaModelo" class="oculto">
-          <label for="modelo">Modelo</label>
-          <select id="modelo"></select>
-        </div>
-
-        <div id="avisoCosto" class="costo gratis">
-          <b>$0</b> · sin red, sin tokens<br>
-          Contraste, XSS, RLS, tokens muertos, alt.
-        </div>
-
-        <button class="btn" id="btnRevisar">Revisar</button>
-        <button class="btn sec oculto" id="btnConfirmar">Sí, ejecutar y gastar</button>
-      </div>
-
-      <div class="tarj">
-        <h2>Proyecto nuevo</h2>
-        <label for="cliente">Cliente</label>
-        <input type="text" id="cliente" placeholder="Café Raíz">
-        <label for="base">Base técnica</label>
-        <select id="base"></select>
-        <label for="primario">Color primario</label>
-        <input type="color" id="primario" value="#2F54FF">
-        <label for="inicial">Inicial del logo</label>
-        <input type="text" id="inicial" maxlength="2" placeholder="C">
-        <button class="btn" id="btnCrear">Crear proyecto · $0</button>
-      </div>
-    </div>
-
-    <!-- ── Columna de resultados ── -->
-    <div class="tarj">
-      <h2 id="tituloSalida">Resultados</h2>
-      <div id="salida"></div>
-    </div>
+<!-- ══════════ ACCESO ══════════ -->
+<div id="acceso">
+  <div class="caja">
+    <h1 id="accTit">Panel del estudio</h1>
+    <p class="sub" id="accSub">cargando…</p>
+    <form id="accForm">
+      <label for="frase" id="accLbl">Frase de acceso</label>
+      <input type="password" id="frase" autocomplete="current-password" required>
+      <div id="accErr" class="err oculto" style="margin-top:12px"></div>
+      <button class="btn full" style="margin-top:16px" id="accBtn">Entrar</button>
+    </form>
+    <p class="nota">
+      <b>Qué protege:</b> que alguien que se siente en este computador, o esté en
+      tu misma red, abra el panel, cree proyectos o gaste tu saldo de API.<br><br>
+      <b>Qué no protege:</b> los archivos. Quien tenga acceso al disco los lee
+      igual. Esto es la puerta del panel, no cifrado del sistema.
+    </p>
   </div>
 </div>
 
-<script>
-const $ = (s) => document.querySelector(s);
-let MODO = 'gratis';
-let ESTADO = null;
-let ULTIMA_ESTIMACION = null;
+<!-- ══════════ APLICACIÓN ══════════ -->
+<div id="app" class="oculto">
+  <nav>
+    <div class="marca"><b>Estudio</b><span id="navMeta">—</span></div>
+    <button data-v="inicio"    aria-current="page">Inicio</button>
+    <button data-v="asistente">Cliente nuevo</button>
+    <button data-v="clientes">Proyectos</button>
+    <button data-v="calidad">Control de calidad</button>
+    <button data-v="salir" class="fin">Cerrar sesión</button>
+  </nav>
 
+  <main>
+    <!-- ── INICIO ── -->
+    <section id="v-inicio">
+      <h2 class="tit">Inicio</h2>
+      <p class="des">La fábrica del estudio. Todo tiene dos modos y tú eliges cuál usar en cada operación.</p>
+      <div class="dosc">
+        <div class="tarj">
+          <h3>Modo gratis</h3>
+          <p style="margin:0 0 12px;font-size:13px">Reglas deterministas. Sin red, sin tokens, <b>$0 siempre</b>.</p>
+          <p style="margin:0;font-size:12.5px;color:var(--soft)">Contraste WCAG · XSS por innerHTML · RLS faltante ·
+             tokens muertos · secretos en código · alt y foco.</p>
+        </div>
+        <div class="tarj">
+          <h3>Modo con IA</h3>
+          <p style="margin:0 0 12px;font-size:13px">Solo lo que una regla no puede ver. <b>Costo estimado antes</b> de gastar.</p>
+          <p style="margin:0;font-size:12.5px;color:var(--soft)">Jerarquía visual · copy genérico · fricción · coherencia.
+             Auditar las 9 bases: ~$0.05 con Haiku.</p>
+        </div>
+      </div>
+      <div class="tarj">
+        <h3>Resumen</h3>
+        <div id="resumenInicio" class="vacio">cargando…</div>
+      </div>
+    </section>
+
+    <!-- ── ASISTENTE ── -->
+    <section id="v-asistente" class="oculto">
+      <h2 class="tit">Cliente nuevo</h2>
+      <p class="des">Las preguntas salen de tu <code>brief-de-cliente.md</code>. Cada respuesta va a un campo
+         de la ficha, y la compuerta final es tu <code>validador-de-ficha.md</code>.</p>
+
+      <!-- fase 1: origen -->
+      <div id="fase-origen">
+        <div class="tarj">
+          <h3>¿De dónde salen los datos?</h3>
+          <label class="c" for="doc">Pega aquí el brief del cliente</label>
+          <textarea id="doc" placeholder="El WhatsApp, el correo o el documento que te mandó el cliente. Tal cual, sin ordenar."></textarea>
+
+          <div class="modos" style="margin-top:16px">
+            <button type="button" id="exGratis" aria-pressed="true">
+              <span class="n">Leer gratis</span><span class="p">patrones · $0</span>
+            </button>
+            <button type="button" id="exIA" class="pg" aria-pressed="false">
+              <span class="n">Leer con IA</span><span class="p">texto libre · ~$0.002</span>
+            </button>
+          </div>
+
+          <div class="fila">
+            <button class="btn" id="btnExtraer">Leer documento</button>
+            <button class="btn sec" id="btnBlanco">Empezar en blanco</button>
+          </div>
+          <div id="exSalida" style="margin-top:14px"></div>
+        </div>
+      </div>
+
+      <!-- fase 2: preguntas -->
+      <div id="fase-pasos" class="oculto">
+        <div class="barra" id="barra"></div>
+        <div class="tarj">
+          <div class="pasoNum" id="pasoNum">—</div>
+          <h3 id="pasoTit" style="font-size:15px;text-transform:none;letter-spacing:0;color:var(--ink)">—</h3>
+          <div id="pasoNota"></div>
+          <div id="pasoCampos"></div>
+          <div class="fila">
+            <button class="btn sec" id="btnAtras">Atrás</button>
+            <button class="btn" id="btnSig">Siguiente</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- fase 3: revisión -->
+      <div id="fase-fin" class="oculto">
+        <div class="tarj">
+          <h3>Compuerta de calidad</h3>
+          <div id="compuerta"></div>
+        </div>
+        <div class="tarj">
+          <h3>Ficha que se va a generar</h3>
+          <div id="fichaPrev" class="kv"></div>
+          <div class="fila">
+            <button class="btn sec" id="btnVolverPasos">Volver a las preguntas</button>
+            <button class="btn" id="btnConstruir">Construir proyecto · $0</button>
+          </div>
+        </div>
+        <div id="finSalida"></div>
+      </div>
+    </section>
+
+    <!-- ── CLIENTES ── -->
+    <section id="v-clientes" class="oculto">
+      <h2 class="tit">Proyectos</h2>
+      <p class="des">Cada carpeta en <code>Proyectos-Clientes/</code>.</p>
+      <div class="tarj"><div id="tablaClientes" class="vacio">cargando…</div></div>
+    </section>
+
+    <!-- ── CALIDAD ── -->
+    <section id="v-calidad" class="oculto">
+      <h2 class="tit">Control de calidad</h2>
+      <p class="des">Nada corre solo. El modo con IA muestra el costo y espera tu confirmación.</p>
+
+      <div class="modos">
+        <button type="button" id="mGratis" aria-pressed="true">
+          <span class="n">Modo gratis</span><span class="p">deterministas · $0 · 0 tokens</span>
+        </button>
+        <button type="button" id="mPago" class="pg" aria-pressed="false">
+          <span class="n">Modo con IA</span><span class="p">criterio UX/UI · costo antes</span>
+        </button>
+      </div>
+
+      <div class="dosc">
+        <div class="tarj">
+          <h3>Qué revisar</h3>
+          <label class="c" for="objetivo">Objetivo</label>
+          <select id="objetivo"></select>
+          <div id="zonaModelo" class="oculto">
+            <label class="c" for="modelo">Modelo</label>
+            <select id="modelo"></select>
+          </div>
+          <div id="avisoCosto" class="costo"><b>$0</b> · sin red, sin tokens</div>
+          <div class="fila">
+            <button class="btn" id="btnRevisar">Revisar</button>
+            <button class="btn sec oculto" id="btnConfirmar">Sí, ejecutar y gastar</button>
+          </div>
+        </div>
+        <div class="tarj">
+          <h3>Resultados</h3>
+          <div id="salida" class="vacio">Elige un modo y pulsa revisar.</div>
+        </div>
+      </div>
+    </section>
+  </main>
+</div>
+
+<script>
+'use strict';
+const $ = (s) => document.querySelector(s);
 const esc = (v) => String(v ?? '').replace(/[&<>"']/g,
   (c) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 
-async function pedir(ruta, cuerpo) {
-  const opciones = cuerpo
+async function api(ruta, cuerpo) {
+  const r = await fetch(ruta, cuerpo
     ? { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(cuerpo) }
-    : {};
-  const r = await fetch(ruta, opciones);
+    : {});
+  if (r.status === 401 && !ruta.startsWith('/api/acceso')) { location.reload(); return {}; }
   return r.json();
 }
 
-// ── Arranque ──────────────────────────────────────────────────
-async function iniciar() {
-  ESTADO = await pedir('/api/estado');
+let ESTADO = null, PASOS = [], RESPUESTAS = {}, iPaso = 0;
+let MODO = 'gratis', MODO_EX = 'gratis';
 
-  $('#objetivo').innerHTML = ESTADO.objetivos
-    .map((o) => `<option value="${esc(o.ruta)}">${esc(o.etiqueta)}</option>`).join('');
-  $('#base').innerHTML = ESTADO.bases
-    .map((b) => `<option value="${esc(b)}">${esc(b)}</option>`).join('');
-  $('#modelo').innerHTML = ESTADO.modelos
-    .map((m) => `<option value="${esc(m.clave)}"${m.clave===ESTADO.modeloPorDefecto?' selected':''}>${esc(m.etiqueta)}</option>`).join('');
+/* ══════════ ACCESO ══════════ */
+async function iniciarAcceso() {
+  const a = await api('/api/acceso/estado');
+  if (a.autenticado || !a.configurado && false) return arrancarApp();
 
-  $('#metaCabecera').textContent =
-    ESTADO.bases.length + ' bases · ' + ESTADO.proyectos.length + ' proyectos'
-    + (ESTADO.tieneClave ? ' · API conectada' : ' · sin API key');
+  if (!a.configurado) {
+    $('#accTit').textContent = 'Primera vez';
+    $('#accSub').textContent = 'define una frase de acceso · mínimo 8 caracteres';
+    $('#accLbl').textContent = 'Frase de acceso nueva';
+    $('#frase').autocomplete = 'new-password';
+    $('#accBtn').textContent = 'Configurar y entrar';
+    $('#accForm').dataset.modo = 'configurar';
+  } else {
+    $('#accSub').textContent = 'acceso local · sesión de 12 horas';
+    $('#accForm').dataset.modo = 'entrar';
+  }
+  $('#acceso').classList.remove('oculto');
 }
 
-// ── Conmutador de modo ────────────────────────────────────────
-function ponerModo(nuevo) {
-  MODO = nuevo;
-  ULTIMA_ESTIMACION = null;
-  $('#mGratis').setAttribute('aria-pressed', String(nuevo === 'gratis'));
-  $('#mPago').setAttribute('aria-pressed', String(nuevo === 'ia'));
-  $('#zonaModelo').classList.toggle('oculto', nuevo === 'gratis');
+$('#accForm').onsubmit = async (e) => {
+  e.preventDefault();
+  const frase = $('#frase').value;
+  const modo = $('#accForm').dataset.modo;
+  $('#accErr').classList.add('oculto');
+
+  if (modo === 'configurar') {
+    const r = await api('/api/acceso/configurar', { frase });
+    if (!r.ok) return mostrarErrAcceso(r.error);
+  }
+  const r = await api('/api/acceso/entrar', { frase });
+  if (!r.ok) return mostrarErrAcceso(r.error);
+  $('#acceso').classList.add('oculto');
+  arrancarApp();
+};
+
+function mostrarErrAcceso(msg) {
+  $('#accErr').textContent = msg || 'No se pudo entrar.';
+  $('#accErr').classList.remove('oculto');
+}
+
+/* ══════════ ARRANQUE ══════════ */
+async function arrancarApp() {
+  $('#acceso').classList.add('oculto');
+  $('#app').classList.remove('oculto');
+
+  ESTADO = await api('/api/estado');
+  PASOS = (await api('/api/brief')).pasos;
+
+  $('#navMeta').textContent = ESTADO.bases.length + ' bases · ' + ESTADO.proyectos.length + ' proyectos';
+  $('#objetivo').innerHTML = ESTADO.objetivos
+    .map((o) => '<option value="' + esc(o.ruta) + '">' + esc(o.etiqueta) + '</option>').join('');
+  $('#modelo').innerHTML = ESTADO.modelos
+    .map((m) => '<option value="' + esc(m.clave) + '"' + (m.clave===ESTADO.modeloPorDefecto?' selected':'') + '>' + esc(m.etiqueta) + '</option>').join('');
+
+  pintarInicio(); pintarClientes();
+}
+
+function pintarInicio() {
+  $('#resumenInicio').className = '';
+  $('#resumenInicio').innerHTML =
+    '<div class="resumen" style="border:0;margin:0;padding:0">'
+    + '<span>' + ESTADO.bases.length + ' bases técnicas</span>'
+    + '<span>' + ESTADO.proyectos.length + ' proyectos de cliente</span>'
+    + '<span style="color:' + (ESTADO.tieneClave ? 'var(--jade)' : 'var(--soft)') + '">'
+    + (ESTADO.tieneClave ? 'API conectada' : 'sin API key · modo gratis disponible') + '</span></div>';
+}
+
+function pintarClientes() {
+  const c = $('#tablaClientes');
+  if (!ESTADO.proyectos.length) {
+    c.className = 'vacio';
+    c.textContent = 'Todavía no hay proyectos. Empieza en "Cliente nuevo".';
+    return;
+  }
+  c.className = '';
+  c.innerHTML = '<table><thead><tr><th>Proyecto</th><th>Base</th><th>Estado</th><th>Creado</th></tr></thead><tbody>'
+    + ESTADO.proyectos.map((p) => '<tr><td><b>' + esc(p.slug) + '</b></td>'
+      + '<td><span class="chip">' + esc(p.base) + '</span></td>'
+      + '<td>' + esc(p.estado) + '</td>'
+      + '<td style="font-family:var(--mono);font-size:11.5px;color:var(--soft)">' + esc(p.creado || '—') + '</td></tr>').join('')
+    + '</tbody></table>';
+}
+
+/* ══════════ NAVEGACIÓN ══════════ */
+document.querySelectorAll('nav button').forEach((b) => {
+  b.onclick = async () => {
+    const v = b.dataset.v;
+    if (v === 'salir') { await api('/api/acceso/salir', {}); return location.reload(); }
+    document.querySelectorAll('nav button').forEach((x) => x.removeAttribute('aria-current'));
+    b.setAttribute('aria-current', 'page');
+    document.querySelectorAll('main section').forEach((s) => s.classList.add('oculto'));
+    $('#v-' + v).classList.remove('oculto');
+    if (v === 'clientes') { ESTADO = await api('/api/estado'); pintarClientes(); }
+  };
+});
+
+/* ══════════ ASISTENTE ══════════ */
+$('#exGratis').onclick = () => ponerModoEx('gratis');
+$('#exIA').onclick = () => ponerModoEx('ia');
+function ponerModoEx(m) {
+  MODO_EX = m;
+  $('#exGratis').setAttribute('aria-pressed', String(m === 'gratis'));
+  $('#exIA').setAttribute('aria-pressed', String(m === 'ia'));
+}
+
+$('#btnBlanco').onclick = () => { RESPUESTAS = {}; irAPasos(); };
+
+$('#btnExtraer').onclick = async () => {
+  const texto = $('#doc').value.trim();
+  if (!texto) { $('#doc').focus(); return; }
+  $('#btnExtraer').disabled = true;
+  $('#exSalida').innerHTML = '<p class="cargando">Leyendo…</p>';
+
+  const r = await api('/api/extraer', { texto, modo: MODO_EX, modelo: $('#modelo').value });
+  $('#btnExtraer').disabled = false;
+
+  if (r.error) { $('#exSalida').innerHTML = '<div class="err">' + esc(r.error) + '</div>'; return; }
+
+  RESPUESTAS = r.respuestas || {};
+  const n = Object.keys(RESPUESTAS).length;
+  $('#exSalida').innerHTML =
+    '<p class="ok">✔ ' + n + ' campos extraídos · ' + (r.costo ? '$' + r.costo : '$0') + '</p>'
+    + '<div class="kv">' + esc(JSON.stringify(RESPUESTAS, null, 2)) + '</div>'
+    + '<p style="font-size:12px;color:var(--soft);margin-top:10px">'
+    + 'Lo que no estaba en el documento quedó vacío — no se inventó nada. '
+    + 'Revísalo en las preguntas.</p>'
+    + '<div class="fila"><button class="btn" id="btnIrPasos">Revisar las respuestas</button></div>';
+  $('#btnIrPasos').onclick = irAPasos;
+};
+
+function irAPasos() {
+  iPaso = 0;
+  $('#fase-origen').classList.add('oculto');
+  $('#fase-fin').classList.add('oculto');
+  $('#fase-pasos').classList.remove('oculto');
+  pintarPaso();
+}
+
+function pintarPaso() {
+  const p = PASOS[iPaso];
+  $('#barra').innerHTML = PASOS.map((_, i) =>
+    '<i class="' + (i < iPaso ? 'ok' : i === iPaso ? 'on' : '') + '"></i>').join('');
+  $('#pasoNum').textContent = 'Paso ' + (iPaso + 1) + ' de ' + PASOS.length;
+  $('#pasoTit').textContent = p.titulo;
+  $('#pasoNota').innerHTML = p.nota ? '<div class="aviso">' + esc(p.nota) + '</div>' : '';
+
+  $('#pasoCampos').innerHTML = p.preguntas.map((q) => {
+    const v = RESPUESTAS[q.id];
+    let control;
+
+    if (q.tipo === 'opcion') {
+      control = '<div class="ops">' + q.opciones.map((o) =>
+        '<label class="op' + (v === o.valor ? ' sel' : '') + '">'
+        + '<input type="radio" name="' + esc(q.id) + '" value="' + esc(o.valor) + '"'
+        + (v === o.valor ? ' checked' : '') + '>'
+        + '<span>' + esc(o.etiqueta) + '</span></label>').join('') + '</div>';
+    } else if (q.tipo === 'si-no') {
+      control = '<div class="ops">'
+        + [['si','Sí'],['no','No']].map(([val, et]) =>
+          '<label class="op' + ((v === true && val === 'si') || (v === false && val === 'no') || v === val ? ' sel' : '') + '">'
+          + '<input type="radio" name="' + esc(q.id) + '" value="' + val + '"'
+          + (((v === true && val === 'si') || (v === false && val === 'no') || v === val) ? ' checked' : '') + '>'
+          + '<span>' + et + '</span></label>').join('') + '</div>';
+    } else if (q.tipo === 'color') {
+      control = '<input type="color" name="' + esc(q.id) + '" value="' + esc(v || '#2F54FF') + '">';
+    } else {
+      control = '<input type="text" name="' + esc(q.id) + '" value="' + esc(v || '') + '">';
+    }
+
+    return '<label class="c">' + esc(q.pregunta)
+      + (q.clave ? ' <span style="color:var(--arcilla)">*</span>' : '') + '</label>'
+      + control
+      + (q.ayuda ? '<p class="ayuda">' + esc(q.ayuda) + '</p>' : '');
+  }).join('');
+
+  $('#pasoCampos').querySelectorAll('.op input').forEach((i) => {
+    i.onchange = () => {
+      i.closest('.ops').querySelectorAll('.op').forEach((o) => o.classList.remove('sel'));
+      i.closest('.op').classList.add('sel');
+    };
+  });
+
+  $('#btnAtras').textContent = iPaso === 0 ? 'Volver al documento' : 'Atrás';
+  $('#btnSig').textContent = iPaso === PASOS.length - 1 ? 'Revisar' : 'Siguiente';
+}
+
+function guardarPaso() {
+  for (const q of PASOS[iPaso].preguntas) {
+    const el = $('#pasoCampos').querySelector('[name="' + q.id + '"]:checked')
+            || $('#pasoCampos').querySelector('[name="' + q.id + '"]');
+    if (!el) continue;
+    let v = el.value;
+    if (q.tipo === 'si-no') v = (v === 'si');
+    if (v !== '' && v !== undefined) RESPUESTAS[q.id] = v;
+  }
+}
+
+$('#btnAtras').onclick = () => {
+  guardarPaso();
+  if (iPaso === 0) {
+    $('#fase-pasos').classList.add('oculto');
+    $('#fase-origen').classList.remove('oculto');
+  } else { iPaso--; pintarPaso(); }
+};
+
+$('#btnSig').onclick = async () => {
+  guardarPaso();
+  if (iPaso < PASOS.length - 1) { iPaso++; pintarPaso(); return; }
+  await irARevision();
+};
+
+async function irARevision() {
+  const r = await api('/api/ficha', { respuestas: RESPUESTAS });
+  $('#fase-pasos').classList.add('oculto');
+  $('#fase-fin').classList.remove('oculto');
+
+  const v = r.validacion;
+  $('#compuerta').innerHTML = v.listo
+    ? '<p class="ok">✔ Ficha completa. Lista para construir.</p>'
+      + (r.base ? '<p style="font-size:12.5px;color:var(--soft);margin:8px 0 0">Base elegida: <span class="chip">' + esc(r.base) + '</span></p>' : '')
+      + (r.avisos.length ? r.avisos.map((a) => '<div class="aviso">' + esc(a) + '</div>').join('') : '')
+    : '<p style="color:var(--rojo);font-family:var(--mono);font-size:12.5px">'
+      + '✖ Faltan ' + v.faltan.length + ' campos obligatorios. No se construye con datos inventados.</p>'
+      + v.faltan.map((f) => '<div class="h"><span class="pin error"></span><span>' + esc(f.pregunta) + '</span></div>').join('');
+
+  $('#fichaPrev').textContent = JSON.stringify(r.ficha, null, 2);
+  $('#btnConstruir').disabled = !v.listo;
+}
+
+$('#btnVolverPasos').onclick = () => { iPaso = 0; irAPasos(); };
+
+$('#btnConstruir').onclick = async () => {
+  $('#btnConstruir').disabled = true;
+  $('#finSalida').innerHTML = '<p class="cargando">Generando…</p>';
+  const r = await api('/api/crear-desde-brief', { respuestas: RESPUESTAS });
+
+  if (!r.ok) {
+    $('#finSalida').innerHTML = '<div class="err">' + esc(r.error) + '</div>';
+    $('#btnConstruir').disabled = false;
+    return;
+  }
+  $('#finSalida').innerHTML = '<div class="tarj"><h3>Listo</h3>'
+    + '<p class="ok">✔ Proyecto creado · $0</p>'
+    + '<div class="arch"><div class="r">' + esc(r.destino) + '</div>'
+    + r.creados.map((c) => '<div class="h"><span class="pin bajo"></span><span>' + esc(c) + '</span></div>').join('')
+    + '</div></div>';
+  ESTADO = await api('/api/estado');
+  pintarClientes(); pintarInicio();
+};
+
+/* ══════════ CALIDAD ══════════ */
+$('#mGratis').onclick = () => ponerModo('gratis');
+$('#mPago').onclick = () => ponerModo('ia');
+
+function ponerModo(m) {
+  MODO = m;
+  $('#mGratis').setAttribute('aria-pressed', String(m === 'gratis'));
+  $('#mPago').setAttribute('aria-pressed', String(m === 'ia'));
+  $('#zonaModelo').classList.toggle('oculto', m === 'gratis');
   $('#btnConfirmar').classList.add('oculto');
 
-  const aviso = $('#avisoCosto');
-  if (nuevo === 'gratis') {
-    aviso.className = 'costo gratis';
-    aviso.innerHTML = '<b>$0</b> · sin red, sin tokens<br>Contraste, XSS, RLS, tokens muertos, alt.';
+  const a = $('#avisoCosto');
+  if (m === 'gratis') {
+    a.className = 'costo';
+    a.innerHTML = '<b>$0</b> · sin red, sin tokens';
     $('#btnRevisar').textContent = 'Revisar';
   } else {
-    aviso.className = 'costo';
-    aviso.innerHTML = 'Criterio de UX/UI: jerarquía, copy, fricción.<br>'
-      + 'Pulsa <b style="font-size:12px">Estimar</b> para ver el costo sin gastar.';
+    a.className = 'costo pg';
+    a.innerHTML = 'Pulsa <b style="font-size:12px">Estimar</b> para ver el costo sin gastar.';
     $('#btnRevisar').textContent = 'Estimar costo';
   }
 }
 
-$('#mGratis').onclick = () => ponerModo('gratis');
-$('#mPago').onclick = () => ponerModo('ia');
-
-// ── Pintado de resultados ─────────────────────────────────────
-function pintarValidacion(r) {
-  if (!r.hallazgos.length) {
-    $('#salida').innerHTML = '<p class="ok">✔ Sin hallazgos. Listo para entregar.</p>'
-      + '<div class="resumen"><span>' + r.archivos + ' archivos</span><span>$0</span></div>';
-    return;
-  }
-  const porArchivo = {};
-  for (const h of r.hallazgos) (porArchivo[h.ruta] ||= []).push(h);
-
-  const errores = r.hallazgos.filter((h) => h.severidad === 'error').length;
-  const avisos = r.hallazgos.length - errores;
-
-  $('#salida').innerHTML = Object.entries(porArchivo).map(([ruta, hs]) => `
-    <div class="arch">
-      <div class="r">${esc(ruta)}</div>
-      ${hs.sort((a,b)=>a.linea-b.linea).map((h) => `
-        <div class="h">
-          <span class="pin ${esc(h.severidad)}"></span>
-          <span class="pt">${esc(h.linea)}</span>
-          <span class="d">${esc(h.mensaje)}
-            <span class="regla">${esc(h.regla)}</span>
-            ${h.pista ? `<span class="pista">↳ ${esc(h.pista)}</span>` : ''}
-          </span>
-        </div>`).join('')}
-    </div>`).join('')
-    + `<div class="resumen">
-         <span>${r.archivos} archivos</span>
-         <span style="color:var(--rojo)">${errores} errores</span>
-         <span style="color:var(--laton)">${avisos} avisos</span>
-         <span style="color:var(--jade)">$0</span>
-       </div>`;
-}
-
-function pintarAuditoria(r) {
-  $('#salida').innerHTML = r.resultados.map((a) => `
-    <div class="arch">
-      <div class="r">${esc(a.ruta)}</div>
-      ${a.hallazgos.map((h) => `
-        <div class="h">
-          <span class="pin ${esc(h.severidad)}"></span>
-          <span class="pt">${esc(h.linea || '·')}</span>
-          <span class="d">${esc(h.mensaje)}
-            ${h.accion ? `<span class="pista">↳ ${esc(h.accion)}</span>` : ''}
-          </span>
-        </div>`).join('')}
-    </div>`).join('')
-    + `<div class="resumen">
-         <span>${r.resultados.length} archivos</span>
-         <span>${esc(r.modelo)}</span>
-         <span style="color:var(--laton)">costo real $${r.costoReal}</span>
-       </div>`;
-}
-
-// ── Acción principal ──────────────────────────────────────────
 $('#btnRevisar').onclick = async () => {
   const ruta = $('#objetivo').value;
-  const btn = $('#btnRevisar');
-  btn.disabled = true;
+  $('#btnRevisar').disabled = true;
+  $('#salida').className = '';
   $('#salida').innerHTML = '<p class="cargando">Trabajando…</p>';
 
-  try {
-    if (MODO === 'gratis') {
-      pintarValidacion(await pedir('/api/validar', { ruta }));
-    } else {
-      const est = await pedir('/api/estimar', { ruta, modelo: $('#modelo').value });
-      ULTIMA_ESTIMACION = est;
-      $('#avisoCosto').innerHTML =
-        `<b>$${est.usd.toFixed(4)} USD</b> <span style="opacity:.7">(~$${est.cop.toLocaleString()} COP)</span><br>`
-        + `${est.archivos} archivos · ~${est.tokensEntrada.toLocaleString()} tokens de entrada`;
-      $('#btnConfirmar').classList.remove('oculto');
-      $('#salida').innerHTML =
-        '<p class="cargando">Estimación lista. Todavía no se ha gastado nada.<br>'
-        + 'Confirma abajo si quieres ejecutar.</p>';
-    }
-  } catch (e) {
-    $('#salida').innerHTML = '<div class="err">' + esc(e.message) + '</div>';
+  if (MODO === 'gratis') {
+    pintarValidacion(await api('/api/validar', { ruta }));
+  } else {
+    const e = await api('/api/estimar', { ruta, modelo: $('#modelo').value });
+    $('#avisoCosto').innerHTML = '<b>$' + e.usd.toFixed(4) + ' USD</b> '
+      + '<span style="opacity:.75">(~$' + e.cop.toLocaleString() + ' COP)</span><br>'
+      + e.archivos + ' archivos · ~' + e.tokensEntrada.toLocaleString() + ' tokens';
+    $('#btnConfirmar').classList.remove('oculto');
+    $('#salida').innerHTML = '<p class="cargando">Estimación lista. Todavía no se gastó nada.</p>';
   }
-  btn.disabled = false;
+  $('#btnRevisar').disabled = false;
 };
 
 $('#btnConfirmar').onclick = async () => {
-  const btn = $('#btnConfirmar');
-  btn.disabled = true;
+  $('#btnConfirmar').disabled = true;
   $('#salida').innerHTML = '<p class="cargando">Auditando con IA…</p>';
-  try {
-    const r = await pedir('/api/auditar', {
-      ruta: $('#objetivo').value, modelo: $('#modelo').value,
-    });
-    if (r.error) $('#salida').innerHTML = '<div class="err">' + esc(r.error) + '</div>';
-    else { pintarAuditoria(r); $('#btnConfirmar').classList.add('oculto'); }
-  } catch (e) {
-    $('#salida').innerHTML = '<div class="err">' + esc(e.message) + '</div>';
+  const r = await api('/api/auditar', { ruta: $('#objetivo').value, modelo: $('#modelo').value });
+  if (r.error) $('#salida').innerHTML = '<div class="err">' + esc(r.error) + '</div>';
+  else {
+    $('#salida').innerHTML = r.resultados.map((a) =>
+      '<div class="arch"><div class="r">' + esc(a.ruta) + '</div>'
+      + a.hallazgos.map((h) => '<div class="h"><span class="pin ' + esc(h.severidad) + '"></span>'
+        + '<span class="pt">' + esc(h.linea || '·') + '</span><span>' + esc(h.mensaje)
+        + (h.accion ? '<span class="pista">↳ ' + esc(h.accion) + '</span>' : '') + '</span></div>').join('')
+      + '</div>').join('')
+      + '<div class="resumen"><span>' + esc(r.modelo) + '</span>'
+      + '<span style="color:var(--laton)">costo real $' + r.costoReal + '</span></div>';
+    $('#btnConfirmar').classList.add('oculto');
   }
-  btn.disabled = false;
+  $('#btnConfirmar').disabled = false;
 };
 
-// ── Crear proyecto ────────────────────────────────────────────
-$('#btnCrear').onclick = async () => {
-  const cliente = $('#cliente').value.trim();
-  if (!cliente) { $('#cliente').focus(); return; }
-  const btn = $('#btnCrear');
-  btn.disabled = true;
-  $('#salida').innerHTML = '<p class="cargando">Generando…</p>';
-
-  const r = await pedir('/api/crear', {
-    cliente,
-    base: $('#base').value,
-    primario: $('#primario').value,
-    inicial: $('#inicial').value.trim(),
-  });
-
-  if (!r.ok) {
-    $('#salida').innerHTML = '<div class="err">' + esc(r.error) + '</div>';
-  } else {
-    $('#salida').innerHTML =
-      '<p class="ok">✔ Proyecto creado · $0</p>'
-      + '<div class="arch"><div class="r">' + esc(r.destino) + '</div>'
-      + r.creados.map((c) => '<div class="h"><span class="pin bajo"></span>'
-          + '<span class="d">' + esc(c) + '</span></div>').join('')
-      + '</div>'
-      + '<div class="resumen"><span>base ' + esc(r.base) + '</span>'
-      + '<span style="color:var(--jade)">sin tokens</span></div>';
-    ESTADO = await pedir('/api/estado');
-    $('#objetivo').innerHTML = ESTADO.objetivos
-      .map((o) => `<option value="${esc(o.ruta)}">${esc(o.etiqueta)}</option>`).join('');
+function pintarValidacion(r) {
+  const s = $('#salida');
+  if (!r.hallazgos || !r.hallazgos.length) {
+    s.innerHTML = '<p class="ok">✔ Sin hallazgos. Listo para entregar.</p>'
+      + '<div class="resumen"><span>' + r.archivos + ' archivos</span><span style="color:var(--jade)">$0</span></div>';
+    return;
   }
-  btn.disabled = false;
-};
+  const porArch = {};
+  for (const h of r.hallazgos) (porArch[h.ruta] ||= []).push(h);
+  const errores = r.hallazgos.filter((h) => h.severidad === 'error').length;
 
-iniciar();
+  s.innerHTML = Object.entries(porArch).map(([ruta, hs]) =>
+    '<div class="arch"><div class="r">' + esc(ruta) + '</div>'
+    + hs.sort((a, b) => a.linea - b.linea).map((h) =>
+      '<div class="h"><span class="pin ' + esc(h.severidad) + '"></span>'
+      + '<span class="pt">' + esc(h.linea) + '</span><span>' + esc(h.mensaje)
+      + '<span class="etq">' + esc(h.regla) + '</span>'
+      + (h.pista ? '<span class="pista">↳ ' + esc(h.pista) + '</span>' : '') + '</span></div>').join('')
+    + '</div>').join('')
+    + '<div class="resumen"><span>' + r.archivos + ' archivos</span>'
+    + '<span style="color:var(--rojo)">' + errores + ' errores</span>'
+    + '<span style="color:var(--laton)">' + (r.hallazgos.length - errores) + ' avisos</span>'
+    + '<span style="color:var(--jade)">$0</span></div>';
+}
+
+iniciarAcceso();
 </script>
 </body>
 </html>

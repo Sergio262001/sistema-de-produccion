@@ -41,3 +41,7 @@ npm-debug.log*
 Proyectos-Clientes/casa-tela/
 Proyectos-Clientes/clinica-sur/
 Proyectos-Clientes/cafe-raiz/
+
+# Acceso al panel: contiene el hash de la frase y el secreto de sesion
+herramientas/.acceso.json
+Proyectos-Clientes/panaderia-la-espiga/

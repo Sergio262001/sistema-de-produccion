@@ -93,18 +93,52 @@ Medido sobre las 9 bases (~35.500 tokens de entrada):
 El `system` prompt va con `cache_control`, así que auditar varios archivos
 seguidos abarata mucho a partir del segundo.
 
+## Acceso
+
+El panel pide una frase la primera vez y la guarda como hash scrypt con sal
+en `.acceso.json` (ignorado por git). La sesión dura 12 horas.
+
+**Qué protege:** que alguien que se siente en tu computador, o esté en tu misma
+red, abra el panel, cree proyectos o gaste tu saldo de API.
+**Qué no protege:** los archivos — quien tenga acceso al disco los lee igual.
+Es la puerta del panel, no cifrado del sistema.
+
+El servidor solo escucha en `127.0.0.1`.
+
+## Asistente de cliente nuevo
+
+Tres fases:
+
+1. **Cargar el documento** — pegas el WhatsApp o correo del cliente tal cual.
+   Modo gratis: extrae por patrones (nombre, teléfono, colores, dominio,
+   pasarela, multisede). Modo IA: Claude lee texto libre, ~$0.002.
+   Lo que no está en el documento **queda vacío** — nunca se inventa.
+2. **Las 8 preguntas** — son tu `brief-de-cliente.md`, y cada respuesta va
+   al campo de ficha que ese archivo ya indicaba.
+3. **La compuerta** — es tu `validador-de-ficha.md`, ejecutable. Si falta un
+   campo obligatorio, el botón de construir queda deshabilitado.
+
+Reglas que aplica solo: multisede o datos personales fuerzan `linea: pro`;
+una pasarela distinta de WhatsApp avisa que la cuenta la crea el cliente.
+
+Probado con un WhatsApp real desordenado: extrajo 12 campos, eligió
+`ecommerce-completo`, derivó `linea: pro` por las 3 sedes, y pasó la compuerta.
+
 ## Estructura
 
 ```
 herramientas/
-├─ panel.js / panel.html   la interfaz con el conmutador de modo
+├─ panel.js / panel.html   interfaz: acceso, asistente, clientes, calidad
 ├─ validar.js              modo gratis · control de calidad
 ├─ crear-proyecto.js       modo gratis · generador
 ├─ auditor-ia.js           modo con costo · criterio UX/UI
 └─ lib/
    ├─ colores.js           contraste WCAG
    ├─ yaml.js              lector/escritor de fichas
-   └─ reglas.js            las reglas del validador
+   ├─ reglas.js            las reglas del validador
+   ├─ brief.js             el cuestionario y la compuerta de ficha
+   ├─ extraer.js           documento → respuestas (gratis o IA)
+   └─ acceso.js            frase de acceso y sesión firmada
 ```
 
 ## Añadir una regla
