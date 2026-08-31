@@ -43,16 +43,42 @@ export const PASOS = [
     titulo: 'Qué necesita',
     nota: 'Esto decide la base técnica. Es la pregunta que más define el proyecto.',
     preguntas: [
+      // El valor ES el identificador de la base: así el formulario del cliente
+      // y el asistente del panel hablan el mismo idioma, sin traducción.
+      // `familia` agrupa igual que 01-documentos/1-catalogo-de-servicios.html.
       { id: 'objetivo', campo: '_objetivo', tipo: 'opcion', clave: true,
-        pregunta: '¿Qué quiere que la web haga?',
+        pregunta: '¿Qué servicio necesita?',
         opciones: [
-          { valor: 'vender',  etiqueta: 'Vender productos en línea',       base: 'ecommerce-completo' },
-          { valor: 'carrito', etiqueta: 'Catálogo con carrito, sin panel',  base: 'carrito-reutilizable' },
-          { valor: 'contacto',etiqueta: 'Que le escriban o pidan cita',     base: 'landing-modular' },
-          { valor: 'menu',    etiqueta: 'Mostrar su carta o menú',          base: 'menu-con-panel-admin' },
-          { valor: 'clientes',etiqueta: 'Llevar clientes e historial',      base: 'crm-simple' },
-          { valor: 'multi',   etiqueta: 'Varios vendedores con comisión',   base: 'marketplace' },
-          { valor: 'planes',  etiqueta: 'Cobrar planes o suscripciones',    base: 'suscripciones' },
+          { valor: 'ecommerce-completo',   etiqueta: 'Tienda online',
+            detalle: 'Catálogo con inventario, carrito y panel de administración.',
+            familia: 'vender', linea: 'Pro',     base: 'ecommerce-completo' },
+          { valor: 'carrito-reutilizable', etiqueta: 'Carrito y pedidos',
+            detalle: 'Catálogo con carrito y checkout, sin panel.',
+            familia: 'vender', linea: 'Starter', base: 'carrito-reutilizable' },
+          { valor: 'marketplace',          etiqueta: 'Marketplace',
+            detalle: 'Varios vendedores con desglose de comisión.',
+            familia: 'vender', linea: 'Pro',     base: 'marketplace' },
+          { valor: 'suscripciones',        etiqueta: 'Suscripciones',
+            detalle: 'Planes o membresías con registro de suscriptores.',
+            familia: 'vender', linea: 'Pro',     base: 'suscripciones' },
+
+          { valor: 'landing-modular',      etiqueta: 'Landing page',
+            detalle: 'Presentación por secciones con formulario de contacto.',
+            familia: 'web', linea: 'Starter',    base: 'landing-modular' },
+
+          { valor: 'menu-con-panel-admin', etiqueta: 'Menú digital QR',
+            detalle: 'La carta en el celular, con panel para editarla.',
+            familia: 'menu', linea: 'Starter',   base: 'menu-con-panel-admin' },
+
+          { valor: 'crm-simple',           etiqueta: 'CRM simple',
+            detalle: 'Clientes e historial de interacciones.',
+            familia: 'panel', linea: 'Pro',      base: 'crm-simple' },
+          { valor: 'auth',                 etiqueta: 'Login y roles',
+            detalle: 'Acceso para el equipo con permisos por persona.',
+            familia: 'panel', linea: 'Starter',  base: 'auth' },
+          { valor: 'dashboard-analytics',  etiqueta: 'Panel de indicadores',
+            detalle: 'Ventas, pedidos y contactos en un solo tablero.',
+            familia: 'panel', linea: 'Pro',      base: 'dashboard-analytics' },
         ] },
       { id: 'autoedita', campo: '_autoedita', tipo: 'si-no',
         pregunta: '¿El cliente quiere editar precios y contenido él mismo?',
@@ -186,6 +212,14 @@ function ponerEnRuta(obj, ruta, valor) {
  * aplicando las implicaciones (varias sedes → pro, datos sensibles → pro…).
  * Devuelve { ficha, base, avisos }.
  */
+/** Las cuatro familias del catálogo de servicios, con su acento. */
+export const FAMILIAS = [
+  { id: 'vender', nombre: 'Ecommerce & Ventas', nota: 'línea principal' },
+  { id: 'web',    nombre: 'Web & Landing' },
+  { id: 'menu',   nombre: 'Menús digitales' },
+  { id: 'panel',  nombre: 'Paneles, Auth & Datos' },
+];
+
 /** Las 9 bases de 02-bases/. El formulario manda el identificador directo. */
 export const BASES_CONOCIDAS = [
   'menu-con-panel-admin', 'carrito-reutilizable', 'landing-modular', 'auth',

@@ -18,7 +18,7 @@ import { fileURLToPath } from 'node:url';
 import { validar } from './validar.js';
 import { crearProyecto, listarBases } from './crear-proyecto.js';
 import { MODELOS, MODELO_POR_DEFECTO, estimarCosto, auditar } from './auditor-ia.js';
-import { PASOS, respuestasAFicha, validarFicha } from './lib/brief.js';
+import { PASOS, FAMILIAS, respuestasAFicha, validarFicha } from './lib/brief.js';
 import { extraerPorPatrones, extraerConIA } from './lib/extraer.js';
 import { crearAcceso, leerCookie } from './lib/acceso.js';
 import { configurarGoogle, urlDeEntrada, canjearCodigo } from './lib/google.js';
@@ -257,7 +257,7 @@ const servidor = createServer(async (req, res) => {
     }
 
     // ─ El cuestionario
-    if (ruta === '/api/brief') return json(res, 200, { pasos: PASOS });
+    if (ruta === '/api/brief') return json(res, 200, { pasos: PASOS, familias: FAMILIAS });
 
     // ─ Prompts maestros
     if (ruta === '/api/prompts') {

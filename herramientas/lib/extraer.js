@@ -116,7 +116,13 @@ export function extraerPorPatrones(texto) {
     const puntos = cand.claves.filter((c) => n.includes(normalizar(c))).length;
     if (puntos > mejorPuntos) { mejor = cand; mejorPuntos = puntos; }
   }
-  if (mejor) { respuestas.objetivo = mejor.objetivo; encontrado.push('qué necesita (' + mejor.base + ')'); }
+  // El valor de `objetivo` ES el identificador de la base: es lo mismo que
+  // manda el formulario del cliente, para que ambos caminos coincidan.
+  if (mejor) {
+    respuestas.objetivo = mejor.base;
+    respuestas.base ??= mejor.base;
+    encontrado.push('qué necesita (' + mejor.base + ')');
+  }
 
   // ─ Pasarela de pago
   if (/wompi/i.test(t)) { respuestas.pagos = 'wompi'; encontrado.push('pasarela'); }
