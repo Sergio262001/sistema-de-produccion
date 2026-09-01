@@ -24,8 +24,13 @@ export function reglaXss({ ruta, lineas }) {
     if (/innerHTML\s*\+?=\s*seguro`/.test(l)) return;
     // ¿toda interpolación pasa por un escapador?
     const interpolaciones = l.match(/\$\{[^}]*\}/g) || [];
+    // `medio()` es un constructor que devuelve marcado YA escapado: escapa la
+    // URL con urlSegura y el nombre y el emoji con esc(). Si algún día se le
+    // mete una interpolación sin escapar, es ahí donde hay que arreglarlo —
+    // no aquí. Cualquier función nueva que se sume a esta lista tiene que
+    // cumplir lo mismo: escapar todo lo que interpola, sin excepciones.
     const sucias = interpolaciones.filter(
-      (x) => !/\b(esc|escapeHtml|seguro|encodeURI|Number|parseInt|parseFloat)\s*\(/.test(x)
+      (x) => !/\b(esc|escapeHtml|seguro|medio|encodeURI|Number|parseInt|parseFloat)\s*\(/.test(x)
              && !/^\$\{\s*[\d'"` ]/.test(x)
     );
     if (sucias.length) {

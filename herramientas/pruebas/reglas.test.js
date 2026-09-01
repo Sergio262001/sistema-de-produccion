@@ -205,3 +205,8 @@ test('id-fantasma · conservar el id oculto es solución válida', () => {
 test('id-fantasma · no aplica a fragmentos sin body', () => {
   assert.equal(reglaIdFantasma(doc('document.getElementById("x").y')).length, 0);
 });
+
+test('xss · medio() construye marcado ya escapado y no se marca', () => {
+  // medio() escapa la URL con urlSegura y el nombre/emoji con esc().
+  assert.equal(reglaXss(doc('el.innerHTML = `${medio(p)}<div>x</div>`;')).length, 0);
+});

@@ -18,7 +18,8 @@ create table if not exists items (
   nombre       text not null,
   descripcion  text,
   precio       int  not null default 0,
-  emoji        text,
+  emoji        text,               -- respaldo cuando no hay foto
+  imagen        text,               -- URL de la foto (Supabase Storage o CDN)
   disponible   boolean default true,
   badge        text,
   orden        int default 0

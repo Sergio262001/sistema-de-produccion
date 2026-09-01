@@ -1,4 +1,4 @@
-# Cafe Prueba
+# Cafe Muestra
 
 Generado desde la base `menu-con-panel-admin` el 2026-09-01.
 

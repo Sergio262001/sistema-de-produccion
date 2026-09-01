@@ -1,8 +1,8 @@
 # Ficha de contexto — generada por herramientas/crear-proyecto.js
 # Sin secretos: los valores reales van en .env
 
-proyecto: Cafe Prueba
-cliente: Cafe Prueba
+proyecto: Cafe Muestra
+cliente: Cafe Muestra
 linea: starter
 base: menu-con-panel-admin
 base_de_datos:

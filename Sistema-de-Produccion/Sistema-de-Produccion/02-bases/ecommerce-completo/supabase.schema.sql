@@ -20,7 +20,8 @@ create table if not exists productos (
   nombre       text not null,
   descripcion  text,
   precio       int  not null default 0,
-  emoji        text,
+  emoji        text,                 -- respaldo cuando no hay foto
+  imagen       text,                 -- URL de la foto (Supabase Storage o CDN)
   stock        int  not null default 0,
   badge        text,
   orden        int  default 0

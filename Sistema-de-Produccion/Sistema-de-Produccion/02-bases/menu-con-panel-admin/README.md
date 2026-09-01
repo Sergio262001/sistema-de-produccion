@@ -67,3 +67,29 @@ Abre `demo.html` en el navegador. Trae el motor **local** activo: puedes ver
 la carta como cliente, y entrar al **panel admin** te pide iniciar sesión
 (usa `admin@caferaiz.co` / `admin123`). En la demo los cambios y el login
 viven en memoria; con Supabase/Firebase se guardan y autentican de verdad.
+
+## Fotos de los items
+
+Cada plato tiene dos campos de imagen y se usan en este orden:
+
+| Campo | Qué es |
+|---|---|
+| `imagen` | URL de la foto real. **Es lo que vende.** |
+| `emoji` | Respaldo cuando todavía no hay foto |
+
+Si `imagen` está vacía se dibuja el emoji en un recuadro. Sirve para
+arrancar, pero **no se entrega así**: nadie compra viendo un emoji.
+
+### Dónde subir las fotos
+
+Lo natural es **Supabase Storage**: crea un bucket público (ej. `fotos`),
+sube las imágenes y pega la URL pública en el campo `imagen` desde el panel.
+También sirve cualquier URL `https://` — el sistema solo acepta `http(s)` y
+rutas del propio sitio; un `javascript:` o un `data:` se descartan.
+
+### Qué pedirle al cliente
+
+- Fotos **horizontales**, mínimo 800 px de ancho.
+- Comprimidas: por encima de ~300 KB cada una, la página se siente lenta.
+- Una por plato. Si faltan, se entrega con el emoji y **queda anotado como
+  pendiente** — no se rellena con fotos de banco.

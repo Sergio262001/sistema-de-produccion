@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Cafe Prueba</title>
+<title>Cafe Muestra</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -47,7 +47,11 @@
   .catblock .cdesc{color:var(--ink-soft);font-size:13.5px;margin-bottom:16px;}
   .item{display:flex;gap:16px;padding:16px 0;border-bottom:1px solid var(--line);align-items:flex-start;}
   .item:last-child{border-bottom:none;}
-  .thumb{width:64px;height:64px;border-radius:13px;flex:none;display:grid;place-items:center;font-size:28px;background:linear-gradient(135deg,#fff,var(--line));border:1px solid var(--line);}
+  /* La foto vende el plato. 96px y proporcion cuadrada: se ve de verdad,
+     y object-fit evita que salga deformada. */
+  .thumb{width:96px;height:96px;border-radius:13px;flex:none;object-fit:cover;display:block;border:1px solid var(--line);background:var(--bg);}
+  .thumb.sinfoto{display:grid;place-items:center;font-size:38px;background:linear-gradient(135deg,#fff,var(--line));}
+  @media(max-width:520px){.thumb{width:76px;height:76px;}.thumb.sinfoto{font-size:30px;}}
   .item .info{flex:1;min-width:0;}
   .item .nm{font-weight:600;font-size:16px;display:flex;align-items:center;gap:8px;}
   .badge{font-size:10px;font-family:'JetBrains Mono',monospace;text-transform:uppercase;letter-spacing:.04em;padding:2px 7px;border-radius:5px;background:#FBF0DC;color:#A9701A;font-weight:500;}
@@ -278,6 +282,22 @@ function esc(v){
   return String(v).replace(/&/g,"&amp;").replace(/</g,"&lt;")
     .replace(/>/g,"&gt;").replace(/\"/g,"&quot;").replace(/'/g,"&#39;");
 }
+/* Solo http(s) y rutas propias: bloquea javascript: y data: en un src. */
+function urlSegura(v){
+  const s=String(v||"").trim();
+  if(!s) return "";
+  if(/^https?:///i.test(s) || s.startsWith("/") || s.startsWith("./")) return s;
+  return "";
+}
+/* Foto del plato, con el emoji como respaldo. Una carta se vende con
+   fotos: el emoji es el plan B, no el plan A. El alt lleva el nombre
+   real del plato — es lo que se lee si la foto no carga. */
+function medio(it, clase="thumb"){
+  const src=urlSegura(it.imagen);
+  return src
+    ? `<img class="${clase}" src="${esc(src)}" alt="${esc(it.nombre||"")}" loading="lazy" decoding="async">`
+    : `<div class="${clase} sinfoto" role="img" aria-label="${esc(it.nombre||"")}">${esc(it.emoji||"🍽️")}</div>`;
+}
 
 /* ====================================================================
    5) VISTA CLIENTE
@@ -300,7 +320,7 @@ function renderMenu(){
       const row=document.createElement('div');
       row.className='item'+(it.disp?'':' off');
       row.innerHTML=`
-        <div class="thumb">${esc(it.emoji||'🍽️')}</div>
+        ${medio(it)}
         <div class="info">
           <div class="nm">${esc(it.nombre)} ${it.badge?'<span class="badge">'+esc(it.badge)+'</span>':''}</div>
           <div class="ds">${esc(it.desc||'')}</div>
