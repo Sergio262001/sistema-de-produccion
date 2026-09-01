@@ -11,7 +11,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import {
   reglaXss, reglaTokensMuertos, reglaAlt,
-  reglaContraste, reglaTeclado, reglaRls, reglaSecretos,
+  reglaContraste, reglaTeclado, reglaRls, reglaSecretos, reglaIdFantasma,
 } from '../lib/reglas.js';
 
 /** Envuelve un texto como lo recibe una regla */
@@ -170,4 +170,38 @@ test('secreto · un comentario que menciona la clave no es una fuga', () => {
 
 test('secreto · la anon key es pública por diseño y no se marca', () => {
   assert.equal(reglaSecretos(doc('const k = "sb_publishable_abc123";', 'x.js')).length, 0);
+});
+
+// ══════════ ID FANTASMA — el bug que entregó una página en blanco ══════════
+
+test('id-fantasma · getElementById encadenado sobre un id inexistente es ERROR', () => {
+  const html = '<body><script>document.getElementById("noExiste").textContent = "x";</script></body>';
+  const h = reglaIdFantasma(doc(html));
+  assert.equal(h.length, 1);
+  assert.equal(h[0].severidad, 'error',
+    'encadenar sobre null tumba todo el JavaScript posterior');
+  assert.match(h[0].mensaje, /noExiste/);
+});
+
+test('id-fantasma · sin encadenar es solo aviso', () => {
+  const html = '<body><script>const el = document.getElementById("quizas");</script></body>';
+  const h = reglaIdFantasma(doc(html));
+  assert.equal(h.length, 1);
+  assert.equal(h[0].severidad, 'aviso');
+});
+
+test('id-fantasma · un id que sí existe no se marca', () => {
+  const html = '<body><div id="app"></div><script>document.getElementById("app").textContent="x";</script></body>';
+  assert.equal(reglaIdFantasma(doc(html)).length, 0);
+});
+
+test('id-fantasma · conservar el id oculto es solución válida', () => {
+  // Es exactamente lo que hace crear-proyecto al quitar la barra de sistema
+  const html = '<body><div hidden><span id="sysClient"></span></div>'
+    + '<script>document.getElementById("sysClient").textContent="x";</script></body>';
+  assert.equal(reglaIdFantasma(doc(html)).length, 0);
+});
+
+test('id-fantasma · no aplica a fragmentos sin body', () => {
+  assert.equal(reglaIdFantasma(doc('document.getElementById("x").y')).length, 0);
 });

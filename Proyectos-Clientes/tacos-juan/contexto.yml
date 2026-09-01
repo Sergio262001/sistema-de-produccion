@@ -1,0 +1,37 @@
+# Ficha de contexto — generada por herramientas/crear-proyecto.js
+# Sin secretos: los valores reales van en .env
+
+proyecto: tacos juan
+cliente: tacos juan
+linea: pro
+base: menu-con-panel-admin
+base_de_datos:
+  motor: supabase
+  necesita_auth: true
+  tablas: [categorias, items]
+  acceso: rls_por_rol
+apis:
+  mensajeria: whatsapp
+  whatsapp_num: POR DEFINIR
+  pagos: wompi
+  analitica: ga4
+auth:
+  motor: supabase
+  rol_requerido: admin
+env: [SUPABASE_URL, SUPABASE_ANON_KEY, GA4_ID]
+marca:
+  inicial: T
+  primario: "#0ee132"
+  secundario: "#f11e28"
+  acento: "#C2703D"
+  display: Fraunces
+  body: Inter
+  subtitulo: taqueria comida mexicana
+  tono: tacos
+entrega:
+  dominio: POR DEFINIR
+  hosting: vercel
+  moneda: $
+  idiomas: [es]
+  estado: en construccion
+  creado: "2026-09-01"

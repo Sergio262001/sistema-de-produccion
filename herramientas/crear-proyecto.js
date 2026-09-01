@@ -65,8 +65,29 @@ function leerArgs(argv) {
 export function adaptarEntregable(html, marca, proyecto) {
   let out = html;
 
-  // 1 · Quitar la sysbar: el marcado Y su CSS (andamiaje de demo, no va al cliente)
-  out = out.replace(/<div class="sysbar"[\s\S]*?<\/div>\s*<\/div>/i, '');
+  // 1 · Quitar la sysbar (andamiaje de demo, no va al cliente).
+  //
+  // OJO — esto rompió una entrega: el script de las bases hace
+  // `document.getElementById('sysClient').textContent = ...`, y ese id vivía
+  // DENTRO de la sysbar. Al borrarla, getElementById devuelve null, la línea
+  // lanza TypeError y TODO el JavaScript posterior deja de ejecutarse: la
+  // página muestra el encabezado (HTML fijo) y nada más.
+  //
+  // Por eso no basta con borrar: hay que conservar los id como elementos
+  // ocultos, para que cualquier referencia siga resolviendo. Sirve para las
+  // 9 bases sin conocer el marcado de ninguna.
+  const bloque = out.match(/<div class="sysbar"[\s\S]*?<\/div>\s*<\/div>/i);
+  let sustituto = '';
+  if (bloque) {
+    const ids = [...bloque[0].matchAll(/\sid="([^"]+)"/g)].map((m) => m[1]);
+    if (ids.length) {
+      sustituto = '\n<!-- Elementos de la barra de sistema del demo. Se conservan\n'
+        + '     ocultos porque el script los referencia; sin ellos el JS falla\n'
+        + '     y la página se queda en blanco. -->\n'
+        + '<div hidden>' + ids.map((i) => '<span id="' + i + '"></span>').join('') + '</div>\n';
+    }
+    out = out.replace(bloque[0], sustituto);
+  }
   out = out.replace(/<!--\s*sysbar[\s\S]*?-->/gi, '');
   // reglas CSS huérfanas: .sysbar..., .toggle...
   out = out.replace(/^\s*\.(sysbar|toggle)\b[^\n]*\{[^}]*\}\s*$/gim, '');

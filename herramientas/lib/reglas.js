@@ -193,6 +193,38 @@ export function reglaSecretos({ ruta, lineas }) {
   return out;
 }
 
+// ── 8 · getElementById a un id que no existe ──────────────────
+//
+// Existe por un bug real y caro: al quitar la barra de sistema del demo, los
+// id que vivían dentro desaparecieron, pero el script seguía pidiéndolos.
+// `getElementById` devolvió null, la línea lanzó TypeError y TODO el
+// JavaScript posterior dejó de correr. La página se entregó mostrando solo el
+// encabezado. Nada en el HTML se veía roto: el daño era invisible al leerlo.
+export function reglaIdFantasma({ ruta, texto, lineas }) {
+  if (!/<body/i.test(texto)) return [];   // solo páginas completas
+  const out = [];
+
+  const declarados = new Set(
+    [...texto.matchAll(/\sid\s*=\s*["']([^"']+)["']/g)].map((m) => m[1])
+  );
+
+  lineas.forEach((l, i) => {
+    if (/^\s*(\/\/|\*|\/\*)/.test(l)) return;            // comentarios no
+    for (const m of l.matchAll(/getElementById\(\s*['"]([^'"]+)['"]\s*\)/g)) {
+      const id = m[1];
+      if (declarados.has(id)) continue;
+      // Encadenar sobre null (.textContent, .classList…) tumba el script entero
+      const encadena = new RegExp('getElementById\\(\\s*[\'"]' + id + '[\'"]\\s*\\)\\s*\\.').test(l);
+      out.push(hallazgo(ruta, i + 1, encadena ? 'error' : 'aviso', 'id-fantasma',
+        'getElementById("' + id + '") pero ese id no existe en la página',
+        encadena
+          ? 'Devuelve null y la línea lanza TypeError: todo el JavaScript de ahí en adelante deja de ejecutarse.'
+          : 'Devuelve null. Comprueba antes de usarlo.'));
+    }
+  });
+  return out;
+}
+
 // ── Registro ──────────────────────────────────────────────────
 export const REGLAS = [
   { id: 'xss',          fn: reglaXss,          extensiones: ['.html', '.js'] },
@@ -202,4 +234,5 @@ export const REGLAS = [
   { id: 'teclado',      fn: reglaTeclado,      extensiones: ['.html'] },
   { id: 'rls',          fn: reglaRls,          extensiones: ['.sql'] },
   { id: 'secreto',      fn: reglaSecretos,     extensiones: ['.html', '.js', '.yml', '.sql'] },
+  { id: 'id-fantasma',  fn: reglaIdFantasma,   extensiones: ['.html'] },
 ];
