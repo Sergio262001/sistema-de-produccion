@@ -168,15 +168,15 @@
    1) CONTEXTO  — esto vendría de tu ficha contexto.proyecto.yml
    ==================================================================== */
 const CONTEXT = {
-  cliente: "Café Raíz",
+  cliente: "tacos mauricio",
   linea: "starter",
   marca: {
-    primario:"#1F6B4A", secundario:"#F3ECE0", acento:"#C2703D",
+    primario:"#2f54ff", secundario:"#f5f7fb", acento:"#C2703D",
     display:"'Fraunces',serif", body:"'Inter',sans-serif",
-    inicial:"R", subtitulo:"Cafetería de especialidad • Bogotá"
+    inicial:"t", subtitulo:"tacos"
   },
   base_de_datos:{ motor:"supabase" },     // firebase | supabase | local
-  apis:{ mensajeria:"whatsapp", whatsapp_num:"573001234567", pagos:"wompi" },
+  apis:{ mensajeria:"whatsapp", whatsapp_num:"573666778839", pagos:"whatsapp" },
   auth:{ motor:"local", rol_requerido:"admin" },   // firebase | supabase | local — base: auth
   moneda:"$"
 };
@@ -286,7 +286,7 @@ function esc(v){
 function urlSegura(v){
   const s=String(v||"").trim();
   if(!s) return "";
-  if(/^https?:///i.test(s) || s.startsWith("/") || s.startsWith("./")) return s;
+  if(/^https?:\/\//i.test(s) || s.startsWith("/") || s.startsWith("./")) return s;
   return "";
 }
 /* Foto del plato, con el emoji como respaldo. Una carta se vende con

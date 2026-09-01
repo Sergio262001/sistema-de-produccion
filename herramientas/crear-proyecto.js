@@ -62,7 +62,54 @@ function leerArgs(argv) {
  * el conmutador de adaptador) que es andamiaje de la fábrica, no del
  * entregable. Esto la quita y aplica los tokens de marca del cliente.
  */
-export function adaptarEntregable(html, marca, proyecto) {
+/**
+ * Reemplaza los valores del objeto CONTEXT que vive dentro del <script>.
+ * Solo toca los campos que la ficha realmente define — lo que no venga se
+ * queda como estaba, para no dejar el entregable a medias.
+ *
+ * Trabaja campo por campo y no sustituyendo el objeto entero: cada base
+ * tiene su propio CONTEXT con claves distintas, y reescribirlo completo
+ * borraría las que esa base necesita.
+ */
+export function ponerEnContexto(html, marca = {}, cliente = '', ficha = {}) {
+  let out = html;
+  const cita = (v) => JSON.stringify(String(v));
+
+  // Solo dentro del bloque CONTEXT, para no tocar datos de ejemplo del menú.
+  const i = out.indexOf('const CONTEXT');
+  if (i === -1) return out;
+  const fin = out.indexOf('\n};', i);
+  if (fin === -1) return out;
+
+  let bloque = out.slice(i, fin + 3);
+
+  const campo = (clave, valor) => {
+    if (valor === undefined || valor === null || valor === '' || valor === 'POR DEFINIR') return;
+    bloque = bloque.replace(
+      new RegExp('(\\b' + clave + '\\s*:\\s*)"[^"]*"'),
+      '$1' + cita(valor)
+    );
+  };
+
+  if (cliente) campo('cliente', cliente);
+  campo('linea',      ficha.linea);
+  campo('primario',   marca.primario);
+  campo('secundario', marca.secundario);
+  campo('acento',     marca.acento);
+  campo('inicial',    marca.inicial);
+  campo('subtitulo',  marca.subtitulo);
+
+  // Lo operativo: si esto se queda con los valores del ejemplo, el botón de
+  // WhatsApp del cliente escribe al número de otro negocio.
+  campo('motor',        ficha.base_de_datos?.motor);
+  campo('whatsapp_num', ficha.apis?.whatsapp_num);
+  campo('pagos',        ficha.apis?.pagos);
+  campo('mensajeria',   ficha.apis?.mensajeria);
+
+  return out.slice(0, i) + bloque + out.slice(fin + 3);
+}
+
+export function adaptarEntregable(html, marca, proyecto, fichaCompleta = {}) {
   let out = html;
 
   // 1 · Quitar la sysbar (andamiaje de demo, no va al cliente).
@@ -116,6 +163,15 @@ export function adaptarEntregable(html, marca, proyecto) {
 
   // 3 · Título e inicial del logo
   out = out.replace(/<title>[\s\S]*?<\/title>/i, '<title>' + proyecto + '</title>');
+
+  // 3b · EL CONTEXT DEL SCRIPT.
+  //
+  // Sin esto el entregable se veía con el nombre y el menú del ejemplo de la
+  // base: se generaba "tacos mauricio" y la página decía "Café Raíz". Los
+  // reemplazos de arriba son cosméticos (título, logo, tokens CSS); pero
+  // applyTheme() lee el objeto CONTEXT del script y lo sobreescribe todo al
+  // arrancar. Si el CONTEXT no cambia, el cliente no cambia.
+  out = ponerEnContexto(out, marca, proyecto, fichaCompleta);
   if (marca.inicial) {
     out = out.replace(/(<div class="logo"[^>]*>)[^<]*(<\/div>)/i, '$1' + marca.inicial + '$2');
   }
@@ -322,7 +378,7 @@ export function crearProyecto(opciones) {
   // 4 · entregable adaptado
   const rutaDemo = join(dirBase, 'demo.html');
   if (existsSync(rutaDemo)) {
-    const html = adaptarEntregable(readFileSync(rutaDemo, 'utf8'), ficha.marca || {}, cliente);
+    const html = adaptarEntregable(readFileSync(rutaDemo, 'utf8'), ficha.marca || {}, cliente, ficha);
     writeFileSync(join(dirSalida, 'index.html'), html, 'utf8');
     creados.push('index.html');
   }

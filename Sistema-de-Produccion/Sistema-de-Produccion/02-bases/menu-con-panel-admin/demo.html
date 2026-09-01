@@ -302,7 +302,7 @@ function esc(v){
 function urlSegura(v){
   const s=String(v||"").trim();
   if(!s) return "";
-  if(/^https?:///i.test(s) || s.startsWith("/") || s.startsWith("./")) return s;
+  if(/^https?:\/\//i.test(s) || s.startsWith("/") || s.startsWith("./")) return s;
   return "";
 }
 /* Foto del plato, con el emoji como respaldo. Una carta se vende con

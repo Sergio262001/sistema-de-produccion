@@ -10,7 +10,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import {
   aSlug, listarBases, construirFicha,
-  adaptarEntregable, dependenciasDe, packageJson, envDelProyecto,
+  adaptarEntregable, dependenciasDe, packageJson, envDelProyecto, ponerEnContexto,
 } from '../crear-proyecto.js';
 
 // ══════════ SLUG ══════════
@@ -143,4 +143,55 @@ test('un WhatsApp sin definir no se cuela como si fuera real', () => {
   const env = envDelProyecto({ apis: { whatsapp_num: 'POR DEFINIR' } });
   assert.ok(!/WHATSAPP_NUM=POR DEFINIR/.test(env),
     'un marcador de posición no debe quedar como valor');
+});
+
+// ══════════ EL CONTEXT DEL ENTREGABLE ══════════
+// Se entregó una página que decía "Café Raíz" para un cliente llamado
+// "tacos mauricio": los reemplazos eran cosméticos y applyTheme() leía
+// el CONTEXT del ejemplo y lo sobreescribía todo al arrancar.
+
+const demoCtx = [
+  '<script>',
+  'const CONTEXT = {',
+  '  cliente: "Café Raíz",',
+  '  linea: "starter",',
+  '  marca: { primario:"#1F6B4A", inicial:"R", subtitulo:"Cafetería · Bogotá" },',
+  '  base_de_datos:{ motor:"local" },',
+  '  apis:{ whatsapp_num:"573001234567", pagos:"wompi" },',
+  '};',
+  '</script>',
+].join('\n');
+
+test('el CONTEXT toma el cliente y la marca reales', () => {
+  const out = ponerEnContexto(demoCtx,
+    { primario: '#2f54ff', inicial: 't', subtitulo: 'tacos' }, 'tacos mauricio');
+  assert.match(out, /cliente: "tacos mauricio"/);
+  assert.match(out, /primario:"#2f54ff"/);
+  assert.match(out, /inicial:"t"/);
+  assert.ok(!out.includes('Café Raíz'), 'no puede quedar el nombre del ejemplo');
+});
+
+test('el WhatsApp del entregable es el del cliente, no el del ejemplo', () => {
+  const out = ponerEnContexto(demoCtx, {}, 'X',
+    { apis: { whatsapp_num: '573666778839', pagos: 'whatsapp' } });
+  assert.match(out, /whatsapp_num:"573666778839"/,
+    'si no, el botón escribe al número de otro negocio');
+  assert.match(out, /pagos:"whatsapp"/);
+});
+
+test('lo que la ficha no define se queda como estaba', () => {
+  const out = ponerEnContexto(demoCtx, { primario: '#000' }, 'X');
+  assert.match(out, /subtitulo:"Cafetería · Bogotá"/,
+    'mejor el valor del ejemplo que un hueco');
+});
+
+test('un POR DEFINIR no se escribe en el entregable', () => {
+  const out = ponerEnContexto(demoCtx, { inicial: 'POR DEFINIR' }, 'X');
+  assert.ok(!out.includes('"POR DEFINIR"'), 'eso es una nota interna, no un valor');
+  assert.match(out, /inicial:"R"/);
+});
+
+test('sin bloque CONTEXT devuelve el html intacto', () => {
+  const html = '<html><body>hola</body></html>';
+  assert.equal(ponerEnContexto(html, { primario: '#000' }, 'X'), html);
 });

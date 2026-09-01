@@ -230,6 +230,40 @@ export function reglaIdFantasma({ ruta, texto, lineas }) {
   return out;
 }
 
+// ── 9 · El JavaScript de la página tiene que compilar ─────────
+//
+// La regla más importante del archivo, y la última en existir. Un error de
+// sintaxis mata el script ENTERO: la página carga, se ve el encabezado, y
+// no hay catálogo, ni carrito, ni panel. Nada en el HTML delata el problema.
+//
+// Existe porque pasó: al inyectar una función en una base, el shell se comió
+// dos barras invertidas y `/^https?:\/\//i` quedó como `/^https?:///i`. Eso
+// abre un comentario, deja un `if(` sin cerrar, y se entregó así.
+export function reglaSintaxis({ ruta, texto }) {
+  if (!/<script/i.test(texto)) return [];
+  const out = [];
+
+  // Solo los <script> propios: los que traen src viven en otro archivo.
+  const bloques = [...texto.matchAll(/<script(?![^>]*\bsrc=)[^>]*>([\s\S]*?)<\/script>/gi)];
+
+  for (const b of bloques) {
+    const codigo = b[1];
+    if (!codigo.trim()) continue;
+    const lineaInicio = texto.slice(0, b.index).split('\n').length;
+
+    try {
+      // Compilar sin ejecutar: `new Function` lanza si la sintaxis está mal.
+      // eslint-disable-next-line no-new-func
+      new Function(codigo);
+    } catch (e) {
+      out.push(hallazgo(ruta, lineaInicio, 'error', 'sintaxis',
+        'El JavaScript no compila: ' + e.message,
+        'Un error de sintaxis mata el script entero — la página se entrega en blanco.'));
+    }
+  }
+  return out;
+}
+
 // ── Registro ──────────────────────────────────────────────────
 export const REGLAS = [
   { id: 'xss',          fn: reglaXss,          extensiones: ['.html', '.js'] },
@@ -240,4 +274,5 @@ export const REGLAS = [
   { id: 'rls',          fn: reglaRls,          extensiones: ['.sql'] },
   { id: 'secreto',      fn: reglaSecretos,     extensiones: ['.html', '.js', '.yml', '.sql'] },
   { id: 'id-fantasma',  fn: reglaIdFantasma,   extensiones: ['.html'] },
+  { id: 'sintaxis',     fn: reglaSintaxis,     extensiones: ['.html'] },
 ];
