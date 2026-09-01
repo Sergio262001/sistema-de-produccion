@@ -17,6 +17,7 @@ import { readFileSync, writeFileSync, readdirSync, mkdirSync, existsSync, statSy
 import { join, resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { leerYaml, escribirYaml } from './lib/yaml.js';
+import { ponerContenido } from './lib/contenido.js';
 
 const AQUI = fileURLToPath(new URL('.', import.meta.url));
 const RAIZ = resolve(AQUI, '..');
@@ -172,8 +173,56 @@ export function adaptarEntregable(html, marca, proyecto, fichaCompleta = {}) {
   // applyTheme() lee el objeto CONTEXT del script y lo sobreescribe todo al
   // arrancar. Si el CONTEXT no cambia, el cliente no cambia.
   out = ponerEnContexto(out, marca, proyecto, fichaCompleta);
+
+  // 3c · EL CATÁLOGO REAL.
+  // Si el cliente escribió sus categorías y productos, reemplazan a los del
+  // ejemplo. Si no, se quedan los del ejemplo a propósito: un catálogo vacío
+  // se ve roto, y unos datos que se ven claramente de ejemplo dicen la verdad
+  // sobre lo que falta.
+  if (fichaCompleta._catalogo && fichaCompleta._catalogo.length) {
+    out = ponerContenido(out, fichaCompleta._catalogo, fichaCompleta.base);
+  }
   if (marca.inicial) {
     out = out.replace(/(<div class="logo"[^>]*>)[^<]*(<\/div>)/i, '$1' + marca.inicial + '$2');
+  }
+
+  // 3d · El texto ESTÁTICO de los elementos de identidad.
+  //
+  // applyTheme() los sobreescribe al arrancar, así que en condiciones normales
+  // da igual lo que digan. Pero si el script falla, lo que queda a la vista es
+  // exactamente esto — y así fue como se entregó una página que decía el
+  // nombre del negocio del ejemplo. Vale la pena que hasta el estado roto
+  // muestre el cliente correcto.
+  const escapar = (s) => String(s).replace(/[&<>]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]));
+  const estatico = { bizName: proyecto, biz: proyecto, logoBox: marca.inicial, logo: marca.inicial };
+  for (const [id, valor] of Object.entries(estatico)) {
+    if (!valor) continue;
+    out = out.replace(
+      new RegExp('(<([a-z0-9]+)[^>]*\\bid="' + id + '"[^>]*>)[^<]*(</\\2>)', 'i'),
+      '$1' + escapar(valor) + '$3'
+    );
+  }
+  if (marca.subtitulo && marca.subtitulo !== 'POR DEFINIR') {
+    // El subtítulo lleva marcado dentro (un <span> para el separador), así que
+    // aquí no sirve [^<]*: hay que consumir hasta el cierre de la etiqueta.
+    out = out.replace(
+      /(<([a-z0-9]+)[^>]*\bid="bizSub"[^>]*>)[\s\S]*?(<\/\2>)/i,
+      '$1' + escapar(marca.subtitulo) + '$3'
+    );
+  }
+
+  // 3e · El correo de demo del panel.
+  //
+  // Las bases traen un usuario de prueba (admin@caferaiz.co) que se IMPRIME
+  // en la pantalla de login. Dejarlo así pone el negocio de otro delante del
+  // cliente. Se cambia al dominio del proyecto.
+  //
+  // Ojo: esto NO arregla el fondo. Sigue siendo una contraseña escrita en el
+  // código, visible para cualquiera. Solo sirve mientras el proyecto usa el
+  // login local; antes de publicar hay que pasar a Supabase Auth.
+  const slug = aSlug(proyecto);
+  if (slug) {
+    out = out.replace(/\badmin@[a-z0-9.-]+\b/gi, 'admin@' + slug + '.local');
   }
 
   return out;
@@ -378,7 +427,11 @@ export function crearProyecto(opciones) {
   // 4 · entregable adaptado
   const rutaDemo = join(dirBase, 'demo.html');
   if (existsSync(rutaDemo)) {
-    const html = adaptarEntregable(readFileSync(rutaDemo, 'utf8'), ficha.marca || {}, cliente, ficha);
+    // `ficha` es la que se escribe en contexto.yml y NO lleva el catálogo:
+    // sería un bloque enorme dentro de la ficha, y su sitio es el entregable.
+    // Por eso se adjunta aquí, solo para generar el HTML.
+    const paraHtml = { ...ficha, _catalogo: fichaEntrada._catalogo };
+    const html = adaptarEntregable(readFileSync(rutaDemo, 'utf8'), ficha.marca || {}, cliente, paraHtml);
     writeFileSync(join(dirSalida, 'index.html'), html, 'utf8');
     creados.push('index.html');
   }

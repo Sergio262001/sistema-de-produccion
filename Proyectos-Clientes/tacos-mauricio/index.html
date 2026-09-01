@@ -115,8 +115,8 @@
   <div class="mhead">
     <div class="logo" id="logoBox">t</div>
     <div>
-      <h1 id="bizName">Café Raíz</h1>
-      <div class="sub" id="bizSub">Cafetería de especialidad <span class="dot">•</span> Bogotá</div>
+      <h1 id="bizName">tacos mauricio</h1>
+      <div class="sub" id="bizSub">Tacos al carbón · Bogotá</div>
     </div>
   </div>
 
@@ -132,7 +132,7 @@
     <!-- gate de acceso (base: auth) — se pinta si no hay sesión con el rol requerido -->
     <div class="loginbox" id="adminLogin">
       <h2>Acceder al panel</h2>
-      <div class="sub">Inicia sesión para editar la carta.<br>Demo: <b>admin@caferaiz.co</b> / <b>admin123</b></div>
+      <div class="sub">Inicia sesión para editar la carta.<br>Demo: <b>admin@tacos-mauricio.local</b> / <b>admin123</b></div>
       <form id="adminLoginForm">
         <input type="email" name="email" placeholder="correo@ejemplo.com" required>
         <input type="password" name="password" placeholder="Contraseña" required>
@@ -173,7 +173,7 @@ const CONTEXT = {
   marca: {
     primario:"#2f54ff", secundario:"#f5f7fb", acento:"#C2703D",
     display:"'Fraunces',serif", body:"'Inter',sans-serif",
-    inicial:"t", subtitulo:"tacos"
+    inicial:"t", subtitulo:"Tacos al carbón · Bogotá"
   },
   base_de_datos:{ motor:"supabase" },     // firebase | supabase | local
   apis:{ mensajeria:"whatsapp", whatsapp_num:"573666778839", pagos:"whatsapp" },
@@ -185,21 +185,14 @@ const CONTEXT = {
    2) DATOS SEMILLA — en el producto real viven en tu base de datos
    ==================================================================== */
 let DATA = {
-  categorias:[
-    {id:"cafe", nombre:"Café", desc:"Tostado propio, grano de origen", items:[
-      {id:"c1", nombre:"Espresso", desc:"Doble shot, intenso", precio:4500, emoji:"☕", disp:true},
-      {id:"c2", nombre:"Latte de la casa", desc:"Leche texturizada, arte latte", precio:8500, emoji:"🥛", disp:true, badge:"top"},
-      {id:"c3", nombre:"Cold brew", desc:"Extracción en frío 18h", precio:9000, emoji:"🧊", disp:true},
+  categorias: [
+    { id:"tacos", nombre:"Tacos", desc:"", items:[
+      { id:"al-pastor", nombre:"Al pastor", desc:"Piña, cilantro y cebolla", precio:12000, disp:true },
+      { id:"carnitas", nombre:"Carnitas", desc:"", precio:11500, disp:true }
     ]},
-    {id:"brunch", nombre:"Brunch", desc:"Hasta las 2 de la tarde", items:[
-      {id:"b1", nombre:"Huevos benedictinos", desc:"Pan de masa madre, holandesa", precio:18500, emoji:"🍳", disp:true, badge:"top"},
-      {id:"b2", nombre:"Avo toast", desc:"Aguacate, tomate, sésamo", precio:15000, emoji:"🥑", disp:true},
-      {id:"b3", nombre:"Pancakes", desc:"Miel de maple, frutos rojos", precio:16000, emoji:"🥞", disp:false},
-    ]},
-    {id:"postres", nombre:"Postres", desc:"Hechos en casa", items:[
-      {id:"p1", nombre:"Cheesecake", desc:"Frutos del bosque", precio:11000, emoji:"🍰", disp:true},
-      {id:"p2", nombre:"Brownie", desc:"Chocolate 70%, nuez", precio:9500, emoji:"🍫", disp:true},
-    ]},
+    { id:"bebidas", nombre:"Bebidas", desc:"", items:[
+      { id:"agua-de-horchata", nombre:"Agua de horchata", desc:"", precio:6000, disp:true }
+    ]}
   ]
 };
 
@@ -226,7 +219,7 @@ const db = adapters[ adapters[CONTEXT.base_de_datos.motor] ? CONTEXT.base_de_dat
    CONTEXT.auth.motor, se usa supabaseAuth o firebaseAuth sin tocar
    el resto del panel.
    ==================================================================== */
-const ADMIN_USERS = [{ email:'admin@caferaiz.co', password:'admin123', rol:'admin', nombre:'Dueño' }];
+const ADMIN_USERS = [{ email:'admin@tacos-mauricio.local', password:'admin123', rol:'admin', nombre:'Dueño' }];
 let authUser = null;
 const localAuth = {
   async login(email,password){

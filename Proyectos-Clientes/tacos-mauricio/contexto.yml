@@ -26,13 +26,12 @@ marca:
   acento: "#C2703D"
   display: Fraunces
   body: Inter
-  subtitulo: tacos
-  tono: cercano
+  subtitulo: Tacos al carbón · Bogotá
+  tono: POR DEFINIR
 entrega:
   dominio: por comprar
   hosting: vercel
   moneda: $
   idiomas: [es]
-  soporte: plan_mensual
   estado: en construccion
   creado: "2026-09-01"

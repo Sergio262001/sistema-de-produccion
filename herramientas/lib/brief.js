@@ -120,6 +120,20 @@ export const PASOS = [
       { id: 'fotos', campo: '_fotos', tipo: 'si-no',
         pregunta: '¿Tiene fotos propias?',
         ayuda: 'Si no, se usan genéricas y se anota como pendiente.' },
+
+      // La pregunta que faltaba, y la razón de que todo entregable se viera
+      // "básico": sin esto el catálogo del cliente era el del ejemplo.
+      // Solo aparece en las bases que tienen catálogo.
+      { id: 'catalogo', campo: '_catalogo', tipo: 'larga',
+        pregunta: 'Escribe tus categorías y tus productos',
+        ayuda: 'Una categoría por línea. Debajo sus productos así: '
+             + 'nombre | precio | descripción (la descripción es opcional). '
+             + 'Si no lo tienes a mano, déjalo vacío: se entrega con datos de '
+             + 'ejemplo y queda anotado como pendiente.',
+        ejemplo: 'Tacos\nAl pastor | 12000 | Piña y cilantro\nCarnitas | 11500\n\n'
+               + 'Bebidas\nAgua de horchata | 6000',
+        soloBases: ['menu-con-panel-admin', 'ecommerce-completo',
+                    'carrito-reutilizable', 'marketplace'] },
     ],
   },
   {
@@ -222,6 +236,8 @@ function ponerEnRuta(obj, ruta, valor) {
  * respuesta ausente y una respuesta "no aplica" se trataban igual, y
  * entonces el entregable salía con los datos del negocio del ejemplo.
  */
+import { leerContenido } from './contenido.js';
+
 export const NO_APLICA = '__no_aplica__';
 
 /**
@@ -358,6 +374,22 @@ export function respuestasAFicha(respuestasCrudas) {
   if (['no', 'ninguno', 'nel', 'todavia no', 'todavía no', 'aun no', 'aún no'].includes(dom)) {
     ficha.entrega.dominio = 'por comprar';
     avisos.push('El cliente no tiene dominio: quedó como "por comprar". Es una compra suya, no del estudio.');
+  }
+
+  // El catálogo llega como texto libre; se guarda ya parseado para que el
+  // generador no tenga que volver a interpretarlo.
+  if (respuestas.catalogo && String(respuestas.catalogo).trim()) {
+    const { categorias, avisos: avisosContenido } = leerContenido(respuestas.catalogo);
+    ficha._catalogo = categorias;
+    avisos.push(...avisosContenido);
+    if (categorias.length) {
+      const n = categorias.reduce((t, c) => t + c.productos.length, 0);
+      avisos.push('Contenido real del cliente: ' + categorias.length + ' categorías, '
+        + n + ' productos. Reemplaza al catálogo de ejemplo.');
+    }
+  } else {
+    avisos.push('Sin catálogo del cliente: se entrega con los datos de ejemplo, '
+      + 'que se ven claramente como tales. Pídeselo antes de publicar.');
   }
 
   ficha.proyecto ??= ficha.cliente;
