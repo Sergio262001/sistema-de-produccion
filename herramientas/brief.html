@@ -228,6 +228,10 @@ const esc = (v) => String(v ?? '').replace(/[&<>"']/g,
   (c) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const $ = (s) => document.querySelector(s);
 
+/* Marca de "no aplica". Debe coincidir con NO_APLICA de lib/brief.js:
+   lo marcado asi NO se entrega — no se simula ni se rellena con el ejemplo. */
+const NO_APLICA = "__no_aplica__";
+
 /* ══════════ FAMILIAS Y SERVICIOS ══════════
    Los cuatro grupos son los de 01-documentos/1-catalogo-de-servicios.html.
    `tec` es la base de 02-bases/ que consume crear-proyecto.js. */
