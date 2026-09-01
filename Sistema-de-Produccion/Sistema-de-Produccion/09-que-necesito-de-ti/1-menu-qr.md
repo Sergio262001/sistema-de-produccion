@@ -81,9 +81,14 @@ los toca el dueño. Es el error que más se corrige tarde.
 ```
 Color principal : #______
 Color secundario: #______
-Logo            : ______
+Logo            : archivo SVG o PNG fondo transparente: ______
+Banner          : foto ancha del local (mín. 1600px): ______
 Tono: [ ] cercano  [ ] formal  [ ] tradicional  [ ] moderno
 ```
+
+**Sin logo la cabecera sale con la inicial del local dentro de un cuadro
+de color.** No bloquea la entrega, pero se nota que es una plantilla. Sin
+banner no se pone ninguna imagen: antes que una foto de banco, nada.
 
 ## G. Credenciales
 

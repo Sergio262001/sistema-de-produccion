@@ -92,6 +92,14 @@
 
   .app{max-width:1040px;margin:0 auto;padding:0 20px;}
   .head{display:flex;align-items:center;gap:14px;padding:28px 0 6px;}
+  /* Banner del cliente: ancho completo, alto acotado, recorte centrado.
+     `hidden` gana siempre — sin banner no debe quedar un hueco gris. */
+  .banner{display:block;width:100%;max-height:260px;object-fit:cover;
+    border-radius:14px;margin:24px 0 0;background:var(--bg);}
+  .banner[hidden]{display:none;}
+  /* Con logo real el cuadro de color estorba: se vuelve marco transparente. */
+  .logo.conimg{background:none;box-shadow:none;overflow:hidden;}
+  .logo img{width:100%;height:100%;object-fit:contain;display:block;}
   .logo{width:46px;height:46px;border-radius:12px;background:var(--brand);color:#fff;display:grid;place-items:center;font-family:var(--display);font-weight:700;font-size:22px;}
   .head h1{font-size:26px;}
   .cartbtn{margin-left:auto;position:relative;background:var(--surface);border:1px solid var(--line);border-radius:30px;padding:11px 18px;font-weight:600;font-size:14px;display:flex;align-items:center;gap:9px;color:var(--ink);}
@@ -244,10 +252,18 @@
       <button type="button" data-d="boutique">Boutique</button>
       <button type="button" data-d="taller">Taller</button>
     </div>
+    <span class="tag">marca</span>
+    <div class="toggle marcasw">
+      <button type="button" class="on" onclick="verMarca(false)">Inicial</button>
+      <button type="button" onclick="verMarca(true)">Logo y banner</button>
+    </div>
     <span class="adapter">datos: <b id="sysAdapter">local</b></span>
 </div></div>
 
 <div class="app">
+  <!-- Banner del cliente. Nace oculto: si no hay imagen no deja hueco. -->
+  <img class="banner" id="banner" alt="" hidden>
+
   <div class="head">
     <div class="logo" id="logo">C</div>
     <h1 id="biz">Casa Tela</h1>
@@ -325,7 +341,11 @@ const CONTEXT = {
   cliente: "Casa Tela",
   linea: "pro",
   marca: { primario:"#1B36C9", secundario:"#F5F7FB", inicial:"C",
-           direccion:"taller" },   // mercado | boutique | taller
+           direccion:"taller",     // mercado | boutique | taller
+           // Logo y banner del cliente. Vacíos = se usa la inicial y no hay
+           // banner. Una inicial en un cuadro sirve para la demo; un negocio
+           // que ya tiene logo no se entrega con una letra.
+           logo:"", banner:"" },
   base_de_datos: { motor: "local" },     // firebase | supabase | local
   auth: { motor: "local", rol_requerido: "admin" },
   apis: { pagos: "whatsapp", whatsapp_num: "573098765432" },
@@ -432,6 +452,51 @@ function urlSegura(v){
   if(!s) return '';
   if(/^https?:\/\//i.test(s) || s.startsWith('/') || s.startsWith('./')) return s;
   return '';
+}
+/* ---- LOGO Y BANNER DEL CLIENTE ----
+   La inicial en un cuadro es el respaldo, no el objetivo: si el negocio ya
+   tiene logo, se entrega con su logo. Ambas funciones aguantan que el
+   elemento no exista — borrar un id del marcado y que el script muera con
+   él ya dejó una entrega en blanco. */
+function pintarLogo(el, m, cliente){
+  if(!el) return;
+  const src = urlSegura(m && m.logo);
+  el.textContent = '';
+  if(src){
+    const img = document.createElement('img');
+    img.src = src;
+    img.alt = cliente || '';       /* el logo ES el nombre del negocio */
+    img.decoding = 'async';
+    el.appendChild(img);
+    el.classList.add('conimg');
+  } else {
+    el.classList.remove('conimg');
+    el.textContent = (m && m.inicial) || '';
+  }
+}
+/* @demo-only
+   Conmutador de la sysbar: enseña en vivo la diferencia entre entregar
+   con la inicial y entregar con el logo del cliente. Los marcadores de
+   arriba y abajo se los lleva crear-proyecto.js: al cliente no le llega
+   ni esta función ni los SVG de ejemplo. */
+function verMarca(con){
+  CONTEXT.marca.logo   = con ? './logo-demo.svg'   : '';
+  CONTEXT.marca.banner = con ? './banner-demo.svg' : '';
+  applyTheme();
+  const sw = document.querySelector('.marcasw');
+  if(sw) sw.querySelectorAll('button').forEach((b,n)=>
+    b.classList.toggle('on', n === (con ? 1 : 0)));
+}
+/* @fin-demo */
+function pintarBanner(el, m, cliente){
+  if(!el) return;
+  const src = urlSegura(m && m.banner);
+  if(!src){ el.hidden = true; el.removeAttribute('src'); return; }
+  el.src = src;
+  el.alt = cliente || '';
+  el.loading = 'lazy';
+  el.decoding = 'async';
+  el.hidden = false;
 }
 /* Foto del producto, con el emoji como respaldo.
    Se entrega vendiendo con FOTOS: un emoji no vende una chaqueta.
@@ -567,7 +632,8 @@ function applyTheme(){
   const dir = DIRECCIONES.includes(m.direccion) ? m.direccion : 'taller';
   document.documentElement.setAttribute('data-dir', dir);
 
-  document.getElementById('logo').textContent = m.inicial;
+  pintarLogo(document.getElementById('logo'), m, CONTEXT.cliente);
+  pintarBanner(document.getElementById('banner'), m, CONTEXT.cliente);
   document.getElementById('biz').textContent = CONTEXT.cliente;
   document.getElementById('sysClient').textContent = CONTEXT.cliente;
   document.getElementById('sysAdapter').textContent = CONTEXT.base_de_datos.motor;

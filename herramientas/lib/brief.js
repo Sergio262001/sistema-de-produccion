@@ -99,7 +99,21 @@ export const PASOS = [
       { id: 'secundario', campo: 'marca.secundario', tipo: 'color', clave: true,
         pregunta: 'Color de fondo' },
       { id: 'inicial', campo: 'marca.inicial', tipo: 'texto',
-        pregunta: 'Inicial para el logo', ayuda: 'Una o dos letras.' },
+        pregunta: 'Inicial para el logo',
+        ayuda: 'Una o dos letras. Es el respaldo si no hay archivo de logo.' },
+
+      // El logo y el banner del cliente. Sin esto el entregable sale con una
+      // letra dentro de un cuadro: sirve para una demo, no para un negocio
+      // que ya tiene su marca hecha. Si vienen vacíos, la inicial sigue
+      // funcionando — no se inventa una imagen.
+      { id: 'logo', campo: 'marca.logo', tipo: 'url',
+        pregunta: 'Dirección del logo',
+        ayuda: 'URL de la imagen (https://...). PNG con fondo transparente '
+             + 'o SVG. Si no la tienes a mano, déjalo vacío: se usa la inicial.' },
+      { id: 'banner', campo: 'marca.banner', tipo: 'url',
+        pregunta: 'Dirección del banner',
+        ayuda: 'URL de una foto ancha para la cabecera. Si no hay, no se '
+             + 'muestra ninguna: no se rellena con una imagen de archivo.' },
       { id: 'tono', campo: 'marca.tono', tipo: 'texto',
         pregunta: 'Dos o tres palabras que describan el tono',
         ayuda: 'Ej: "cercano y artesanal", "profesional y serio"' },
@@ -374,6 +388,34 @@ export function respuestasAFicha(respuestasCrudas) {
   if (['no', 'ninguno', 'nel', 'todavia no', 'todavía no', 'aun no', 'aún no'].includes(dom)) {
     ficha.entrega.dominio = 'por comprar';
     avisos.push('El cliente no tiene dominio: quedó como "por comprar". Es una compra suya, no del estudio.');
+  }
+
+  // Logo y banner: misma regla que urlSegura() en las bases, pero aquí el
+  // objetivo es AVISAR, no solo filtrar. Una URL mala que llega al entregable
+  // se ve como un logo roto, y eso es peor que la inicial.
+  for (const [clave, nombre] of [['logo', 'logo'], ['banner', 'banner']]) {
+    const url = String(ficha.marca?.[clave] || '').trim();
+    if (!url) continue;
+    if (!/^(https?:\/\/|\/|\.\/)/i.test(url)) {
+      delete ficha.marca[clave];
+      avisos.push('La dirección del ' + nombre + ' ("' + url + '") no es una URL: '
+        + 'se descarta. Tiene que empezar por https:// — un enlace de Drive o '
+        + 'un archivo del escritorio no sirven, hay que subir la imagen.');
+      continue;
+    }
+    ficha.marca[clave] = url;
+    if (/^http:\/\//i.test(url)) {
+      avisos.push('El ' + nombre + ' está en http sin cifrar: el navegador puede '
+        + 'bloquearlo dentro de un sitio https. Súbelo a https antes de entregar.');
+    }
+    if (/drive\.google\.com|dropbox\.com|\/file\/d\//i.test(url)) {
+      avisos.push('La dirección del ' + nombre + ' parece un enlace para compartir, '
+        + 'no la imagen en sí. Verifica que se vea al abrirla sola en el navegador.');
+    }
+  }
+  if (!ficha.marca?.logo) {
+    avisos.push('Sin archivo de logo: se entrega con la inicial en un cuadro de '
+      + 'color. Es un respaldo digno, pero pídeselo antes de publicar.');
   }
 
   // El catálogo llega como texto libre; se guarda ya parseado para que el

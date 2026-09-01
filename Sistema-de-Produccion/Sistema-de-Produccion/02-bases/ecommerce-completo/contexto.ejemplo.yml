@@ -44,6 +44,11 @@ env:
 
 # ── MARCA (alimenta los tokens de diseño) ───────────────────
 marca:
+  # Logo y banner del cliente. URL completa (https://), ruta del propio
+  # sitio (/img/logo.svg) o vacío. Vacío = se pinta la inicial y no se
+  # muestra banner. No se rellenan con imágenes de archivo.
+  logo:       ""
+  banner:     ""
   inicial:    "C"
   primario:   "#1B36C9"
   secundario: "#F5F7FB"

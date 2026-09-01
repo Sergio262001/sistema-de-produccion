@@ -111,6 +111,24 @@ test('todo campo referido en un paso existe en P', async () => {
   }
 });
 
+test('el paso de marca pide logo y banner', async () => {
+  const { F } = await cargarFormulario();
+  const marca = F.PASOS.find((p) => p.id === 'marca');
+  assert.ok(marca.campos.includes('logo'),
+    'sin esta pregunta el cliente no tiene dónde darnos su logo');
+  assert.ok(marca.campos.includes('banner'));
+  assert.equal(F.P.logo.t, 'url');
+  assert.equal(F.P.banner.t, 'url');
+});
+
+test('un campo de tipo url se dibuja con su vista previa', async () => {
+  const { F } = await cargarFormulario();
+  const html = F.control('logo');
+  assert.match(html, /type="url"/);
+  assert.match(html, /id="prev-logo"/, 'sin la zona de previa no se ve si carga');
+  assert.match(html, /No aplica/, 'el logo no es obligatorio: debe poder no aplicar');
+});
+
 test('todo servicio ofrecido apunta a una base real', async () => {
   const { F } = await cargarFormulario();
   const { listarBases } = await import('../crear-proyecto.js');

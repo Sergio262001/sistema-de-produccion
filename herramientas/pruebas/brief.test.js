@@ -222,3 +222,43 @@ test('sin ningún no-aplica, nada cambia', () => {
   assert.equal(omitidos.length, 0);
   assert.equal(ficha.cliente, 'Casa Tela');
 });
+
+// ══════════ LOGO Y BANNER ══════════
+
+test('el logo y el banner del cliente llegan a la ficha', () => {
+  const { ficha } = respuestasAFicha({ ...completas,
+    logo: 'https://cdn.ej/logo.svg', banner: 'https://cdn.ej/local.jpg' });
+  assert.equal(ficha.marca.logo, 'https://cdn.ej/logo.svg');
+  assert.equal(ficha.marca.banner, 'https://cdn.ej/local.jpg');
+});
+
+test('una direccion que no es URL se descarta y se avisa', () => {
+  const { ficha, avisos } = respuestasAFicha({ ...completas,
+    logo: 'C:\\Users\\ana\\Escritorio\\logo.png' });
+  assert.equal(ficha.marca.logo, undefined,
+    'un archivo del escritorio del cliente no existe en el servidor');
+  assert.ok(avisos.some((a) => a.includes('no es una URL')),
+    'el estudio tiene que enterarse, no descubrirlo en la entrega');
+});
+
+test('sin logo se avisa que se entrega con la inicial', () => {
+  const { avisos } = respuestasAFicha(completas);
+  assert.ok(avisos.some((a) => a.includes('Sin archivo de logo')));
+});
+
+test('un enlace de Drive se acepta pero se marca como sospechoso', () => {
+  const { ficha, avisos } = respuestasAFicha({ ...completas,
+    logo: 'https://drive.google.com/file/d/abc123/view' });
+  assert.equal(ficha.marca.logo, 'https://drive.google.com/file/d/abc123/view');
+  assert.ok(avisos.some((a) => a.includes('enlace para compartir')));
+});
+
+test('un logo en http sin cifrar avisa del bloqueo del navegador', () => {
+  const { avisos } = respuestasAFicha({ ...completas, logo: 'http://ej.co/logo.png' });
+  assert.ok(avisos.some((a) => a.includes('http sin cifrar')));
+});
+
+test('el logo marcado "no aplica" no llega a la ficha', () => {
+  const { ficha } = respuestasAFicha({ ...completas, logo: NO_APLICA });
+  assert.equal(ficha.marca.logo, undefined);
+});

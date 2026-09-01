@@ -191,6 +191,60 @@ test('un POR DEFINIR no se escribe en el entregable', () => {
   assert.match(out, /inicial:"R"/);
 });
 
+// ══════════ LOGO Y BANNER ══════════
+
+const ctxConMarca = [
+  '<script>',
+  'const CONTEXT = {',
+  '  cliente: "Café Raíz",',
+  '  marca: { primario:"#1F6B4A", inicial:"R", logo:"", banner:"" },',
+  '};',
+  '</script>',
+].join('\n');
+
+test('el logo y el banner del cliente llegan al CONTEXT', () => {
+  const out = ponerEnContexto(ctxConMarca,
+    { logo: 'https://cdn.ej/logo.svg', banner: 'https://cdn.ej/local.jpg' }, 'X');
+  assert.match(out, /logo:"https:\/\/cdn\.ej\/logo\.svg"/);
+  assert.match(out, /banner:"https:\/\/cdn\.ej\/local\.jpg"/);
+});
+
+test('sin logo el CONTEXT se queda vacío y manda la inicial', () => {
+  const out = ponerEnContexto(ctxConMarca, { inicial: 'T' }, 'X');
+  assert.match(out, /logo:""/, 'vacío es la señal de "usa la inicial"');
+  assert.match(out, /banner:""/);
+  assert.match(out, /inicial:"T"/);
+});
+
+test('el logo del ejemplo no se hereda al cliente nuevo', () => {
+  const ejemplo = { marca: { primario: '#000', inicial: 'R',
+    logo: 'https://caferaiz.co/logo.svg', banner: 'https://caferaiz.co/local.jpg' } };
+  const ficha = construirFicha(ejemplo,
+    { proyecto: 'Tacos Mauricio', cliente: 'Tacos Mauricio', base: 'menu-con-panel-admin' });
+  assert.equal(ficha.marca.logo, 'POR DEFINIR',
+    'heredarlo pondría la marca de otro negocio en la cabecera del cliente');
+  assert.equal(ficha.marca.banner, 'POR DEFINIR');
+});
+
+test('el andamiaje marcado @demo-only no viaja al cliente', () => {
+  const html = [
+    '<html><body><div class="app"></div>',
+    '<script>',
+    'function util(){ return 1; }',
+    '/* @demo-only  conmutador solo para enseñar */',
+    'function verMarca(c){ CONTEXT.marca.logo = "./logo-demo.svg"; }',
+    '/* @fin-demo */',
+    'function otra(){ return 2; }',
+    '</script></body></html>',
+  ].join('\n');
+  const out = adaptarEntregable(html, {}, 'X');
+  assert.ok(!out.includes('verMarca'),
+    'código muerto que además apunta a un archivo de ejemplo');
+  assert.ok(!out.includes('logo-demo.svg'));
+  assert.ok(out.includes('function util()'), 'lo de fuera del marcador se queda');
+  assert.ok(out.includes('function otra()'));
+});
+
 test('sin bloque CONTEXT devuelve el html intacto', () => {
   const html = '<html><body>hola</body></html>';
   assert.equal(ponerEnContexto(html, { primario: '#000' }, 'X'), html);

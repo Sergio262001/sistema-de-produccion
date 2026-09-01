@@ -115,11 +115,17 @@ Color principal   : #______     (el de su logo)
 Color secundario  : #______
 Tipografía        : ____________  (o "usa la del sistema")
 Logo              : archivo SVG o PNG fondo transparente: ______
+Banner            : foto ancha para la cabecera (mín. 1600px): ______
 Tono: [ ] cercano y relajado  [ ] formal  [ ] técnico  [ ] divertido
 ```
 
 Si solo tienes el logo, mándalo y saco los colores. Si no hay nada,
 salgo con los tokens por defecto y los cambias en un archivo.
+
+**Sin logo la cabecera sale con la inicial del negocio dentro de un
+cuadro de color.** Es un respaldo digno y no bloquea la entrega, pero se
+nota que es una plantilla. Sin banner no se pone ninguna imagen: antes
+que una foto de banco de imágenes, nada.
 
 ## G. Credenciales
 

@@ -100,6 +100,12 @@ export function ponerEnContexto(html, marca = {}, cliente = '', ficha = {}) {
   campo('inicial',    marca.inicial);
   campo('subtitulo',  marca.subtitulo);
 
+  // El logo y el banner del cliente. En las bases nacen vacíos ("") a
+  // propósito: sin ellos se pinta la inicial y no se muestra banner, que es
+  // lo correcto cuando el cliente todavía no ha mandado sus imágenes.
+  campo('logo',   marca.logo);
+  campo('banner', marca.banner);
+
   // Lo operativo: si esto se queda con los valores del ejemplo, el botón de
   // WhatsApp del cliente escribe al número de otro negocio.
   campo('motor',        ficha.base_de_datos?.motor);
@@ -137,6 +143,14 @@ export function adaptarEntregable(html, marca, proyecto, fichaCompleta = {}) {
     out = out.replace(bloque[0], sustituto);
   }
   out = out.replace(/<!--\s*sysbar[\s\S]*?-->/gi, '');
+
+  // 1b · Andamiaje de demo marcado a mano.
+  //
+  // Borrar la sysbar quita los botones, pero deja vivas las funciones que
+  // esos botones llamaban: código muerto que viaja al cliente y encima
+  // apunta a archivos de ejemplo. Lo que va entre @demo-only y @fin-demo
+  // se borra entero.
+  out = out.replace(/\/\*\s*@demo-only[\s\S]*?\/\*\s*@fin-demo\s*\*\//g, '');
   // reglas CSS huérfanas: .sysbar..., .toggle...
   out = out.replace(/^\s*\.(sysbar|toggle)\b[^\n]*\{[^}]*\}\s*$/gim, '');
   // líneas en blanco de más que deja el borrado
@@ -232,7 +246,10 @@ export function adaptarEntregable(html, marca, proyecto, fichaCompleta = {}) {
 // Campos que son IDENTIDAD de otro negocio: heredarlos del ejemplo haría que
 // un cliente nuevo saliera con el subtítulo, el dominio o el WhatsApp de otro.
 // Se marcan como POR DEFINIR para que no puedan colarse hasta la entrega.
-const IDENTIDAD = ['subtitulo', 'tono', 'dominio', 'whatsapp_num', 'inicial'];
+// `logo` y `banner` están aquí por la misma razón: heredar el logo del
+// ejemplo pondría la marca de otro negocio en la cabecera del cliente.
+const IDENTIDAD = ['subtitulo', 'tono', 'dominio', 'whatsapp_num', 'inicial',
+                   'logo', 'banner'];
 
 function limpiarIdentidad(obj = {}, provisto = {}) {
   const out = {};
@@ -559,6 +576,8 @@ if (process.argv[1] && process.argv[1].endsWith('crear-proyecto.js')) {
   }
   if (args.primario) opciones.marca.primario = args.primario;
   if (args.inicial) opciones.marca.inicial = args.inicial;
+  if (args.logo) opciones.marca.logo = args.logo;
+  if (args.banner) opciones.marca.banner = args.banner;
 
   const r = crearProyecto(opciones);
   if (!r.ok) {

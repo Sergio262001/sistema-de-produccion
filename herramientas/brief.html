@@ -130,7 +130,13 @@
   label.q{display:block;font-size:15.5px;font-weight:600;margin-bottom:4px;}
   .req{color:var(--arcilla);font-weight:400;}
   .ay{font-size:13px;color:var(--soft);margin:0 0 10px;max-width:54ch;}
-  input[type=text],input[type=tel],select,textarea{
+  /* Vista previa de logo y banner */
+  .prev{margin-top:10px;}
+  .prev img{max-width:min(100%,320px);max-height:150px;object-fit:contain;
+      display:block;border:1px solid var(--line);border-radius:9px;
+      padding:8px;background:var(--sup);}
+  .prev .mal{font-size:13px;color:var(--rojo);display:block;max-width:54ch;}
+  input[type=text],input[type=tel],input[type=url],select,textarea{
       width:100%;background:var(--sup);border:1px solid var(--line);border-radius:9px;
       padding:12px 14px;font:inherit;color:inherit;transition:border-color .15s;}
   input:hover,textarea:hover{border-color:var(--tenue);}
@@ -284,7 +290,12 @@ const P = {
   primario:  { q:'Color principal', t:'color', req:true, v:'#2F54FF',
                a:'Si no la tienes definida, deja el que viene: la diseñamos contigo.' },
   secundario:{ q:'Color de fondo', t:'color', req:true, v:'#F5F7FB' },
-  inicial:   { q:'Inicial para el logo', t:'texto', a:'Una o dos letras.' },
+  inicial:   { q:'Inicial para el logo', t:'texto',
+               a:'Una o dos letras. Se usa solo si no subes un logo.' },
+  logo:      { q:'¿Tienes el logo en archivo?', t:'url',
+               a:'Pega la dirección de la imagen (empieza por https://). Ideal: PNG con fondo transparente o SVG. Si no lo tienes a mano, deja el campo vacío: usamos tu inicial.' },
+  banner:    { q:'¿Tienes una foto para la cabecera?', t:'url',
+               a:'Una foto ancha de tu local, tu producto o tu equipo. Pega su dirección. Si no hay, no ponemos ninguna: preferimos eso a una foto de banco de imágenes.' },
   tono:      { q:'¿Cómo quieres que se sienta?', t:'texto',
                a:'Dos o tres palabras. Ej: "cercano y artesanal".' },
   whatsapp:  { q:'Número de WhatsApp', t:'tel', a:'Con indicativo. Ej: 573001234567' },
@@ -319,7 +330,7 @@ const PASOS = [
     campos:['cliente','subtitulo','dominio','sedes'] },
   { id:'marca',    t:'Marca',     h:'La marca',
     g:'Si todavía no tienes marca definida, no pasa nada: la diseñamos como parte del proyecto.',
-    campos:['tienemarca','primario','secundario','inicial','tono'] },
+    campos:['tienemarca','logo','banner','primario','secundario','inicial','tono'] },
   { id:'operacion',t:'Operación', h:'Cómo va a operar',
     g:'Cómo recibes pedidos y dónde viven los datos.',
     campos:['whatsapp','pagos','sensibles','motor'] },
@@ -444,6 +455,13 @@ function control(id) {
     const val = v || p.v;
     c = '<div class="colf"><input type="color" name="' + esc(id) + '" value="' + esc(val)
       + '"><span class="hex">' + esc(val) + '</span></div>';
+  } else if (p.t === 'url') {
+    // Vista previa al lado del campo. Una dirección que no carga es el fallo
+    // típico aquí (un enlace de Drive que no es la imagen), y el cliente lo
+    // ve al instante en vez de descubrirlo en la entrega.
+    c = '<input type="url" inputmode="url" placeholder="https://" name="' + esc(id)
+      + '" value="' + esc(v || '') + '" data-prev="' + esc(id) + '">'
+      + '<div class="prev" id="prev-' + esc(id) + '"></div>';
   } else {
     c = '<input type="' + (p.t === 'tel' ? 'tel' : 'text') + '" name="' + esc(id)
       + '" value="' + esc(v || '') + '">';
@@ -477,6 +495,34 @@ function enlazar() {
   });
   $('#campos').querySelectorAll('input[type=color]').forEach((x) => {
     x.oninput = () => { x.nextElementSibling.textContent = x.value; };
+  });
+
+  // Vista previa de logo y banner. Solo http(s): la misma regla que
+  // urlSegura() en las bases — un javascript: o un data: en un src se
+  // ejecuta, y aquí el texto lo escribe alguien de fuera.
+  $('#campos').querySelectorAll('input[data-prev]').forEach((x) => {
+    const zona = document.getElementById('prev-' + x.dataset.prev);
+    if (!zona) return;
+    const pintarPrev = () => {
+      const u = String(x.value || '').trim();
+      zona.innerHTML = '';
+      if (!u) return;
+      if (!/^https?:\/\//i.test(u)) {
+        zona.innerHTML = '<span class="mal">Tiene que empezar por https://</span>';
+        return;
+      }
+      const img = document.createElement('img');
+      img.alt = 'Vista previa';
+      img.onerror = () => {
+        zona.innerHTML = '<span class="mal">Esa dirección no muestra una imagen. '
+          + 'Ábrela en una pestaña: si no ves la foto sola, no es la buena.</span>';
+      };
+      img.src = u;
+      zona.appendChild(img);
+    };
+    x.onchange = pintarPrev;
+    x.onblur = pintarPrev;
+    pintarPrev();
   });
 }
 

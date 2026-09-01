@@ -50,9 +50,16 @@ Lo que antes tomaba ~2 horas a mano:
 ```bash
 node crear-proyecto.js --listar-bases
 node crear-proyecto.js --cliente "Café Raíz" --base menu-con-panel-admin \
-                       --primario "#8B4513" --inicial "C"
+                       --primario "#8B4513" --inicial "C" \
+                       --logo "https://cliente.com/logo.svg" \
+                       --banner "https://cliente.com/local.jpg"
 node crear-proyecto.js --ficha ruta/a/contexto.yml
 ```
+
+`--logo` y `--banner` son opcionales y solo aceptan `https://`, `/` o `./`
+(lo mismo que filtra `urlSegura()` en las bases). Sin logo se pinta la
+inicial en un cuadro de color; sin banner no se muestra ninguno — nunca se
+rellena con una imagen de archivo.
 
 Crea `Proyectos-Clientes/<slug>/` con `src/` copiado literal (nunca reescribe
 adaptadores), el esquema SQL, el `index.html` ya con los tokens de marca y sin
