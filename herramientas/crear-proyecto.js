@@ -140,15 +140,28 @@ function limpiarIdentidad(obj = {}, provisto = {}) {
 }
 
 export function construirFicha(ejemplo, datos) {
+  // `datos.ficha` es lo que el cliente YA respondió (brief o asistente).
+  // Lo que él contestó manda; lo que no, se marca POR DEFINIR en vez de
+  // heredar la identidad del negocio del ejemplo.
+  const dado = datos.ficha || {};
+
   const ficha = { ...ejemplo };
   ficha.proyecto = datos.proyecto;
   ficha.cliente = datos.cliente;
   ficha.base = datos.base;
   if (datos.linea) ficha.linea = datos.linea;
-  ficha.marca = limpiarIdentidad(ejemplo.marca, datos.marca);
-  if (ficha.apis) ficha.apis = limpiarIdentidad(ficha.apis, {});
+
+  ficha.marca = limpiarIdentidad(ejemplo.marca, { ...(dado.marca || {}), ...(datos.marca || {}) });
+  if (ejemplo.apis || dado.apis) {
+    ficha.apis = limpiarIdentidad(ejemplo.apis, dado.apis || {});
+  }
+  if (dado.base_de_datos) {
+    ficha.base_de_datos = { ...(ejemplo.base_de_datos || {}), ...dado.base_de_datos };
+  }
+  if (dado.auth) ficha.auth = { ...(ejemplo.auth || {}), ...dado.auth };
+
   ficha.entrega = {
-    ...limpiarIdentidad(ejemplo.entrega, {}),
+    ...limpiarIdentidad(ejemplo.entrega, dado.entrega || {}),
     estado: 'en construccion',
     creado: new Date().toISOString().slice(0, 10),
   };
@@ -255,7 +268,11 @@ export function envDelProyecto(ficha, ejemplo = '') {
 // ── Generación ────────────────────────────────────────────────
 
 export function crearProyecto(opciones) {
-  const { cliente, base, linea, marca = {}, destino } = opciones;
+  // `ficha` es lo que trae el asistente o el brief del cliente: TODO lo que
+  // el cliente ya respondió. Antes solo se pasaban cliente/base/linea/marca,
+  // así que el WhatsApp, el dominio, la pasarela y la analítica se perdían y
+  // salían como POR DEFINIR aunque el cliente los hubiera contestado.
+  const { cliente, base, linea, marca = {}, ficha: fichaEntrada = {}, destino } = opciones;
 
   if (!cliente) return { ok: false, error: 'Falta --cliente' };
   if (!base) return { ok: false, error: 'Falta --base' };
@@ -295,7 +312,7 @@ export function crearProyecto(opciones) {
     try { ejemplo = leerYaml(readFileSync(rutaEjemplo, 'utf8')); } catch { ejemplo = {}; }
   }
   const ficha = construirFicha(ejemplo, {
-    proyecto: cliente, cliente, base, linea, marca,
+    proyecto: cliente, cliente, base, linea, marca, ficha: fichaEntrada,
   });
   writeFileSync(join(dirSalida, 'contexto.yml'),
     '# Ficha de contexto — generada por herramientas/crear-proyecto.js\n' +

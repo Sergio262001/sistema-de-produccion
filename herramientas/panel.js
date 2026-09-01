@@ -316,6 +316,7 @@ const servidor = createServer(async (req, res) => {
         base: base || respuestas.base,
         linea: ficha.linea,
         marca: ficha.marca || {},
+        ficha,                       // el resto de lo que respondio el cliente
       });
       if (r.ok) historial.anotar({ tipo: 'proyecto', proyecto: r.slug,
         resumen: 'creado desde el asistente · ' + r.base,

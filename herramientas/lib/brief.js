@@ -282,6 +282,35 @@ export function respuestasAFicha(respuestas) {
     avisos.push('Motor local: es punto de partida válido, pero debe quedar escrito que es temporal.');
   }
 
+  // ── Normalizaciones ──
+  // Van aquí y no en cada formulario porque por esta función pasan LOS DOS
+  // caminos (el brief del cliente y el asistente del panel). Arreglarlo en
+  // un solo formulario dejaría el otro mal.
+
+  // WhatsApp sin indicativo: el enlace wa.me no abre sin él. 10 dígitos que
+  // empiezan por 3 es un móvil colombiano; se le antepone 57.
+  const wa = String(ficha.apis?.whatsapp_num || '').replace(/\D/g, '');
+  if (wa) {
+    if (/^3\d{9}$/.test(wa)) {
+      ficha.apis.whatsapp_num = '57' + wa;
+      avisos.push('Al WhatsApp le faltaba el indicativo: quedó como 57' + wa + '. Confírmalo con el cliente.');
+    } else if (/^57\d{10}$/.test(wa)) {
+      ficha.apis.whatsapp_num = wa;
+    } else {
+      ficha.apis.whatsapp_num = wa;
+      avisos.push('El WhatsApp "' + wa + '" no parece un número colombiano válido. Verifícalo antes de entregar.');
+    }
+  }
+
+  // "no" / "ninguno" como dominio es una respuesta, no un dominio. Se
+  // convierte en algo que el resto del sistema entiende y que además dice
+  // qué falta hacer.
+  const dom = String(ficha.entrega?.dominio || '').trim().toLowerCase();
+  if (['no', 'ninguno', 'nel', 'todavia no', 'todavía no', 'aun no', 'aún no'].includes(dom)) {
+    ficha.entrega.dominio = 'por comprar';
+    avisos.push('El cliente no tiene dominio: quedó como "por comprar". Es una compra suya, no del estudio.');
+  }
+
   ficha.proyecto ??= ficha.cliente;
   if (base) ficha.base = base;
 

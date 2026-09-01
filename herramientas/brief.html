@@ -493,7 +493,7 @@ function pintarListo() {
     + JSON.stringify(datos, null, 2) + '\n--- FIN BRIEF ---\n';
 
   $('#h1').textContent = 'Tu brief está listo';
-  $('#bajada').textContent = 'Copia el bloque y envíaselo al estudio. Lleva un formato que el sistema lee solo.';
+  $('#bajada').textContent = 'Copia el bloque de abajo. El sistema lo lee entero, sin que nadie retranscriba nada.';
 
   $('#contenido').innerHTML =
     '<div class="listo"><div class="tic">✓</div></div>'
@@ -508,6 +508,10 @@ function pintarListo() {
           + (datos.sedes === 'varias' ? 'hay varias sedes' : 'se guardan datos personales')
           + '. Eso implica panel, roles y protección reforzada.</div>' : '')
     + '<div class="salida" id="salida">' + esc(texto) + '</div>'
+    + '<div class="nota" style="margin-top:22px"><b>Qué sigue.</b> Este brief todavía '
+    + 'NO crea el proyecto. Cópialo y pégalo en el panel del estudio, en '
+    + '<b>Cliente nuevo → Leer documento</b>. Ahí se revisan las respuestas y se '
+    + 'construye el proyecto.</div>'
     + '<div class="pie-p"><button class="btn ok" id="copiar">Copiar el brief</button>'
     + '<button class="btn sec" id="bajar">Descargar .txt</button>'
     + '<button class="btn sec" id="editar">Volver a editar</button></div>';

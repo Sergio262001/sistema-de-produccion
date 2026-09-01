@@ -147,3 +147,40 @@ test('rechaza un nombre que es un marcador de posición', () => {
 test('no rechaza un nombre real que contiene una de esas palabras', () => {
   assert.equal(validarFicha({ ...completas, cliente: 'Cliente Feliz SAS' }).listo, true);
 });
+
+// ══════════ NORMALIZACIONES — bugs vistos con un brief real ══════════
+
+test('al WhatsApp sin indicativo se le antepone 57', () => {
+  const { ficha, avisos } = respuestasAFicha({ ...completas, whatsapp: '3666778839' });
+  assert.equal(ficha.apis.whatsapp_num, '573666778839',
+    'un wa.me sin indicativo no abre');
+  assert.ok(avisos.some((a) => /indicativo/i.test(a)), 'y avisa para que se confirme');
+});
+
+test('un WhatsApp que ya trae el 57 no se duplica', () => {
+  const { ficha } = respuestasAFicha({ ...completas, whatsapp: '573001234567' });
+  assert.equal(ficha.apis.whatsapp_num, '573001234567');
+});
+
+test('un WhatsApp con espacios y signos se limpia', () => {
+  const { ficha } = respuestasAFicha({ ...completas, whatsapp: '+57 300 123 4567' });
+  assert.equal(ficha.apis.whatsapp_num, '573001234567');
+});
+
+test('un número que no cuadra se conserva pero se avisa', () => {
+  const { ficha, avisos } = respuestasAFicha({ ...completas, whatsapp: '12345' });
+  assert.equal(ficha.apis.whatsapp_num, '12345', 'no se inventa un número');
+  assert.ok(avisos.some((a) => /no parece.*válido/i.test(a)));
+});
+
+test('"no" como dominio se vuelve "por comprar"', () => {
+  for (const r of ['no', 'No', 'ninguno', 'todavía no']) {
+    const { ficha } = respuestasAFicha({ ...completas, dominio: r });
+    assert.equal(ficha.entrega.dominio, 'por comprar', 'respuesta: ' + r);
+  }
+});
+
+test('un dominio real no se toca', () => {
+  const { ficha } = respuestasAFicha({ ...completas, dominio: 'tacosmauricio.co' });
+  assert.equal(ficha.entrega.dominio, 'tacosmauricio.co');
+});
