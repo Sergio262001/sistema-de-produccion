@@ -4,16 +4,81 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Base: Ecommerce Completo · Demo</title>
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;800&family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Karla:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
+  /* ══════════════════════════════════════════════════════════════
+     DIRECCIONES DE ARTE
+     Cambiar solo el color no basta: dos clientes con paletas distintas
+     recibian el mismo sitio. La direccion cambia tipografia, escala,
+     forma, peso de linea y ritmo — mundos visuales distintos sobre la
+     MISMA base y el mismo HTML.
+     Se elige en la ficha:  marca.direccion: mercado | boutique | taller
+     ══════════════════════════════════════════════════════════════ */
   :root{
     --brand:#1B36C9;--bg:#F5F7FB;--accent:#E8A02C;--surface:#fff;--ink:#0F1626;
-    --ink-soft:#454F66;--line:#E2E7F0;--danger:#E5484D;--radius:14px;
-    --display:'Space Grotesk',sans-serif;--body:'Inter',sans-serif;
+    --ink-soft:#454F66;--line:#E2E7F0;--danger:#E5484D;
+
+    /* Valores por defecto = direccion "taller" */
+    --display:'IBM Plex Sans',system-ui,sans-serif;
+    --body:'IBM Plex Sans',system-ui,sans-serif;
+    --mono:'IBM Plex Mono',ui-monospace,monospace;
+    --radius:8px;--borde:1px;--sombra:0 6px 20px rgba(15,22,38,.09);
+    --peso-titulo:600;--tracking:-.01em;--ritmo:1;
+    --precio-familia:var(--mono);--precio-peso:500;
+    --etiqueta-caja:1px solid var(--line);
   }
+
+  /* MERCADO — denso, alto contraste, honesto.
+     Panaderias, fruterias, tiendas de barrio: negocios de volumen donde
+     el precio es el protagonista y lo aspiracional estorba. */
+  [data-dir="mercado"]{
+    --display:'Archivo',system-ui,sans-serif;
+    --body:'Archivo',system-ui,sans-serif;
+    --radius:3px;--borde:2px;--sombra:none;
+    --peso-titulo:800;--tracking:-.03em;--ritmo:.85;
+    --precio-familia:var(--display);--precio-peso:800;
+    --etiqueta-caja:2px solid var(--ink);
+  }
+  [data-dir="mercado"] .product{border-width:2px;border-color:var(--ink);}
+  [data-dir="mercado"] .product .pr{font-size:20px;}
+  [data-dir="mercado"]{--sombra:4px 4px 0 var(--ink);}
+  [data-dir="mercado"] .product:hover{transform:none;}
+  [data-dir="mercado"] .add{border-radius:3px;text-transform:uppercase;letter-spacing:.04em;}
+  [data-dir="mercado"] .nav-pills button{border-radius:3px;border-width:2px;font-weight:600;}
+
+  /* BOUTIQUE — aire, editorial, sin ruido.
+     Ropa de diseñador, joyeria, cafe de especialidad: lo que se vende
+     caro necesita espacio en blanco y una serif que sostenga el precio. */
+  [data-dir="boutique"]{
+    --display:'Fraunces',Georgia,serif;
+    --body:'Karla',system-ui,sans-serif;
+    --radius:0px;--borde:1px;--sombra:none;
+    --peso-titulo:600;--tracking:-.005em;--ritmo:1.35;
+    --precio-familia:var(--body);--precio-peso:500;
+    --etiqueta-caja:none;
+  }
+  [data-dir="boutique"] .product{border:0;background:transparent;}
+  [data-dir="boutique"] .product .ph{border:0;border-radius:0;aspect-ratio:3/4;}
+  [data-dir="boutique"] .product .b{padding:14px 2px 4px;}
+  [data-dir="boutique"] .product h3{font-size:17px;letter-spacing:-.01em;}
+  [data-dir="boutique"] .product .pr{color:var(--ink);font-size:15px;}
+  [data-dir="boutique"]{--sombra:none;}
+  [data-dir="boutique"] .product:hover{transform:none;}
+  [data-dir="boutique"] .product:hover .ph{filter:brightness(.94);}
+  [data-dir="boutique"] .add{border-radius:0;background:var(--ink);}
+  [data-dir="boutique"] .nav-pills button{border-radius:0;border:0;border-bottom:1px solid transparent;background:transparent;padding:8px 4px;margin-right:14px;}
+  [data-dir="boutique"] .nav-pills button.on{background:transparent;color:var(--ink);border-bottom-color:var(--ink);}
+  [data-dir="boutique"] .grid{gap:28px 20px;}
+
+  /* TALLER — ficha tecnica, funcional.
+     Clinicas, ferreterias, servicios B2B: el dato manda y la pagina
+     tiene que leerse como un catalogo, no como una campaña. */
+  [data-dir="taller"] .product .pr{font-family:var(--mono);}
+  [data-dir="taller"] .badge{border-radius:2px;}
   *{box-sizing:border-box;}
   body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--body);-webkit-font-smoothing:antialiased;}
-  h1,h2,h3{font-family:var(--display);margin:0;line-height:1.15;}
+  h1,h2,h3{font-family:var(--display);font-weight:var(--peso-titulo);letter-spacing:var(--tracking);margin:0;line-height:1.15;}
   button{font-family:inherit;cursor:pointer;}
 
   .sysbar{background:#0C1322;color:#C9D2EA;font-family:monospace;font-size:12.5px;}
@@ -36,8 +101,8 @@
   .nav-pills button{white-space:nowrap;background:var(--surface);border:1px solid var(--line);color:var(--ink-soft);border-radius:30px;padding:8px 16px;font-size:13.5px;font-weight:500;}
   .nav-pills button.on{background:var(--brand);color:#fff;border-color:var(--brand);}
 
-  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:16px;padding:8px 0 50px;}
-  .product{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;display:flex;flex-direction:column;}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:calc(16px * var(--ritmo));padding:8px 0 50px;}
+  .product{background:var(--surface);border:var(--borde) solid var(--line);border-radius:var(--radius);overflow:hidden;display:flex;flex-direction:column;}
   .product.agotado{opacity:.55;}
   /* La foto es lo que vende. Proporción fija para que la rejilla no salte
      mientras cargan, y object-fit para que ninguna salga deformada. */
@@ -47,7 +112,7 @@
                background:linear-gradient(135deg,#fff,var(--line));}
   .product:hover .ph{filter:brightness(1.03);}
   .product{transition:box-shadow .16s,transform .16s;}
-  .product:hover{box-shadow:0 6px 20px rgba(15,22,38,.09);transform:translateY(-2px);}
+  .product:hover{box-shadow:var(--sombra);transform:translateY(-2px);}
   .product .b{padding:14px 15px 15px;display:flex;flex-direction:column;flex:1;gap:2px;}
   .product h3{font-size:15.5px;margin:0 0 2px;line-height:1.3;}
   /* La descripción se corta a dos líneas: parejas, sin romper la rejilla */
@@ -55,9 +120,11 @@
               flex:1;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;
               overflow:hidden;}
   .product .row{display:flex;align-items:center;justify-content:space-between;gap:8px;}
-  .product .pr{font-family:var(--display);font-weight:600;font-size:16px;color:var(--brand);}
-  .badge{font-family:monospace;font-size:10px;text-transform:uppercase;letter-spacing:.04em;padding:2px 7px;border-radius:5px;background:var(--bg);color:var(--ink-soft);font-weight:500;}
+  .product .pr{font-family:var(--precio-familia);font-weight:var(--precio-peso);font-size:16px;color:var(--brand);}
+  .badge{font-family:var(--mono);border:var(--etiqueta-caja);font-size:10px;text-transform:uppercase;letter-spacing:.04em;padding:2px 7px;border-radius:5px;background:var(--bg);color:var(--ink-soft);font-weight:500;}
   .badge.stock0{background:#FBE6E7;color:var(--danger);}
+  /* El acento marca lo destacado: es su unica funcion, y por eso existe. */
+  .badge.destacado{background:var(--accent);color:#1A1204;border-color:var(--accent);font-weight:600;}
   .badge.stock-tag{margin-top:6px;width:fit-content;}
   .add{background:var(--brand);color:#fff;border:0;border-radius:9px;padding:8px 12px;font-weight:600;font-size:12.5px;}
   .add:disabled{background:var(--line);color:var(--ink-soft);cursor:not-allowed;}
@@ -171,7 +238,12 @@
     <button type="button" id="tCatalog" class="on" onclick="setView('catalog')">Catálogo</button>
     <button type="button" id="tAdmin" onclick="setView('admin')">Panel admin</button>
   </div>
-  <span class="adapter">datos: <b id="sysAdapter">local</b></span>
+  <div class="toggle dirsw">
+      <button type="button" data-d="mercado">Mercado</button>
+      <button type="button" data-d="boutique">Boutique</button>
+      <button type="button" data-d="taller">Taller</button>
+    </div>
+    <span class="adapter">datos: <b id="sysAdapter">local</b></span>
 </div></div>
 
 <div class="app">
@@ -251,7 +323,8 @@
 const CONTEXT = {
   cliente: "Casa Tela",
   linea: "pro",
-  marca: { primario:"#1B36C9", secundario:"#F5F7FB", inicial:"C", display:"'Space Grotesk',sans-serif", body:"'Inter',sans-serif" },
+  marca: { primario:"#1B36C9", secundario:"#F5F7FB", inicial:"C",
+           direccion:"taller" },   // mercado | boutique | taller
   base_de_datos: { motor: "local" },     // firebase | supabase | local
   auth: { motor: "local", rol_requerido: "admin" },
   apis: { pagos: "whatsapp", whatsapp_num: "573098765432" },
@@ -464,10 +537,30 @@ const M = CONTEXT.moneda;
 /* ════════════════════════════════════════════════════════════
    4) THEMING
    ════════════════════════════════════════════════════════════ */
+/** Las tres direcciones válidas. Cualquier otra cosa cae en "taller". */
+const DIRECCIONES = ['mercado', 'boutique', 'taller'];
+
+function cablearDirecciones(){
+  document.querySelectorAll(".dirsw button").forEach(b=>{
+    b.onclick=()=>{
+      CONTEXT.marca.direccion=b.dataset.d;
+      applyTheme();
+      document.querySelectorAll(".dirsw button").forEach(x=>x.classList.toggle("on",x===b));
+    };
+  });
+}
+
 function applyTheme(){
   const m=CONTEXT.marca, r=document.documentElement.style;
   r.setProperty('--brand', m.primario);
   r.setProperty('--bg', m.secundario);
+
+  // La dirección de arte cambia tipografía, escala, forma y ritmo — no
+  // solo color. Es lo que evita que dos clientes reciban el mismo sitio
+  // pintado distinto. Ver el bloque DIRECCIONES DE ARTE en el CSS.
+  const dir = DIRECCIONES.includes(m.direccion) ? m.direccion : 'taller';
+  document.documentElement.setAttribute('data-dir', dir);
+
   document.getElementById('logo').textContent = m.inicial;
   document.getElementById('biz').textContent = CONTEXT.cliente;
   document.getElementById('sysClient').textContent = CONTEXT.cliente;
@@ -493,7 +586,7 @@ function renderCatalogo(){
     const agotado = p.stock<=0;
     const el=document.createElement('div'); el.className='product'+(agotado?' agotado':'');
     el.innerHTML=`${medio(p)}<div class="b">
-      <h3>${esc(p.nombre)} ${p.badge?'<span class="badge">'+esc(p.badge)+'</span>':''}</h3>
+      <h3>${esc(p.nombre)} ${p.badge?'<span class="badge destacado">'+esc(p.badge)+'</span>':''}</h3>
       <div class="d">${esc(p.desc||'')}</div>
       <div class="row"><span class="pr">${money(p.precio,M)}</span>
       <button type="button" class="add" ${agotado?'disabled':''}>${agotado?'Agotado':'Agregar'}</button></div>
@@ -718,7 +811,7 @@ window.openCart=openCart; window.closeCart=closeCart;
 
 /* ---- init ---- */
 (async function init(){
-  applyTheme();
+  applyTheme(); cablearDirecciones();
   DATA = await db.load();
   renderCatalogo();
 })();

@@ -137,3 +137,34 @@ rutas del propio sitio; un `javascript:` o un `data:` se descartan.
 - Comprimidas: por encima de ~300 KB cada una, la página se siente lenta.
 - Una por producto. Si faltan, se entrega con el emoji y **queda anotado como
   pendiente** — no se rellena con fotos de banco.
+
+## Direcciones de arte
+
+Cambiar solo el color no basta: dos clientes con paletas distintas recibían
+el mismo sitio pintado diferente. La **dirección** cambia tipografía, escala,
+forma, peso de línea y ritmo — mundos visuales distintos sobre el mismo HTML.
+
+Se elige en la ficha:
+
+```yaml
+marca:
+  direccion: boutique   # mercado | boutique | taller
+```
+
+| Dirección | Cómo se siente | Para quién |
+|---|---|---|
+| `mercado` | Denso, alto contraste, bordes marcados, precio grande. Archivo 800. | Panaderías, fruterías, tiendas de barrio: volumen, y el precio manda |
+| `boutique` | Aire, serif editorial, sin bordes ni sombras, foto vertical 3:4. Fraunces + Karla. | Ropa de diseñador, joyería, café de especialidad: lo que se vende caro |
+| `taller` | Ficha técnica, precio en monoespaciada, funcional. IBM Plex. | Clínicas, ferreterías, B2B: el dato manda |
+
+Si `direccion` no está o trae algo desconocido, cae en `taller`.
+
+**En la demo hay un conmutador** en la barra de sistema para ver las tres en
+vivo sobre el mismo catálogo. Sirve para decidir con el cliente en una llamada,
+antes de construir nada.
+
+### Por qué existen estas tres y no otras
+
+Salen de los rubros que el estudio atiende, no de un catálogo de estilos. Si
+aparece un cliente que no encaja en ninguna, se agrega una cuarta — pero
+cada una debe responder a un tipo de negocio real, no a un gusto.
