@@ -5,7 +5,8 @@
 
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { leerContenido, aPrecio, aSemilla, ponerContenido } from '../lib/contenido.js';
+import { leerContenido, aPrecio, aSemilla, ponerContenido, puedeSembrar }
+  from '../lib/contenido.js';
 
 const carta = [
   'Tacos',
@@ -115,4 +116,27 @@ test('reemplaza el catálogo de ejemplo por el del cliente', () => {
 test('sin contenido, deja el ejemplo intacto', () => {
   assert.equal(ponerContenido(html, [], 'menu-con-panel-admin'), html,
     'mejor datos que se ven de ejemplo que un catálogo vacío');
+});
+
+// ══════════ QUÉ BASES SE PUEDEN SEMBRAR ══════════
+
+test('el marketplace no se siembra: le borraria los vendedores', () => {
+  const html = [
+    'let DATA = {',
+    '  vendedores: [ { id:"v1", nombre:"Taller Norte" } ],',
+    '  productos: [ { id:"p1", vendedorId:"v1", nombre:"Maceta", precio:35000 } ],',
+    '};',
+  ].join('\n');
+  const cats = [{ id: 'x', nombre: 'X', desc: '', productos: [
+    { id: 'a', nombre: 'Algo', desc: '', precio: 1000 }] }];
+  assert.equal(ponerContenido(html, cats, 'marketplace'), html,
+    'sin vendedores la pagina se cae al renderizar');
+  assert.equal(puedeSembrar('marketplace'), false);
+});
+
+test('las tres bases de catalogo plano si se siembran', () => {
+  for (const base of ['menu-con-panel-admin', 'ecommerce-completo',
+                      'carrito-reutilizable']) {
+    assert.equal(puedeSembrar(base), true, base + ' deberia poder sembrarse');
+  }
 });

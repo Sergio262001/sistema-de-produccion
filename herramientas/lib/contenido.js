@@ -143,8 +143,23 @@ export function aSemilla(categorias, base) {
  * real. Si no hay contenido, devuelve el html intacto: mejor los datos de
  * ejemplo — que se ven claramente de ejemplo — que un catálogo vacío.
  */
+/**
+ * ¿El `let DATA` de esta base tiene la forma { categorias: [...] }?
+ *
+ * `marketplace` NO la tiene: su DATA lleva `vendedores` y cada producto
+ * pertenece a uno. Sembrarlo a ciegas borraría los vendedores y la página
+ * quedaría rota — y el brief tampoco pregunta a qué vendedor va cada
+ * producto, así que no hay forma de reconstruirlo. Mejor no tocarlo y
+ * decirlo, que entregar algo roto en silencio.
+ */
+export const BASES_SEMBRABLES = [
+  'menu-con-panel-admin', 'ecommerce-completo', 'carrito-reutilizable',
+];
+export const puedeSembrar = (base) => BASES_SEMBRABLES.includes(base);
+
 export function ponerContenido(html, categorias, base) {
   if (!categorias || !categorias.length) return html;
+  if (base && !puedeSembrar(base)) return html;
 
   const i = html.search(/\blet DATA\s*=\s*\{/);
   if (i === -1) return html;

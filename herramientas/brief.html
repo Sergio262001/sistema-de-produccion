@@ -130,6 +130,11 @@
   label.q{display:block;font-size:15.5px;font-weight:600;margin-bottom:4px;}
   .req{color:var(--arcilla);font-weight:400;}
   .ay{font-size:13px;color:var(--soft);margin:0 0 10px;max-width:54ch;}
+  /* Contador del catálogo */
+  textarea{min-height:150px;resize:vertical;font-size:14px;line-height:1.55;}
+  .cuentaf{margin-top:7px;font-size:12.5px;font-family:var(--mono);
+      color:var(--soft);min-height:1.2em;}
+  .cuentaf.ok{color:var(--jade);}
   /* Vista previa de logo y banner */
   .prev{margin-top:10px;}
   .prev img{max-width:min(100%,320px);max-height:150px;object-fit:contain;
@@ -310,6 +315,13 @@ const P = {
   motor:     { q:'¿Ya tienes cuenta de base de datos?', t:'op', req:true,
                o:[['supabase','Sí, Supabase'],['firebase','Sí, Firebase'],
                   ['local','No — arrancamos sin ella y la conectamos después']] },
+  // LA pregunta que faltaba en este formulario. Existía en lib/brief.js —
+  // por eso el asistente del panel sí la hacía — pero aquí nunca se dibujó,
+  // así que TODO brief que llenaba un cliente salía con el catálogo del
+  // ejemplo. Es la razón principal de que las entregas se vieran a plantilla.
+  catalogo:  { q:'Escribe tus categorías y tus productos', t:'larga',
+               a:'Una categoría por línea. Debajo, sus productos así: nombre | precio | descripción (la descripción es opcional). Si no lo tienes a mano, déjalo vacío: entregamos con datos de ejemplo y queda anotado como pendiente.',
+               ej:'Tacos\nAl pastor | 12000 | Piña y cilantro\nCarnitas | 11500\n\nBebidas\nAgua de horchata | 6000' },
   contenido_listo:{ q:'¿Tienes el contenido listo?', t:'op',
                a:'Textos, fotos, lista de productos con precios.',
                o:[['si','Sí, lo tengo todo'],['parcial','Tengo una parte'],['no','No, hay que producirlo']] },
@@ -336,7 +348,7 @@ const PASOS = [
     campos:['whatsapp','pagos','sensibles','motor'] },
   { id:'entrega',  t:'Entrega',   h:'Contenido y entrega',
     g:'Lo último, y lo que más suele demorar: el contenido real.',
-    campos:['contenido_listo','fotos','analitica','soporte'] },
+    campos:['catalogo','contenido_listo','fotos','analitica','soporte'] },
   { id:'listo',    t:'Listo',     h:'Tu brief está listo',
     g:'' },
 ];
@@ -350,6 +362,10 @@ function camposDe(paso) {
   return (paso.campos || []).filter((c) => {
     if (c === 'pagos') return s && s.vende;
     if (c === 'sensibles') return ['landing-modular','crm-simple','auth'].includes(SERVICIO);
+    // El catálogo solo tiene sentido donde hay catálogo. Preguntárselo al
+    // de una landing es ruido, y el ruido hace que se abandone el formulario.
+    if (c === 'catalogo') return ['menu-con-panel-admin','ecommerce-completo',
+                                  'carrito-reutilizable','marketplace'].includes(SERVICIO);
     return true;
   });
 }
@@ -455,6 +471,13 @@ function control(id) {
     const val = v || p.v;
     c = '<div class="colf"><input type="color" name="' + esc(id) + '" value="' + esc(val)
       + '"><span class="hex">' + esc(val) + '</span></div>';
+  } else if (p.t === 'larga') {
+    // El contador de abajo no es adorno: dice en vivo si el formato se
+    // entendió. Si escribe 12 productos y marca 0, el error se ve antes
+    // de mandar el brief, no cuando el entregable sale con el ejemplo.
+    c = '<textarea rows="9" name="' + esc(id) + '" data-cuenta="' + esc(id)
+      + '" placeholder="' + esc(p.ej || '') + '">' + esc(v || '') + '</textarea>'
+      + '<div class="cuentaf" id="cuenta-' + esc(id) + '"></div>';
   } else if (p.t === 'url') {
     // Vista previa al lado del campo. Una dirección que no carga es el fallo
     // típico aquí (un enlace de Drive que no es la imagen), y el cliente lo
@@ -495,6 +518,29 @@ function enlazar() {
   });
   $('#campos').querySelectorAll('input[type=color]').forEach((x) => {
     x.oninput = () => { x.nextElementSibling.textContent = x.value; };
+  });
+
+  // Contador del catálogo. Cuenta igual que lee lib/contenido.js: una
+  // línea con barras es un producto, una línea suelta es una categoría.
+  $('#campos').querySelectorAll('textarea[data-cuenta]').forEach((x) => {
+    const zona = document.getElementById('cuenta-' + x.dataset.cuenta);
+    if (!zona) return;
+    const contar = () => {
+      let cats = 0, prods = 0;
+      for (const linea of String(x.value || '').split('\n')) {
+        const l = linea.trim();
+        if (!l) continue;
+        if (l.includes('|')) prods++; else cats++;
+      }
+      zona.textContent = prods
+        ? cats + (cats === 1 ? ' categoría' : ' categorías') + ' · '
+          + prods + (prods === 1 ? ' producto' : ' productos')
+        : (cats ? 'Ningún producto todavía: a los productos les falta el '
+                + 'formato "nombre | precio".' : '');
+      zona.className = 'cuentaf' + (prods ? ' ok' : '');
+    };
+    x.oninput = contar;
+    contar();
   });
 
   // Vista previa de logo y banner. Solo http(s): la misma regla que

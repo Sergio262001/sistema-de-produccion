@@ -93,7 +93,10 @@
   .acat > h3{font-size:16px;margin-bottom:12px;color:var(--brand);font-family:var(--body);font-weight:600;text-transform:uppercase;letter-spacing:.04em;font-size:12px;}
   .arow{display:grid;grid-template-columns:1fr 110px auto auto;gap:10px;align-items:center;padding:8px 0;border-top:1px solid var(--line);}
   .arow:first-of-type{border-top:none;}
-  .arow input[type=text],.arow input[type=number]{font-family:inherit;font-size:14px;border:1px solid var(--line);border-radius:8px;padding:8px 10px;width:100%;color:var(--ink);background:#FCFAF6;}
+  .arow input[type=text],.arow input[type=number],.arow input[type=url]{font-family:inherit;font-size:14px;border:1px solid var(--line);border-radius:8px;padding:8px 10px;width:100%;color:var(--ink);background:#FCFAF6;}
+  /* La foto ocupa su propia línea: la carta se vende con fotos y el dueño
+     tiene que poder ponerlas sin llamarme. */
+  .arow .foto{grid-column:1/-1;font-size:12.5px;color:var(--ink-soft);}
   .arow input:focus{outline:2px solid var(--brand);outline-offset:1px;border-color:transparent;}
   .arow .av{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--ink-soft);font-family:'JetBrains Mono',monospace;}
   .sw{width:38px;height:22px;border-radius:20px;background:var(--line);border:0;position:relative;transition:.2s;flex:none;}
@@ -429,7 +432,8 @@ function renderAdmin(){
         <input type="text" value="${esc(it.nombre)}" oninput="upd('${esc(c.id)}','${esc(it.id)}','nombre',this.value)">
         <input type="number" value="${it.precio}" step="500" oninput="upd('${c.id}','${it.id}','precio',+this.value)">
         <div class="av"><button type="button" class="sw ${it.disp?'on':''}" onclick="toggleDisp('${c.id}','${it.id}',this)" aria-label="Disponible"></button>${it.disp?'activo':'agotado'}</div>
-        <button type="button" class="del" onclick="delItem('${c.id}','${it.id}')" aria-label="Eliminar">×</button>`;
+        <button type="button" class="del" onclick="delItem('${c.id}','${it.id}')" aria-label="Eliminar">×</button>
+        <input class="foto" type="url" value="${esc(it.imagen||'')}" placeholder="URL de la foto del plato (https://...)" aria-label="Foto de ${esc(it.nombre)}" oninput="upd('${c.id}','${it.id}','imagen',this.value)">`;
       box.appendChild(row);
     });
     list.appendChild(box);

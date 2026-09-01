@@ -71,7 +71,13 @@ Costo de envío       : [ ] fijo $______  [ ] gratis desde $______
 ```
 Color principal : #______
 Color secundario: #______
+Logo            : archivo SVG o PNG fondo transparente: ______
+Banner          : foto ancha para la cabecera (mín. 1600px): ______
 ```
+
+**Sin logo la cabecera sale con la inicial del negocio dentro de un cuadro
+de color.** No bloquea la entrega, pero se nota que es una plantilla. Sin
+banner no se pone ninguna imagen: antes que una foto de banco, nada.
 
 ## F. Credenciales
 

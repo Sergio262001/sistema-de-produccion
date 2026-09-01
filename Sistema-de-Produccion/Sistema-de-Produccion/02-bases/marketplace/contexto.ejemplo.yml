@@ -30,6 +30,11 @@ env:
 
 # ── MARCA (alimenta los tokens de diseño) ───────────────────
 marca:
+  # Marca de la PLATAFORMA, no la de cada vendedor. Vacío = se pinta la
+  # inicial y no se muestra banner; no se rellenan con imágenes de archivo.
+  logo:       ""
+  banner:     ""
+  inicial:    "M"
   primario:   "#6A3CF0"
   secundario: "#F5F7FB"
   display:    "Space Grotesk"

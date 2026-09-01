@@ -19,7 +19,10 @@ import { join, resolve } from 'node:path';
 const AQUI = resolve(fileURLToPath(new URL('.', import.meta.url)), '..');
 const BASES = resolve(AQUI, '..', 'Sistema-de-Produccion', 'Sistema-de-Produccion', '02-bases');
 
-const CON_LOGO = ['ecommerce-completo', 'menu-con-panel-admin'];
+// Las cuatro bases de venta. Son las que le entregan una vitrina a un
+// negocio, y por eso son las que no pueden salir con una letra por logo.
+const CON_LOGO = ['ecommerce-completo', 'menu-con-panel-admin',
+                  'carrito-reutilizable', 'marketplace'];
 
 const leerBase = (b) => readFileSync(join(BASES, b, 'demo.html'), 'utf8');
 
@@ -147,11 +150,23 @@ for (const base of CON_LOGO) {
       'el marcador tiene que envolver la función, no ir suelto');
   });
 
-  test(base + ': applyTheme llama a las dos funciones', () => {
+  // Unas bases tematizan en applyTheme() y otras en pintarMarca(): lo que
+  // importa es que ALGUNA las llame, o el logo del cliente nunca se pinta.
+  test(base + ': el arranque llama a las dos funciones', () => {
     const t = leerBase(base);
-    const cuerpo = extraerFuncion(t, 'applyTheme');
-    assert.match(cuerpo, /pintarLogo\(/,
-      'si applyTheme no lo llama, el logo del cliente nunca se pinta');
-    assert.match(cuerpo, /pintarBanner\(/);
+    const nombre = t.includes('function applyTheme(') ? 'applyTheme' : 'pintarMarca';
+    const cuerpo = extraerFuncion(t, nombre);
+    assert.match(cuerpo, /pintarLogo\(/, nombre + ' no pinta el logo');
+    assert.match(cuerpo, /pintarBanner\(/, nombre + ' no pinta el banner');
+    assert.match(t, new RegExp('(^|[^a-zA-Z])' + nombre + '\\(\\s*\\)\\s*;', 'm'),
+      nombre + ' está definida pero nunca se llama al arrancar');
+  });
+
+  // Las cuatro son bases de venta: la foto del producto es el producto.
+  test(base + ': el catálogo se pinta con medio(), no con el emoji suelto', () => {
+    const t = leerBase(base);
+    assert.match(t, /function medio\(/, 'sin medio() no hay fotos de producto');
+    assert.ok(!/innerHTML\s*=\s*`<div class="ph">/.test(t),
+      'quedó una tarjeta pintando el emoji directo, sin pasar por medio()');
   });
 }

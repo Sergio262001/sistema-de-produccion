@@ -89,7 +89,17 @@ WHATSAPP_NUM: 57________
 Color principal : #______
 Color secundario: #______
 Titular de la portada: ______________________
+Logo de la plataforma : archivo SVG o PNG fondo transparente: ______
+Banner de la plataforma: foto ancha (mín. 1600px): ______
 ```
+
+Ojo: **es la marca de la plataforma, no la de cada vendedor.** Sin logo, la
+cabecera sale con la inicial dentro de un cuadro de color.
+
+**El catálogo de este servicio no se carga solo.** En las demás bases el
+catálogo que escribe el cliente se siembra automáticamente; aquí cada
+producto pertenece a un vendedor, y esa asignación hay que hacerla a mano.
+Pide la lista con la columna del vendedor incluida.
 
 ## G. Credenciales
 

@@ -13,7 +13,7 @@ sigue pendiente y las reglas de trabajo que salieron de equivocarse.
 Léelo antes de tocar código.
 
 **[`herramientas/`](herramientas/) es la fábrica operable.** `node panel.js`
-levanta el panel; `npm test` corre 174 pruebas. Cero dependencias en el modo
+levanta el panel; `npm test` corre 238 pruebas. Cero dependencias en el modo
 gratis. Su [`README`](herramientas/README.md) explica cada pieza.
 
 ---
@@ -74,16 +74,17 @@ enlaza arriba; esto es solo el resumen.
 
 - `herramientas/` — la fábrica operable: panel, formulario de brief,
   validador, generador, auditor con IA, agente de Claude e historial.
-  174 pruebas pasando.
-- `Sistema-de-Produccion/` — las 10 bases. Fotos de producto en 2 de 9;
-  logo y banner del cliente en 2 de 9; direcciones de arte en 1 de 9.
+  238 pruebas pasando.
+- `Sistema-de-Produccion/` — las 10 bases. Fotos de producto en 4 de 9;
+  logo y banner del cliente en 4 de 9; direcciones de arte en 1 de 9.
 - `Proyectos-Clientes/` — los entregables. **Los generados antes del
   2026-09-01 están rotos** (les falta el arreglo de la página en blanco):
   regenerarlos o borrarlos.
 
 ### Deuda que no hay que redescubrir
 
-- `lib/acceso.js` **es el login y no tiene ni una prueba.**
+- `panel.js` — las ~20 rutas del servidor, sin una sola prueba. Una de ellas
+  lanza al agente, que escribe archivos. (`lib/acceso.js` ya está cubierto.)
 - `prueba-ecommerce` sigue con `localAuth` contra RLS — el pendiente
   original, todavía abierto.
 - `backend-pro` nunca se probó contra Wompi real.

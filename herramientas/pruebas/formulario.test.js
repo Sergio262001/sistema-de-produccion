@@ -111,6 +111,40 @@ test('todo campo referido en un paso existe en P', async () => {
   }
 });
 
+// El fallo que hacía que TODO brief de cliente saliera con el catálogo del
+// ejemplo: la pregunta existía en lib/brief.js pero este formulario nunca
+// la dibujaba.
+test('el formulario pide el catálogo en las bases que lo tienen', async () => {
+  const { F } = await cargarFormulario();
+  assert.ok(F.P.catalogo, 'sin esta pregunta el entregable sale con el menú del ejemplo');
+  assert.equal(F.P.catalogo.t, 'larga');
+
+  for (const base of ['menu-con-panel-admin', 'ecommerce-completo',
+                      'carrito-reutilizable', 'marketplace']) {
+    F.SET(base);
+    const campos = F.PASOS.flatMap((p) => F.camposDe(p));
+    assert.ok(campos.includes('catalogo'), base + ' debería pedir catálogo');
+  }
+});
+
+test('a quien no tiene catálogo no se le pregunta', async () => {
+  const { F } = await cargarFormulario();
+  for (const base of ['landing-modular', 'auth', 'crm-simple']) {
+    F.SET(base);
+    const campos = F.PASOS.flatMap((p) => F.camposDe(p));
+    assert.ok(!campos.includes('catalogo'), base + ' no tiene catálogo que pedir');
+  }
+});
+
+test('el campo de catálogo se dibuja como textarea con contador', async () => {
+  const { F } = await cargarFormulario();
+  const html = F.control('catalogo');
+  assert.match(html, /<textarea/);
+  assert.match(html, /id="cuenta-catalogo"/,
+    'el contador es lo que le dice al cliente si el formato se entendió');
+  assert.match(html, /placeholder="/, 'el ejemplo va en el placeholder');
+});
+
 test('el paso de marca pide logo y banner', async () => {
   const { F } = await cargarFormulario();
   const marca = F.PASOS.find((p) => p.id === 'marca');

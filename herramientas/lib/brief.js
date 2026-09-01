@@ -250,7 +250,7 @@ function ponerEnRuta(obj, ruta, valor) {
  * respuesta ausente y una respuesta "no aplica" se trataban igual, y
  * entonces el entregable salía con los datos del negocio del ejemplo.
  */
-import { leerContenido } from './contenido.js';
+import { leerContenido, puedeSembrar } from './contenido.js';
 
 export const NO_APLICA = '__no_aplica__';
 
@@ -426,8 +426,17 @@ export function respuestasAFicha(respuestasCrudas) {
     avisos.push(...avisosContenido);
     if (categorias.length) {
       const n = categorias.reduce((t, c) => t + c.productos.length, 0);
-      avisos.push('Contenido real del cliente: ' + categorias.length + ' categorías, '
-        + n + ' productos. Reemplaza al catálogo de ejemplo.');
+      const resumen = categorias.length + ' categorías, ' + n + ' productos';
+      if (base && !puedeSembrar(base)) {
+        // Callarse esto sería entregar el catálogo del ejemplo sin avisar.
+        avisos.push('El cliente entregó su catálogo (' + resumen + ') pero la base "'
+          + base + '" no se puede sembrar automáticamente: cada producto pertenece '
+          + 'a un vendedor y el brief no pregunta cuál. Queda guardado en la ficha; '
+          + 'hay que cargarlo a mano asignando vendedor.');
+      } else {
+        avisos.push('Contenido real del cliente: ' + resumen
+          + '. Reemplaza al catálogo de ejemplo.');
+      }
     }
   } else {
     avisos.push('Sin catálogo del cliente: se entrega con los datos de ejemplo, '

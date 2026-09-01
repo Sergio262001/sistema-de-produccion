@@ -20,6 +20,9 @@
   .sysbar .in{max-width:1000px;margin:0 auto;padding:11px 20px;display:flex;gap:14px;align-items:center;flex-wrap:wrap;}
   .sysbar .tag{background:#1B2438;border:1px solid #2A3654;border-radius:6px;padding:3px 9px;color:#9BB0E0;}
   .sysbar b{color:#fff;}
+  .toggle{display:flex;background:#1B2438;border:1px solid #2A3654;border-radius:8px;overflow:hidden;}
+  .toggle button{background:transparent;border:0;color:#9BB0E0;font-family:'JetBrains Mono',monospace;font-size:12px;padding:6px 13px;}
+  .toggle button.on{background:var(--brand);color:#fff;}
   .sysbar .pay{margin-left:auto;color:#8E9AB8;}
   .sysbar .pay b{color:#5FD0A6;}
 
@@ -32,7 +35,20 @@
 
   .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:16px;padding:24px 0 60px;}
   .card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;display:flex;flex-direction:column;}
-  .card .ph{height:120px;display:grid;place-items:center;font-size:46px;background:linear-gradient(135deg,#fff,var(--line));}
+  /* La foto es lo que vende. Alto fijo para que la rejilla no salte
+     mientras cargan, y object-fit para que ninguna salga deformada. */
+  .card .ph{width:100%;height:150px;object-fit:cover;display:block;
+     background:var(--bg);border-bottom:1px solid var(--line);}
+  .card .ph.sinfoto{display:grid;place-items:center;font-size:46px;
+     background:linear-gradient(135deg,#fff,var(--line));}
+  /* Banner del cliente: ancho completo, alto acotado, recorte centrado.
+     `hidden` gana siempre — sin banner no debe quedar un hueco gris. */
+  .banner{display:block;width:100%;max-height:240px;object-fit:cover;
+     border-radius:14px;margin:24px 0 0;background:var(--bg);}
+  .banner[hidden]{display:none;}
+  /* Con logo real el cuadro de color estorba: se vuelve marco transparente. */
+  .logo.conimg{background:none;box-shadow:none;overflow:hidden;}
+  .logo img{width:100%;height:100%;object-fit:contain;display:block;}
   .card .b{padding:14px 15px 15px;display:flex;flex-direction:column;flex:1;}
   .card h3{font-size:16px;font-family:var(--body);font-weight:600;}
   .card .d{font-size:12.5px;color:var(--ink-soft);margin:3px 0 12px;line-height:1.4;flex:1;}
@@ -52,7 +68,8 @@
   .lines{flex:1;overflow-y:auto;padding:8px 22px;}
   .empty{text-align:center;color:var(--ink-soft);padding:60px 20px;font-size:14px;}
   .line{display:flex;gap:12px;padding:15px 0;border-bottom:1px solid var(--line);align-items:center;}
-  .line .em{width:46px;height:46px;border-radius:10px;background:var(--surface);border:1px solid var(--line);display:grid;place-items:center;font-size:22px;flex:none;}
+  .line .em{width:46px;height:46px;border-radius:10px;background:var(--surface);border:1px solid var(--line);object-fit:cover;display:block;flex:none;}
+  .line .em.sinfoto{display:grid;place-items:center;font-size:22px;}
   .line .li{flex:1;min-width:0;}
   .line .nm{font-weight:600;font-size:14px;}
   .line .lp{font-size:12.5px;color:var(--ink-soft);}
@@ -74,10 +91,18 @@
 <div class="sysbar"><div class="in">
   <span class="tag">base: carrito-reutilizable</span>
   <span>contexto: <b id="sysClient">Café Raíz</b></span>
+  <span class="tag">marca</span>
+  <div class="toggle marcasw">
+    <button type="button" class="on" onclick="verMarca(false)">Inicial</button>
+    <button type="button" onclick="verMarca(true)">Logo y banner</button>
+  </div>
   <span class="pay">checkout: <b id="sysPay">whatsapp</b></span>
 </div></div>
 
 <div class="app">
+  <!-- Banner del cliente. Nace oculto: si no hay imagen no deja hueco. -->
+  <img class="banner" id="banner" alt="" hidden>
+
   <div class="head">
     <div class="logo" id="logo">R</div>
     <h1 id="biz">Café Raíz</h1>
@@ -127,6 +152,48 @@ function esc(v){
   if(v===null||v===undefined) return '';
   return String(v).replace(/&/g,'&amp;').replace(/</g,'&lt;')
     .replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+}
+/* Solo http(s) y rutas del propio sitio. Bloquea javascript: y data:,
+   que en un src pueden ejecutar código en la sesión de quien mire. */
+function urlSegura(v){
+  const s=String(v||'').trim();
+  if(!s) return '';
+  if(/^https?:\/\//i.test(s) || s.startsWith('/') || s.startsWith('./')) return s;
+  return '';
+}
+/* Foto del producto, con el emoji como respaldo. Se vende con fotos:
+   un emoji no vende un plato ni una chaqueta. El alt lleva el nombre
+   real — es lo que se lee si la foto no carga. */
+function medio(p, clase='ph'){
+  const src=urlSegura(p.imagen);
+  return src
+    ? `<img class="${clase}" src="${esc(src)}" alt="${esc(p.nombre||'')}" loading="lazy" decoding="async">`
+    : `<div class="${clase} sinfoto" role="img" aria-label="${esc(p.nombre||'')}">${esc(p.emoji||'🛍️')}</div>`;
+}
+/* ---- LOGO Y BANNER DEL CLIENTE ----
+   Aguantan que el elemento no exista: borrar un id del marcado y que el
+   script muera con él ya dejó una entrega en blanco. */
+function pintarLogo(el, m, cliente){
+  if(!el) return;
+  const src = urlSegura(m && m.logo);
+  el.textContent = '';
+  if(src){
+    const img = document.createElement('img');
+    img.src = src; img.alt = cliente || ''; img.decoding = 'async';
+    el.appendChild(img);
+    el.classList.add('conimg');
+  } else {
+    el.classList.remove('conimg');
+    el.textContent = (m && m.inicial) || '';
+  }
+}
+function pintarBanner(el, m, cliente){
+  if(!el) return;
+  const src = urlSegura(m && m.banner);
+  if(!src){ el.hidden = true; el.removeAttribute('src'); return; }
+  el.src = src; el.alt = cliente || '';
+  el.loading = 'lazy'; el.decoding = 'async';
+  el.hidden = false;
 }
 
 
@@ -179,26 +246,62 @@ async function abrirWompi(state,ctx){
 /* CONTEXTO — vendría de la ficha del proyecto */
 const CONTEXT = {
   cliente: "Café Raíz",
-  marca:{ primario:"#1F6B4A", secundario:"#F3ECE0", inicial:"R" },
+  marca:{ primario:"#1F6B4A", secundario:"#F3ECE0", inicial:"R",
+          // Logo y banner del cliente. Vacíos = inicial en un cuadro y sin
+          // banner. Un negocio que ya tiene logo no se entrega con una letra.
+          logo:"", banner:"" },
   apis:{ pagos:"whatsapp", whatsapp_num:"573001234567", wompi_public_key:"" },  // prueba: cambia pagos a "wompi" y pon tu public key sandbox
   moneda:"$"
 };
 
-/* CATÁLOGO de ejemplo (en real viene de la base de datos) */
-const PRODUCTOS = [
-  { id:'c2', nombre:'Latte de la casa', desc:'Leche texturizada, arte latte', precio:8500, emoji:'🥛' },
-  { id:'b1', nombre:'Huevos benedictinos', desc:'Pan de masa madre', precio:18500, emoji:'🍳' },
-  { id:'b2', nombre:'Avo toast', desc:'Aguacate, tomate, sésamo', precio:15000, emoji:'🥑' },
-  { id:'p1', nombre:'Cheesecake', desc:'Frutos del bosque', precio:11000, emoji:'🍰' },
-  { id:'c3', nombre:'Cold brew', desc:'Extracción en frío 18h', precio:9000, emoji:'🧊' },
-  { id:'p2', nombre:'Brownie', desc:'Chocolate 70%, nuez', precio:9500, emoji:'🍫' },
-];
+/* CATÁLOGO de ejemplo (en real viene de la base de datos).
+   Va por categorías y se llama `DATA` a propósito: es la forma que el
+   generador sabe reemplazar con el catálogo real del cliente. Cuando esto
+   era un array plano llamado PRODUCTOS, el generador no lo encontraba y
+   la tienda del cliente se entregaba con el menú del café de ejemplo. */
+let DATA = {
+  categorias: [
+    { id:'cafe', nombre:'Café', desc:'Tostado propio', productos:[
+      { id:'c2', nombre:'Latte de la casa', desc:'Leche texturizada, arte latte', precio:8500, emoji:'🥛' },
+      { id:'c3', nombre:'Cold brew', desc:'Extracción en frío 18h', precio:9000, emoji:'🧊' },
+    ]},
+    { id:'cocina', nombre:'Cocina', desc:'Todo el día', productos:[
+      { id:'b1', nombre:'Huevos benedictinos', desc:'Pan de masa madre', precio:18500, emoji:'🍳' },
+      { id:'b2', nombre:'Avo toast', desc:'Aguacate, tomate, sésamo', precio:15000, emoji:'🥑' },
+    ]},
+    { id:'postres', nombre:'Postres', desc:'Hechos en casa', productos:[
+      { id:'p1', nombre:'Cheesecake', desc:'Frutos del bosque', precio:11000, emoji:'🍰' },
+      { id:'p2', nombre:'Brownie', desc:'Chocolate 70%, nuez', precio:9500, emoji:'🍫' },
+    ]},
+  ],
+};
+/* La vitrina es plana: una sola rejilla con todo. Las categorías existen
+   para que el catálogo del cliente encaje, no para partir la pantalla. */
+const PRODUCTOS = DATA.categorias.flatMap(c => c.productos || []);
 
 /* tema desde contexto */
 const r=document.documentElement.style;
 r.setProperty('--brand',CONTEXT.marca.primario);
 r.setProperty('--bg',CONTEXT.marca.secundario);
-document.getElementById('logo').textContent=CONTEXT.marca.inicial;
+function pintarMarca(){
+  pintarLogo(document.getElementById('logo'),CONTEXT.marca,CONTEXT.cliente);
+  pintarBanner(document.getElementById('banner'),CONTEXT.marca,CONTEXT.cliente);
+}
+pintarMarca();
+/* @demo-only
+   Conmutador de la sysbar: enseña en vivo la diferencia entre entregar
+   con la inicial y entregar con el logo del cliente. Los marcadores de
+   arriba y abajo se los lleva crear-proyecto.js: al cliente no le llega
+   ni esta función ni los SVG de ejemplo. */
+function verMarca(con){
+  CONTEXT.marca.logo   = con ? './logo-demo.svg'   : '';
+  CONTEXT.marca.banner = con ? './banner-demo.svg' : '';
+  pintarMarca();
+  const sw = document.querySelector('.marcasw');
+  if(sw) sw.querySelectorAll('button').forEach((b,n)=>
+    b.classList.toggle('on', n === (con ? 1 : 0)));
+}
+/* @fin-demo */
 document.getElementById('biz').textContent=CONTEXT.cliente;
 document.getElementById('sysClient').textContent=CONTEXT.cliente;
 document.getElementById('sysPay').textContent=CONTEXT.apis.pagos;
@@ -211,7 +314,7 @@ const M = CONTEXT.moneda;
 const grid=document.getElementById('grid');
 PRODUCTOS.forEach(p=>{
   const el=document.createElement('div'); el.className='card';
-  el.innerHTML=`<div class="ph">${esc(p.emoji)}</div><div class="b">
+  el.innerHTML=`${medio(p)}<div class="b">
     <h3>${esc(p.nombre)}</h3><div class="d">${esc(p.desc)}</div>
     <div class="row"><span class="pr">${money(p.precio,M)}</span>
     <button type="button" class="add">Agregar</button></div></div>`;
@@ -232,7 +335,7 @@ function renderLines(state){
   c.innerHTML='';
   state.items.forEach(i=>{
     const row=document.createElement('div'); row.className='line';
-    row.innerHTML=`<div class="em">${esc(i.emoji||'🍽️')}</div>
+    row.innerHTML=`${medio(i,'em')}
       <div class="li"><div class="nm">${esc(i.nombre)}</div><div class="lp">${money(i.precio,M)} c/u</div></div>
       <div class="qty"><button type="button" aria-label="menos">−</button><span>${i.qty}</span><button type="button" aria-label="más">+</button></div>`;
     const [minus,,plus]=row.querySelectorAll('.qty *');
