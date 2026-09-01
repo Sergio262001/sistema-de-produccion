@@ -5,6 +5,19 @@ Este archivo se carga automáticamente al abrir Claude Code desde
 viven aquí. **Léelo antes de actuar** y luego abre el `CLAUDE.md` o
 `AGENTS.md` del proyecto concreto que toque la tarea.
 
+## EMPIEZA POR AQUÍ
+
+**[`01-documentos/5-bitacora-2026-08-31.md`](Sistema-de-Produccion/Sistema-de-Produccion/01-documentos/5-bitacora-2026-08-31.md)**
+— qué se construyó en la última sesión, los bugs que aparecieron, lo que
+sigue pendiente y las reglas de trabajo que salieron de equivocarse.
+Léelo antes de tocar código.
+
+**[`herramientas/`](herramientas/) es la fábrica operable.** `node panel.js`
+levanta el panel; `npm test` corre 142 pruebas. Cero dependencias en el modo
+gratis. Su [`README`](herramientas/README.md) explica cada pieza.
+
+---
+
 ## Sobre el dueño
 - Diseñador web/gráfico UX/UI, Colombia. **Responder siempre en español.**
 - Stack: Supabase, Firebase, Figma, GA4, HTML/CSS/JS vanilla, y
@@ -53,33 +66,30 @@ Un proyecto real de cliente por subcarpeta, con su propio git y su propio
 - `prueba-ecommerce/` — prueba interna (sin cliente) de la base
   `ecommerce-completo` contra un Supabase real. Vite como servidor de dev.
 
-## Estado y siguiente hilo abierto (al 2026-08-31)
-El único pendiente técnico realmente activo está en
-[`Proyectos-Clientes/prueba-ecommerce/README.md`](Proyectos-Clientes/prueba-ecommerce/README.md):
-el catálogo ya lee de Supabase real, pero **guardar desde el panel admin
-falla** porque el login usa `localAuth` y las políticas RLS exigen una
-sesión real de Supabase Auth. Arreglarlo = cambiar `src/main.js` para que
-llame a `supabase.auth.signInWithPassword(...)` y crear el usuario en
-Authentication → Users.
+## Estado (al 2026-09-01)
 
-Todo lo demás del backlog está bloqueado por credenciales (`GA4_ID`,
-`WOMPI_PUBLIC_KEY`) o por decisiones de negocio (precios, productización),
-no por código pendiente.
+Todo está en **git y subido**: `github.com/Sergio262001/sistema-de-produccion`
+(privado). El detalle completo de la última sesión está en la bitácora que
+enlaza arriba; esto es solo el resumen.
 
-## Deuda conocida (no descubrirla de nuevo cada sesión)
-- **Solo `Informatecol/` está en git.** El sistema de producción y los
-  proyectos de cliente viven únicamente en OneDrive, sin historial.
-- **Doble anidación** `Sistema-de-Produccion/Sistema-de-Produccion/` —
-  una carpeta de más que rompe enlaces relativos.
-- **`esc()` está copiado a mano en 7 de 9 `demo.html`.** Es la función de
-  seguridad que corrigió un XSS almacenado real. Si se arregla un bug ahí,
-  hay que propagarlo a las 7 copias.
-- **`backend-pro` nunca se probó contra Wompi real** — sigue la
-  documentación oficial pero no se ha validado en sandbox. No venderlo
-  como probado.
-- **Sin tests de ningún tipo** en el sistema de producción.
-- `08-pagina-del-estudio` tiene 4 copias de 2 archivos (`versiones/` y
-  `comparacion/`).
+- `herramientas/` — la fábrica operable: panel, formulario de brief,
+  validador, generador, auditor con IA, agente de Claude e historial.
+  142 pruebas pasando.
+- `Sistema-de-Produccion/` — las 10 bases. Fotos de producto en 2 de 9;
+  direcciones de arte en 1 de 9.
+- `Proyectos-Clientes/` — los entregables. **Los generados antes del
+  2026-09-01 están rotos** (les falta el arreglo de la página en blanco):
+  regenerarlos o borrarlos.
+
+### Deuda que no hay que redescubrir
+
+- `lib/acceso.js` **es el login y no tiene ni una prueba.**
+- `prueba-ecommerce` sigue con `localAuth` contra RLS — el pendiente
+  original, todavía abierto.
+- `backend-pro` nunca se probó contra Wompi real.
+- Doble carpeta `Sistema-de-Produccion/Sistema-de-Produccion/`.
+- `08-pagina-del-estudio` tiene 4 copias de 2 archivos.
+- `panel.html` son 1.144 líneas en un archivo.
 
 ## Cómo trabajar
 - Confirma a qué proyecto y a qué base pertenece la tarea antes de construir.
