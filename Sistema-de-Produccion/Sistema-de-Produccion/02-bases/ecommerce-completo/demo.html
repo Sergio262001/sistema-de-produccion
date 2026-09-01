@@ -238,6 +238,7 @@
     <button type="button" id="tCatalog" class="on" onclick="setView('catalog')">Catálogo</button>
     <button type="button" id="tAdmin" onclick="setView('admin')">Panel admin</button>
   </div>
+  <span class="tag">dirección</span>
   <div class="toggle dirsw">
       <button type="button" data-d="mercado">Mercado</button>
       <button type="button" data-d="boutique">Boutique</button>
@@ -541,13 +542,18 @@ const M = CONTEXT.moneda;
 const DIRECCIONES = ['mercado', 'boutique', 'taller'];
 
 function cablearDirecciones(){
-  document.querySelectorAll(".dirsw button").forEach(b=>{
-    b.onclick=()=>{
-      CONTEXT.marca.direccion=b.dataset.d;
+  const botones = document.querySelectorAll(".dirsw button");
+  const marcar = (d) => botones.forEach(x => x.classList.toggle("on", x.dataset.d === d));
+
+  botones.forEach(b => {
+    b.onclick = () => {
+      CONTEXT.marca.direccion = b.dataset.d;
       applyTheme();
-      document.querySelectorAll(".dirsw button").forEach(x=>x.classList.toggle("on",x===b));
+      marcar(b.dataset.d);
     };
   });
+  // Al abrir, el botón marcado tiene que coincidir con lo que dice la ficha.
+  marcar(document.documentElement.getAttribute("data-dir"));
 }
 
 function applyTheme(){
