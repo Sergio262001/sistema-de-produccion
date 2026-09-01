@@ -145,6 +145,8 @@
       transition:.14s;}
   .op:hover{border-color:var(--tenue);}
   .op.sel{border-color:var(--arcilla);background:var(--sup2);}
+  .op.na .t{color:var(--soft);font-size:13.5px;}
+  .op.na.sel{border-color:var(--soft);background:var(--sup2);}
   .op input{margin:3px 0 0;accent-color:var(--arcilla);flex-shrink:0;}
   .op .t{font-size:14.5px;}
   .dos{display:grid;grid-template-columns:1fr 1fr;gap:18px;}
@@ -442,9 +444,24 @@ function control(id) {
     c = '<input type="' + (p.t === 'tel' ? 'tel' : 'text') + '" name="' + esc(id)
       + '" value="' + esc(v || '') + '">';
   }
+  // Las obligatorias no la llevan: si el proyecto no se puede construir
+  // sin ese dato, "no aplica" no es una respuesta valida.
+  const noAplica = p.req ? ''
+    : '<label class="op na' + (v === NO_APLICA ? ' sel' : '') + '">'
+      + '<input type="radio" name="' + esc(id) + '" value="' + NO_APLICA + '"'
+      + (v === NO_APLICA ? ' checked' : '') + '>'
+      + '<span class="t">No aplica a mi negocio</span></label>';
+
+  // Sin regex a propósito: escribir la barra de cierre dentro de una
+  // expresión regular ya rompió este archivo una vez.
+  const cierre = '</' + 'div>';
+  const conNA = (p.t === 'op' || p.t === 'sino')
+    ? c.slice(0, c.lastIndexOf(cierre)) + noAplica + cierre
+    : c + (noAplica ? '<div class="ops" style="margin-top:8px">' + noAplica + cierre : '');
+
   return '<div class="campo"><label class="q">' + esc(p.q)
     + (p.req ? ' <span class="req">*</span>' : '') + '</label>'
-    + (p.a ? '<p class="ay">' + esc(p.a) + '</p>' : '') + c + '</div>';
+    + (p.a ? '<p class="ay">' + esc(p.a) + '</p>' : '') + conNA + '</div>';
 }
 
 function enlazar() {

@@ -13,9 +13,22 @@ import { evaluar } from './colores.js';
 const hallazgo = (ruta, linea, severidad, regla, mensaje, pista) =>
   ({ ruta, linea, severidad, regla, mensaje, pista });
 
+/**
+ * El validador y sus pruebas contienen, por definición, un ejemplo de cada
+ * cosa que buscan: la forma de las claves secretas y el `innerHTML` inseguro
+ * que deben detectar. Marcarlos sería ruido permanente, y un informe con
+ * ruido se deja de mirar.
+ *
+ * La exención es de dos archivos y está escrita aquí, no repartida en cada
+ * regla, para que se vea de un vistazo qué queda fuera y por qué.
+ */
+const ES_EL_PROPIO_VALIDADOR = (ruta) =>
+  /herramientas\/(lib\/reglas\.js|pruebas\/reglas\.test\.js)$/.test(ruta);
+
 // ── 1 · XSS: innerHTML interpolando sin escapar ───────────────
 export function reglaXss({ ruta, lineas }) {
   const out = [];
+  if (ES_EL_PROPIO_VALIDADOR(ruta)) return out;
   lineas.forEach((l, i) => {
     if (!/innerHTML\s*(\+?=)/.test(l)) return;
     if (!/\$\{/.test(l)) return;                 // sin interpolación no hay riesgo
@@ -176,6 +189,11 @@ export function reglaRls({ ruta, texto, lineas }) {
 export function reglaSecretos({ ruta, lineas }) {
   const out = [];
   if (/\.env\.example$/.test(ruta)) return out;
+
+  // El propio detector y sus pruebas contienen, por definición, la forma de
+  // cada clave que buscan. Marcarlos sería ruido permanente en el informe, y
+  // un informe con ruido se deja de mirar.
+  if (/herramientas\/(lib\/reglas\.js|pruebas\/reglas\.test\.js)$/.test(ruta)) return out;
 
   const patrones = [
     [/service_role/i,                    'clave service_role (omnipotente, nunca en el navegador)'],

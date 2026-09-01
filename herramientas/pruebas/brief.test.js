@@ -9,7 +9,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import {
   PASOS, FAMILIAS, BASES_CONOCIDAS,
-  respuestasAFicha, validarFicha, todasLasPreguntas,
+  respuestasAFicha, validarFicha, todasLasPreguntas, NO_APLICA, esNoAplica,
 } from '../lib/brief.js';
 
 const completas = {
@@ -183,4 +183,42 @@ test('"no" como dominio se vuelve "por comprar"', () => {
 test('un dominio real no se toca', () => {
   const { ficha } = respuestasAFicha({ ...completas, dominio: 'tacosmauricio.co' });
   assert.equal(ficha.entrega.dominio, 'tacosmauricio.co');
+});
+
+// ══════════ "NO APLICA" — no se simula, se omite ══════════
+
+test('lo marcado "no aplica" no llega a la ficha', () => {
+  const { ficha, omitidos } = respuestasAFicha({
+    ...completas, tono: NO_APLICA, subtitulo: 'no aplica',
+  });
+  assert.equal(ficha.marca.tono, undefined, 'no se rellena con el ejemplo');
+  assert.equal(ficha.marca.subtitulo, undefined);
+  assert.ok(omitidos.includes('tono'));
+  assert.ok(omitidos.includes('subtitulo'));
+});
+
+test('avisa qué se omitió, para poder pedirlo después', () => {
+  const { avisos } = respuestasAFicha({ ...completas, tono: NO_APLICA });
+  assert.ok(avisos.some((a) => /no aplica.*tono/i.test(a)));
+});
+
+test('reconoce las formas explícitas de "no aplica"', () => {
+  for (const forma of ['no aplica', 'No Aplica', 'N/A', 'n.a.', NO_APLICA]) {
+    assert.equal(esNoAplica(forma), true, 'debía reconocer: ' + forma);
+  }
+});
+
+test('NO se traga respuestas ambiguas que sí son información', () => {
+  // "todavía no" como dominio significa "hay que comprarlo" — eso es un
+  // dato, no una ausencia. Estuvo en la lista y borraba la respuesta.
+  for (const real of ['cercano y artesanal', 'no', 'ninguno', 'Casa Tela',
+                      'todavía no', 'no sé']) {
+    assert.equal(esNoAplica(real), false, 'no debía marcar: ' + real);
+  }
+});
+
+test('sin ningún no-aplica, nada cambia', () => {
+  const { ficha, omitidos } = respuestasAFicha(completas);
+  assert.equal(omitidos.length, 0);
+  assert.equal(ficha.cliente, 'Casa Tela');
 });

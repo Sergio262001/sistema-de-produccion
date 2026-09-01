@@ -212,6 +212,46 @@ function ponerEnRuta(obj, ruta, valor) {
  * aplicando las implicaciones (varias sedes → pro, datos sensibles → pro…).
  * Devuelve { ficha, base, avisos }.
  */
+/**
+ * Marca de "no aplica". Lo que el cliente marque así NO se entrega:
+ * no se simula, no se rellena con el ejemplo, no se inventa un valor
+ * razonable. Se omite, y queda escrito como pendiente.
+ *
+ * El sistema ya predicaba esto en brief-de-cliente.md ("si una respuesta
+ * queda vacía, pregunta antes de asumir"), pero no era ejecutable: una
+ * respuesta ausente y una respuesta "no aplica" se trataban igual, y
+ * entonces el entregable salía con los datos del negocio del ejemplo.
+ */
+export const NO_APLICA = '__no_aplica__';
+
+/**
+ * ¿Este valor es un "no aplica" EXPLÍCITO?
+ *
+ * La lista es corta a propósito. Se probó con "todavía no" dentro y se
+ * tragaba una respuesta legítima: "todavía no" como dominio significa "no
+ * tengo, hay que comprarlo" — eso es información, no ausencia de ella.
+ * Ante la duda, se trata como respuesta: perder un dato del cliente es peor
+ * que arrastrar uno ambiguo.
+ */
+export const esNoAplica = (v) =>
+  v === NO_APLICA
+  || (typeof v === 'string'
+      && ['no aplica', 'no-aplica', 'n/a', 'n.a.'].includes(v.trim().toLowerCase()));
+
+/**
+ * Quita del objeto todo lo marcado como no aplica, y devuelve qué se quitó
+ * para poder anotarlo como pendiente en el README del proyecto.
+ */
+export function separarNoAplica(respuestas = {}) {
+  const limpias = {};
+  const omitidos = [];
+  for (const [k, v] of Object.entries(respuestas)) {
+    if (esNoAplica(v)) omitidos.push(k);
+    else limpias[k] = v;
+  }
+  return { limpias, omitidos };
+}
+
 /** Las cuatro familias del catálogo de servicios, con su acento. */
 export const FAMILIAS = [
   { id: 'vender', nombre: 'Ecommerce & Ventas', nota: 'línea principal' },
@@ -227,9 +267,18 @@ export const BASES_CONOCIDAS = [
   'marketplace',
 ];
 
-export function respuestasAFicha(respuestas) {
+export function respuestasAFicha(respuestasCrudas) {
+  // Lo marcado "no aplica" se saca ANTES de armar nada: así no hay forma de
+  // que se cuele por un valor por defecto más abajo.
+  const { limpias: respuestas, omitidos } = separarNoAplica(respuestasCrudas || {});
+
   const ficha = {};
   const avisos = [];
+
+  if (omitidos.length) {
+    avisos.push('El cliente marcó como "no aplica": ' + omitidos.join(', ')
+      + '. Esos campos se omiten del entregable — no se rellenan con datos de ejemplo.');
+  }
 
   // El brief.html ya eligió el servicio y manda su identificador. Si viene,
   // manda sobre la deducción por palabras clave.
@@ -314,7 +363,7 @@ export function respuestasAFicha(respuestas) {
   ficha.proyecto ??= ficha.cliente;
   if (base) ficha.base = base;
 
-  return { ficha, base, avisos };
+  return { ficha, base, avisos, omitidos };
 }
 
 /**
