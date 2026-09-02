@@ -183,6 +183,15 @@ export const PASOS = [
       { id: 'bajada', campo: 'pagina.hero.bajada', tipo: 'texto',
         pregunta: 'Una línea más que explique',
         ayuda: 'Va debajo del titular, en letra más pequeña.' },
+      // La landing no tiene catálogo: sus "productos" son los servicios.
+      // Sin esta pregunta se entregaba con los cuatro servicios del ejemplo.
+      { id: 'servicios', campo: 'pagina.servicios', tipo: 'larga',
+        pregunta: 'Qué servicios ofreces',
+        ayuda: 'Uno por línea, así: nombre | qué incluye (lo de después de la '
+             + 'barra es opcional).',
+        ejemplo: 'Corte y peinado | Incluye lavado y secado\n'
+               + 'Color | Tinte, mechas o balayage\nTratamientos capilares',
+        soloBases: ['landing-modular'] },
       { id: 'sobre', campo: 'pagina.sobre.texto', tipo: 'larga',
         pregunta: 'Cuenta el negocio en un párrafo',
         ayuda: 'Quién está detrás, desde cuándo, por qué lo hacen así. Es lo '
@@ -462,6 +471,25 @@ export function respuestasAFicha(respuestasCrudas) {
     }
   }
   // ── Los bloques de página ──
+  // Los servicios llegan como texto libre: "nombre | qué incluye" por línea.
+  // Se guardan ya en lista para que la base no tenga que interpretarlos.
+  if (typeof ficha.pagina?.servicios === 'string') {
+    const lista = ficha.pagina.servicios.split('\n')
+      .map((l) => l.trim()).filter(Boolean)
+      .map((l) => {
+        const [titulo, ...resto] = l.split('|');
+        return { titulo: titulo.trim(), desc: resto.join('|').trim() };
+      })
+      .filter((s) => s.titulo);
+    if (lista.length) {
+      ficha.pagina.servicios = lista;
+      avisos.push('Servicios del cliente: ' + lista.length
+        + '. Reemplazan a los del ejemplo.');
+    } else {
+      delete ficha.pagina.servicios;
+    }
+  }
+
   // Los horarios llegan como texto libre, una línea por franja. Se guardan
   // ya en lista para que la base no tenga que interpretarlos.
   if (typeof ficha.pagina?.horarios === 'string') {

@@ -21,8 +21,12 @@ const BASES = resolve(AQUI, '..', 'Sistema-de-Produccion', 'Sistema-de-Produccio
 
 // Las cuatro bases de venta. Son las que le entregan una vitrina a un
 // negocio, y por eso son las que no pueden salir con una letra por logo.
-const CON_LOGO = ['ecommerce-completo', 'menu-con-panel-admin',
-                  'carrito-reutilizable', 'marketplace'];
+const VENTA = ['ecommerce-completo', 'menu-con-panel-admin',
+               'carrito-reutilizable', 'marketplace'];
+
+// La landing no tiene catálogo, pero sí marca y dirección de arte: es la
+// base que MÁS vive del diseño.
+const CON_LOGO = [...VENTA, 'landing-modular'];
 
 const leerBase = (b) => readFileSync(join(BASES, b, 'demo.html'), 'utf8');
 
@@ -161,7 +165,11 @@ for (const base of CON_LOGO) {
       assert.match(bloque, /--display\s*:/, d + ' no cambia la tipografía');
       assert.match(bloque, /--radius\s*:/, d + ' no cambia la forma');
       assert.match(bloque, /--ritmo\s*:/, d + ' no cambia el ritmo');
-      assert.match(bloque, /--precio-/, d + ' no cambia cómo se ve el precio');
+      // Y algo más allá de tipografía y forma, o "dirección de arte" sería
+      // un nombre grande para cambiar la fuente y las esquinas.
+      const tokens = new Set((bloque.match(/--[a-z-]+\s*:/g) || []));
+      assert.ok(tokens.size >= 6,
+        d + ' solo mueve ' + tokens.size + ' tokens: no es una dirección, es un retoque');
     }
   });
 
@@ -178,18 +186,18 @@ for (const base of CON_LOGO) {
   // siempre, elegir "mercado" o "taller" no cambiaría absolutamente nada.
   test(base + ': la marca no pisa la tipografía de la dirección', () => {
     const t = leerBase(base);
-    const suelto = /^\s*(?:r|[a-z]+)\.setProperty\((['"])--display\1/m;
-    const linea = t.split('\n').find((l) => suelto.test(l));
-    if (linea) {
+    for (const linea of t.split('\n')) {
+      if (!/setProperty\(\s*(['"])--(display|body)\1/.test(linea)) continue;
       assert.match(linea, /if\s*\(/,
-        'setProperty("--display") sin condición anula la dirección de arte');
+        'un setProperty("--display") sin condición es un estilo en línea que '
+        + 'le gana a [data-dir]: la dirección de arte no cambiaría nada.\n  ' + linea.trim());
     }
   });
 
   // ── BLOQUES DE PÁGINA ──
   // Lo que convierte un catálogo en un sitio. La regla que no se negocia:
   // un bloque sin contenido no se pinta, ni con texto de ejemplo.
-  test(base + ': tiene los bloques de página y nacen ocultos', () => {
+  if (VENTA.includes(base)) test(base + ': tiene los bloques de página y nacen ocultos', () => {
     const t = leerBase(base);
     for (const id of ['hero', 'bloques', 'pie']) {
       assert.match(t, new RegExp('id="' + id + '"[^>]*hidden'),
@@ -199,7 +207,7 @@ for (const base of CON_LOGO) {
     assert.match(t, /\bpagina\s*:\s*\{/, 'el CONTEXT no trae los bloques');
   });
 
-  test(base + ': un bloque vacío no se pinta', async () => {
+  if (VENTA.includes(base)) test(base + ': un bloque vacío no se pinta', async () => {
     const t = leerBase(base);
     const cuerpo = extraerFuncion(t, 'pintarPagina');
     // Cada bloque tiene que consultar su contenido antes de mostrarse.
@@ -214,8 +222,12 @@ for (const base of CON_LOGO) {
     assert.match(t, /@demo-only/, 'si no, verMarca() viaja al cliente como código muerto');
     assert.match(t, /@fin-demo/);
     const i = t.indexOf('@demo-only'), f = t.indexOf('@fin-demo');
-    assert.ok(i < f && t.slice(i, f).includes('function verMarca'),
-      'el marcador tiene que envolver la función, no ir suelto');
+    const dentro = t.slice(i, f);
+    assert.ok(i < f && /function\s|=>/.test(dentro),
+      'el marcador tiene que envolver código, no ir suelto');
+    assert.ok(/verMarca|dirsw/.test(dentro),
+      'el conmutador de la sysbar tiene que quedar dentro del marcador, '
+      + 'o viaja al cliente como código muerto');
   });
 
   // Unas bases tematizan en applyTheme() y otras en pintarMarca(): lo que
@@ -231,7 +243,7 @@ for (const base of CON_LOGO) {
   });
 
   // Las cuatro son bases de venta: la foto del producto es el producto.
-  test(base + ': el catálogo se pinta con medio(), no con el emoji suelto', () => {
+  if (VENTA.includes(base)) test(base + ': el catálogo se pinta con medio(), no con el emoji suelto', () => {
     const t = leerBase(base);
     assert.match(t, /function medio\(/, 'sin medio() no hay fotos de producto');
     assert.ok(!/innerHTML\s*=\s*`<div class="ph">/.test(t),

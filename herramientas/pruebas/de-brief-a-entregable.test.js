@@ -242,6 +242,38 @@ for (const base of ['menu-con-panel-admin', 'ecommerce-completo',
   });
 }
 
+// La landing es la base que más vive del diseño y la que más tiempo salió
+// con el contenido del ejemplo: no tiene catálogo, tiene servicios.
+test('la landing recibe los servicios del cliente, no los del ejemplo', () => {
+  const { html, ficha } = cadena({ ...RESPUESTAS,
+    base: 'landing-modular', objetivo: 'landing-modular',
+    cliente: 'Peluquería Marta', catalogo: '',
+    servicios: 'Corte y peinado | Incluye lavado\nColor | Tinte o mechas\nCejas' });
+
+  assert.deepEqual(ficha.pagina.servicios, [
+    { titulo: 'Corte y peinado', desc: 'Incluye lavado' },
+    { titulo: 'Color', desc: 'Tinte o mechas' },
+    { titulo: 'Cejas', desc: '' },
+  ], 'el texto libre se guarda ya en lista');
+
+  assert.ok(html.includes('Corte y peinado'), 'los servicios no llegaron');
+  for (const ajeno of ['Menús digitales', 'Estudio Lumen', 'wireframe',
+                       'Identidad y UX']) {
+    assert.ok(!html.includes(ajeno), 'se coló del ejemplo: ' + ajeno);
+  }
+});
+
+test('la landing sin servicios no inventa ninguno', () => {
+  const { html } = cadena({ ...RESPUESTAS,
+    base: 'landing-modular', objetivo: 'landing-modular', catalogo: '' });
+  // Se mira el CONTEXT, no el marcado: el <section id="servicios"> siempre
+  // existe en el HTML — lo que decide si se ve es que traiga contenido.
+  const ctx = html.slice(html.indexOf('const CONTEXT'), html.indexOf('\n};'));
+  assert.ok(!ctx.includes('servicios'),
+    'sin respuesta, la sección de servicios no debe tener datos');
+  assert.ok(!html.includes('Landing pages'), 'ni se heredan los del ejemplo');
+});
+
 test('si el catálogo no se puede sembrar, el aviso lo dice', () => {
   const { avisos } = cadena({ ...RESPUESTAS, base: 'marketplace', objetivo: 'marketplace' });
   assert.ok(avisos.some((a) => a.includes('no se puede sembrar')),

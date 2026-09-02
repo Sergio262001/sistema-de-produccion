@@ -104,6 +104,17 @@ export function ponerBloquePagina(bloque, pagina) {
     limpio.hero = {};
     if (texto(p.hero.titular)) limpio.hero.titular = texto(p.hero.titular);
     if (texto(p.hero.bajada)) limpio.hero.bajada = texto(p.hero.bajada);
+    // El eyebrow y el texto del botón son del ejemplo si no vienen: se
+    // arman con datos del propio cliente o se omiten.
+    if (texto(p.hero.eyebrow)) limpio.hero.eyebrow = texto(p.hero.eyebrow);
+    limpio.hero.cta = texto(p.hero.cta) || 'Escríbenos';
+  }
+  const servicios = (Array.isArray(p.servicios) ? p.servicios : [])
+    .map((s) => ({ titulo: texto(s?.titulo), desc: texto(s?.desc) }))
+    .filter((s) => s.titulo);
+  if (servicios.length) {
+    limpio.servicios = servicios;
+    if (texto(p.servicios_titulo)) limpio.servicios_titulo = texto(p.servicios_titulo);
   }
   if (texto(p.sobre?.texto)) {
     limpio.sobre = { titulo: texto(p.sobre.titulo) || 'Sobre nosotros',

@@ -328,6 +328,9 @@ const P = {
                a:'Lo primero que va a leer alguien que entre. Qué vendes y para quién, en una línea. Ej: "Pan de masa madre, horneado cada mañana en Laureles".' },
   bajada:    { q:'Una línea más que explique', t:'texto',
                a:'Va debajo del titular, en letra más pequeña. Puede ser el envío, el horario o lo que te hace distinto.' },
+  servicios: { q:'¿Qué servicios ofreces?', t:'larga',
+               a:'Uno por línea, así: nombre | qué incluye. Lo de después de la barra es opcional.',
+               ej:'Corte y peinado | Incluye lavado y secado\nColor | Tinte, mechas o balayage\nTratamientos capilares' },
   sobre:     { q:'Cuéntanos tu negocio en un párrafo', t:'larga',
                a:'Quién está detrás, desde cuándo, por qué lo haces así. Tres o cuatro frases. Es lo que separa un negocio de una lista de precios.' },
   horarios:  { q:'¿Qué horarios atiendes?', t:'larga',
@@ -368,7 +371,7 @@ const PASOS = [
     campos:['tienemarca','logo','banner','primario','secundario','inicial','tono','direccion'] },
   { id:'pagina',   t:'Página',    h:'Tu página, no solo tu catálogo',
     g:'Esto es lo que hace que tu sitio se sienta tuyo y no una lista de precios. Lo que dejes vacío simplemente no se muestra.',
-    campos:['titular','bajada','sobre','horarios','ubicacion','instagram'] },
+    campos:['titular','bajada','servicios','sobre','horarios','ubicacion','instagram'] },
   { id:'operacion',t:'Operación', h:'Cómo va a operar',
     g:'Cómo recibes pedidos y dónde viven los datos.',
     campos:['whatsapp','pagos','sensibles','motor'] },
@@ -392,6 +395,8 @@ function camposDe(paso) {
     // de una landing es ruido, y el ruido hace que se abandone el formulario.
     if (c === 'catalogo') return ['menu-con-panel-admin','ecommerce-completo',
                                   'carrito-reutilizable','marketplace'].includes(SERVICIO);
+    // La landing no tiene catálogo: sus "productos" son los servicios.
+    if (c === 'servicios') return SERVICIO === 'landing-modular';
     return true;
   });
 }
