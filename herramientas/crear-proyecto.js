@@ -72,6 +72,57 @@ function leerArgs(argv) {
  * tiene su propio CONTEXT con claves distintas, y reescribirlo completo
  * borraría las que esa base necesita.
  */
+/**
+ * Reemplaza el objeto `pagina:{...}` del CONTEXT por el del cliente.
+ *
+ * Se buscan las llaves emparejadas en vez de usar una expresión regular
+ * porque el objeto tiene objetos y listas dentro, y un `[\s\S]*?\}` cortaría
+ * en la primera llave que encuentre, dejando basura suelta en el script.
+ *
+ * Si el cliente no respondió nada, se escribe `pagina:{}`: la base pinta los
+ * bloques solo cuando traen contenido, así que quedan sin mostrarse.
+ */
+export function ponerBloquePagina(bloque, pagina) {
+  const i = bloque.search(/\bpagina\s*:\s*\{/);
+  if (i === -1) return bloque;                 // base sin bloques de página
+
+  const abre = bloque.indexOf('{', i);
+  let nivel = 0, fin = -1;
+  for (let n = abre; n < bloque.length; n++) {
+    if (bloque[n] === '{') nivel++;
+    else if (bloque[n] === '}') {
+      nivel--;
+      if (nivel === 0) { fin = n; break; }
+    }
+  }
+  if (fin === -1) return bloque;               // sin cierre: mejor no tocar
+
+  const limpio = {};
+  const p = pagina || {};
+  const texto = (v) => String(v ?? '').trim();
+  if (texto(p.hero?.titular) || texto(p.hero?.bajada)) {
+    limpio.hero = {};
+    if (texto(p.hero.titular)) limpio.hero.titular = texto(p.hero.titular);
+    if (texto(p.hero.bajada)) limpio.hero.bajada = texto(p.hero.bajada);
+  }
+  if (texto(p.sobre?.texto)) {
+    limpio.sobre = { titulo: texto(p.sobre.titulo) || 'Sobre nosotros',
+                     texto: texto(p.sobre.texto) };
+  }
+  const horarios = (Array.isArray(p.horarios) ? p.horarios : [])
+    .map(texto).filter(Boolean);
+  if (horarios.length) limpio.horarios = horarios;
+  if (texto(p.ubicacion?.direccion)) {
+    limpio.ubicacion = { direccion: texto(p.ubicacion.direccion) };
+  }
+  if (texto(p.redes?.instagram)) {
+    limpio.redes = { instagram: texto(p.redes.instagram).replace(/^@/, '') };
+  }
+
+  return bloque.slice(0, i) + 'pagina:' + JSON.stringify(limpio)
+       + bloque.slice(fin + 1);
+}
+
 export function ponerEnContexto(html, marca = {}, cliente = '', ficha = {}) {
   let out = html;
   const cita = (v) => JSON.stringify(String(v));
@@ -110,6 +161,16 @@ export function ponerEnContexto(html, marca = {}, cliente = '', ficha = {}) {
   // la dirección del ejemplo, que es justo lo que hacía que dos negocios
   // distintos recibieran la misma página pintada de otro color.
   campo('direccion', marca.direccion);
+
+  // LOS BLOQUES DE PÁGINA SON IDENTIDAD AJENA, ENTERA.
+  //
+  // El titular, la historia, los horarios, la dirección y el Instagram del
+  // ejemplo describen a OTRO negocio. Heredarlos sería peor que dejarlos
+  // vacíos: el cliente vería su nombre encima de la historia de un café que
+  // no es suyo, con la dirección de otro local. Por eso no se parchea campo
+  // a campo — se reemplaza el objeto completo, y si el cliente no respondió
+  // nada, queda vacío y la página simplemente no pinta esos bloques.
+  bloque = ponerBloquePagina(bloque, ficha.pagina);
 
   // Lo operativo: si esto se queda con los valores del ejemplo, el botón de
   // WhatsApp del cliente escribe al número de otro negocio.
@@ -286,6 +347,12 @@ export function construirFicha(ejemplo, datos) {
     ficha.base_de_datos = { ...(ejemplo.base_de_datos || {}), ...dado.base_de_datos };
   }
   if (dado.auth) ficha.auth = { ...(ejemplo.auth || {}), ...dado.auth };
+
+  // Los bloques de página NO se heredan del ejemplo, ni una palabra: el
+  // titular, la historia, los horarios y la dirección son de otro negocio.
+  // O son los del cliente, o no hay.
+  if (dado.pagina) ficha.pagina = dado.pagina;
+  else delete ficha.pagina;
 
   ficha.entrega = {
     ...limpiarIdentidad(ejemplo.entrega, dado.entrega || {}),
@@ -584,6 +651,11 @@ if (process.argv[1] && process.argv[1].endsWith('crear-proyecto.js')) {
   if (args.logo) opciones.marca.logo = args.logo;
   if (args.banner) opciones.marca.banner = args.banner;
   if (args.direccion) opciones.marca.direccion = args.direccion;
+
+  // `--destino` saca la generación de Proyectos-Clientes/. Existe para poder
+  // probar el generador sin dejar carpetas de prueba dentro del repositorio:
+  // una se coló en un commit por generarla en el sitio de verdad.
+  if (args.destino) opciones.destino = resolve(args.destino);
 
   const r = crearProyecto(opciones);
   if (!r.ok) {

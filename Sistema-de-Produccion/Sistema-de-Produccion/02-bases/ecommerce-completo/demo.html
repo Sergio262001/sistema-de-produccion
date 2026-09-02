@@ -105,6 +105,48 @@
   .cartbtn{margin-left:auto;position:relative;background:var(--surface);border:1px solid var(--line);border-radius:30px;padding:11px 18px;font-weight:600;font-size:14px;display:flex;align-items:center;gap:9px;color:var(--ink);}
   .cartbtn .badge{background:var(--brand);color:#fff;border-radius:20px;min-width:20px;height:20px;font-size:11px;display:grid;place-items:center;padding:0 5px;font-family:monospace;}
 
+  /* ---- BLOQUES DE PÁGINA ----
+     Hero, sobre el negocio, horarios, dónde estamos y pie. Todos nacen
+     ocultos: si la ficha no los trae, no dejan hueco. `hidden` y
+     `.en-admin` ganan siempre. */
+  .hero{padding:calc(10px * var(--ritmo)) 0 calc(26px * var(--ritmo));
+     max-width:58ch;}
+  .hero h2{font-size:clamp(24px,4.2vw,36px);line-height:1.1;}
+  .hero p{margin:12px 0 0;color:var(--ink-soft);font-size:16px;line-height:1.55;}
+
+  .bloques{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));
+     gap:calc(20px * var(--ritmo));padding:calc(26px * var(--ritmo)) 0;
+     border-top:var(--borde) solid var(--line);}
+  .bloque h2{font-size:15px;font-family:var(--body);font-weight:600;
+     text-transform:uppercase;letter-spacing:.06em;color:var(--ink-soft);
+     margin-bottom:10px;}
+  .bloque p{margin:0;font-size:14.5px;line-height:1.6;color:var(--ink);}
+  .bloque .lista{list-style:none;margin:0;padding:0;font-size:14.5px;
+     line-height:1.9;color:var(--ink);}
+  .enlace{display:inline-block;margin-top:10px;color:var(--brand);
+     font-size:13.5px;font-weight:600;text-decoration:none;
+     border-bottom:1px solid currentColor;}
+  .enlace:hover{opacity:.75;}
+
+  .pie{border-top:var(--borde) solid var(--line);padding:22px 0 90px;}
+  .pie-in{display:flex;flex-wrap:wrap;gap:16px;align-items:center;
+     font-size:13.5px;color:var(--ink-soft);}
+  .pie-in b{font-family:var(--display);font-size:15px;color:var(--ink);}
+  .pie .enlace{margin-top:0;}
+
+  .hero[hidden],.bloques[hidden],.pie[hidden]{display:none;}
+  .hero.en-admin,.bloques.en-admin,.pie.en-admin{display:none;}
+
+  /* La dirección de arte también manda aquí, o el hero sería el mismo
+     rectángulo de texto para los tres mundos visuales. */
+  [data-dir="mercado"] .hero h2{text-transform:uppercase;}
+  [data-dir="mercado"] .bloque h2{border-bottom:2px solid var(--ink);
+     padding-bottom:6px;color:var(--ink);}
+  [data-dir="boutique"] .hero{max-width:44ch;padding-bottom:40px;}
+  [data-dir="boutique"] .hero h2{font-size:clamp(28px,5vw,44px);}
+  [data-dir="boutique"] .bloque h2{text-transform:none;letter-spacing:0;
+     font-family:var(--display);font-size:19px;color:var(--ink);}
+
   .nav-pills{display:flex;gap:8px;overflow-x:auto;padding:18px 0;}
   .nav-pills button{white-space:nowrap;background:var(--surface);border:1px solid var(--line);color:var(--ink-soft);border-radius:30px;padding:8px 16px;font-size:13.5px;font-weight:500;}
   .nav-pills button.on{background:var(--brand);color:#fff;border-color:var(--brand);}
@@ -270,8 +312,15 @@
     <button type="button" class="cartbtn" onclick="openCart()">🛒 Carrito <span class="badge" id="count">0</span></button>
   </div>
 
+  <!-- HERO. Nace oculto: sin titular no se muestra. -->
+  <section class="hero" id="hero" hidden></section>
+
   <div class="nav-pills" id="cats"></div>
   <div class="grid" id="grid"></div>
+
+  <!-- BLOQUES DE PÁGINA (sobre el negocio, horarios, dónde estamos).
+       Cada uno se pinta SOLO si la ficha lo trae. Vacío = no existe. -->
+  <section class="bloques" id="bloques" hidden></section>
 
   <!-- PANEL ADMIN -->
   <div class="admin" id="admin">
@@ -317,6 +366,9 @@
       </div>
     </div>
   </div>
+
+  <!-- PIE. Contacto, horarios y dirección. Oculto si no hay nada que decir. -->
+  <footer class="pie" id="pie" hidden></footer>
 </div>
 
 <div class="overlay" id="overlay" onclick="closeCart()"></div>
@@ -346,6 +398,23 @@ const CONTEXT = {
            // banner. Una inicial en un cuadro sirve para la demo; un negocio
            // que ya tiene logo no se entrega con una letra.
            logo:"", banner:"" },
+  /* LOS BLOQUES DE LA PÁGINA.
+     Sin esto el entregable era cabecera + categorías + rejilla: un
+     catálogo, no un sitio. Cada bloque se pinta SOLO si trae contenido.
+     Vacío = no existe; nunca se rellena con texto de ejemplo. */
+  pagina: {
+    hero: { titular: "Ropa de algodón orgánico, hecha en Colombia",
+            bajada: "Cortes que duran. Envío a todo el país en 2 a 4 días." },
+    sobre: { titulo: "Sobre nosotros",
+             texto: "Casa Tela empezó en un taller de dos máquinas en 2020. "
+                  + "Trabajamos con algodón certificado y confeccionamos en "
+                  + "Medellín, con dos talleres a los que les pagamos por "
+                  + "prenda terminada, no por hora." },
+    horarios: ["Tienda física · lunes a sábado, 10:00 a 19:00",
+               "Pedidos en línea · todos los días"],
+    ubicacion: { direccion: "Calle 10 #38-22, El Poblado · Medellín" },
+    redes: { instagram: "casatela.co" }
+  },
   base_de_datos: { motor: "local" },     // firebase | supabase | local
   auth: { motor: "local", rol_requerido: "admin" },
   apis: { pagos: "whatsapp", whatsapp_num: "573098765432" },
@@ -603,6 +672,83 @@ const M = CONTEXT.moneda;
 /* ════════════════════════════════════════════════════════════
    4) THEMING
    ════════════════════════════════════════════════════════════ */
+/* ====================================================================
+   BLOQUES DE PÁGINA — lo que convierte un catálogo en un sitio.
+
+   Regla única y no negociable: un bloque sin contenido NO se pinta.
+   Ni con texto de ejemplo, ni con un "Próximamente", ni con una foto de
+   banco. Un hueco honesto se ve mejor que un relleno inventado, y además
+   le dice al dueño qué le falta mandar.
+   ==================================================================== */
+function pintarPagina(){
+  const p = (CONTEXT.pagina) || {};
+
+  // ── Hero ──
+  const hero = document.getElementById('hero');
+  if(hero){
+    const t = String(p.hero && p.hero.titular || '').trim();
+    const b = String(p.hero && p.hero.bajada || '').trim();
+    if(t || b){
+      hero.innerHTML = (t ? '<h2>'+esc(t)+'</h2>' : '')
+                     + (b ? '<p>'+esc(b)+'</p>' : '');
+      hero.hidden = false;
+    } else { hero.hidden = true; }
+  }
+
+  // ── Sobre el negocio · horarios · dónde estamos ──
+  const zona = document.getElementById('bloques');
+  if(zona){
+    const partes = [];
+
+    const texto = String(p.sobre && p.sobre.texto || '').trim();
+    if(texto){
+      const titulo = String(p.sobre.titulo || 'Sobre nosotros').trim();
+      partes.push('<div class="bloque"><h2>'+esc(titulo)+'</h2>'
+        + '<p>'+esc(texto)+'</p></div>');
+    }
+
+    const horarios = Array.isArray(p.horarios) ? p.horarios.filter(Boolean) : [];
+    if(horarios.length){
+      partes.push('<div class="bloque"><h2>Horarios</h2><ul class="lista">'
+        + horarios.map((h)=>'<li>'+esc(h)+'</li>').join('')
+        + '</ul></div>');
+    }
+
+    const dir = String(p.ubicacion && p.ubicacion.direccion || '').trim();
+    if(dir){
+      // El enlace al mapa se arma con la dirección; no hace falta API ni clave.
+      const mapa = 'https://www.google.com/maps/search/?api=1&query='
+        + encodeURIComponent(dir);
+      partes.push('<div class="bloque"><h2>Dónde estamos</h2><p>'+esc(dir)+'</p>'
+        + '<a class="enlace" href="'+esc(mapa)+'" target="_blank" rel="noopener">'
+        + 'Ver en el mapa</a></div>');
+    }
+
+    zona.innerHTML = partes.join('');
+    zona.hidden = partes.length === 0;
+  }
+
+  // ── Pie ──
+  const pie = document.getElementById('pie');
+  if(pie){
+    const trozos = [];
+    const wa = String(CONTEXT.apis && CONTEXT.apis.whatsapp_num || '').replace(/\D/g,'');
+    if(wa) trozos.push('<a class="enlace" href="https://wa.me/'+esc(wa)
+      + '" target="_blank" rel="noopener">WhatsApp</a>');
+    const ig = String(p.redes && p.redes.instagram || '').replace(/^@/,'').trim();
+    if(ig) trozos.push('<a class="enlace" href="https://instagram.com/'+esc(ig)
+      + '" target="_blank" rel="noopener">@'+esc(ig)+'</a>');
+    const dir = String(p.ubicacion && p.ubicacion.direccion || '').trim();
+    if(dir) trozos.push('<span>'+esc(dir)+'</span>');
+
+    if(trozos.length){
+      pie.innerHTML = '<div class="pie-in"><b>'+esc(CONTEXT.cliente)+'</b>'
+        + trozos.join('') + '</div>';
+      pie.hidden = false;
+    } else { pie.hidden = true; }
+  }
+}
+
 /** Las tres direcciones válidas. Cualquier otra cosa cae en "taller". */
 const DIRECCIONES = ['mercado', 'boutique', 'taller'];
 
@@ -637,6 +783,7 @@ function applyTheme(){
   document.getElementById('biz').textContent = CONTEXT.cliente;
   document.getElementById('sysClient').textContent = CONTEXT.cliente;
   document.getElementById('sysAdapter').textContent = CONTEXT.base_de_datos.motor;
+  pintarPagina();
 }
 
 /* ════════════════════════════════════════════════════════════
@@ -868,6 +1015,12 @@ document.getElementById('adminLoginForm').addEventListener('submit', async (e)=>
 function setView(v){
   document.getElementById('cats').classList.toggle('hide', v==='admin');
   document.getElementById('grid').classList.toggle('hide', v==='admin');
+  // El hero y los bloques son de la vista cliente: en el panel estorban.
+  // Se respeta que estuvieran ocultos por falta de contenido.
+  ['hero','bloques','pie'].forEach((id)=>{
+    const el=document.getElementById(id);
+    if(el) el.classList.toggle('en-admin', v==='admin');
+  });
   document.getElementById('admin').classList.toggle('show', v==='admin');
   document.getElementById('tCatalog').classList.toggle('on', v==='catalog');
   document.getElementById('tAdmin').classList.toggle('on', v==='admin');

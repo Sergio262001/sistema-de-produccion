@@ -186,6 +186,29 @@ for (const base of CON_LOGO) {
     }
   });
 
+  // ── BLOQUES DE PÁGINA ──
+  // Lo que convierte un catálogo en un sitio. La regla que no se negocia:
+  // un bloque sin contenido no se pinta, ni con texto de ejemplo.
+  test(base + ': tiene los bloques de página y nacen ocultos', () => {
+    const t = leerBase(base);
+    for (const id of ['hero', 'bloques', 'pie']) {
+      assert.match(t, new RegExp('id="' + id + '"[^>]*hidden'),
+        'falta el bloque "' + id + '" o no nace oculto');
+    }
+    assert.match(t, /function pintarPagina\(/);
+    assert.match(t, /\bpagina\s*:\s*\{/, 'el CONTEXT no trae los bloques');
+  });
+
+  test(base + ': un bloque vacío no se pinta', async () => {
+    const t = leerBase(base);
+    const cuerpo = extraerFuncion(t, 'pintarPagina');
+    // Cada bloque tiene que consultar su contenido antes de mostrarse.
+    assert.match(cuerpo, /hidden\s*=\s*true/,
+      'sin esto, un bloque sin datos deja un hueco vacío en la entrega');
+    assert.ok(!/Próximamente|Lorem|proximamente/i.test(cuerpo),
+      'nunca se rellena un bloque vacío con texto de relleno');
+  });
+
   test(base + ': el conmutador de la demo está marcado como andamiaje', () => {
     const t = leerBase(base);
     assert.match(t, /@demo-only/, 'si no, verMarca() viaja al cliente como código muerto');

@@ -168,6 +168,37 @@ export const PASOS = [
     ],
   },
   {
+    // El paso que faltaba para que el entregable dejara de ser un catálogo.
+    // Sin esto la página del cliente era: cabecera + categorías + rejilla.
+    // Ningún bloque se inventa: lo que no se responde, no se pinta.
+    id: 'pagina',
+    titulo: 'La página, no solo el catálogo',
+    nota: 'Cada respuesta es un bloque de la página. Lo que quede vacío no se '
+        + 'muestra — no se rellena con texto de ejemplo.',
+    preguntas: [
+      { id: 'titular', campo: 'pagina.hero.titular', tipo: 'texto',
+        pregunta: 'La frase grande de arriba',
+        ayuda: 'Lo primero que se lee. Qué vendes y para quién, en una línea. '
+             + 'Ej: "Pan de masa madre, horneado cada mañana en Laureles".' },
+      { id: 'bajada', campo: 'pagina.hero.bajada', tipo: 'texto',
+        pregunta: 'Una línea más que explique',
+        ayuda: 'Va debajo del titular, en letra más pequeña.' },
+      { id: 'sobre', campo: 'pagina.sobre.texto', tipo: 'larga',
+        pregunta: 'Cuenta el negocio en un párrafo',
+        ayuda: 'Quién está detrás, desde cuándo, por qué lo hacen así. Es lo '
+             + 'que separa a un negocio de un catálogo. Tres o cuatro frases.' },
+      { id: 'horarios', campo: 'pagina.horarios', tipo: 'larga',
+        pregunta: 'Horarios de atención',
+        ayuda: 'Uno por línea. Ej: "Lunes a viernes · 8:00 a 18:00".' },
+      { id: 'ubicacion', campo: 'pagina.ubicacion.direccion', tipo: 'texto',
+        pregunta: 'Dirección del local',
+        ayuda: 'Si no atiendes al público, marca que no aplica.' },
+      { id: 'instagram', campo: 'pagina.redes.instagram', tipo: 'texto',
+        pregunta: 'Instagram',
+        ayuda: 'Solo el usuario, sin la arroba.' },
+    ],
+  },
+  {
     id: 'contacto',
     titulo: 'Cómo recibe pedidos hoy',
     preguntas: [
@@ -430,6 +461,37 @@ export function respuestasAFicha(respuestasCrudas) {
         + 'no la imagen en sí. Verifica que se vea al abrirla sola en el navegador.');
     }
   }
+  // ── Los bloques de página ──
+  // Los horarios llegan como texto libre, una línea por franja. Se guardan
+  // ya en lista para que la base no tenga que interpretarlos.
+  if (typeof ficha.pagina?.horarios === 'string') {
+    const lineas = ficha.pagina.horarios.split('\n')
+      .map((l) => l.trim()).filter(Boolean);
+    if (lineas.length) ficha.pagina.horarios = lineas;
+    else delete ficha.pagina.horarios;
+  }
+
+  // Instagram: la gente pega la arroba, la URL completa o el usuario suelto.
+  const ig = String(ficha.pagina?.redes?.instagram || '').trim();
+  if (ig) {
+    const usuario = ig.replace(/^https?:\/\/(www\.)?instagram\.com\//i, '')
+      .replace(/^@/, '').replace(/\/.*$/, '').trim();
+    if (usuario) ficha.pagina.redes.instagram = usuario;
+    else delete ficha.pagina.redes.instagram;
+  }
+
+  // Si no contestó ningún bloque, el entregable vuelve a ser un catálogo
+  // suelto. No es un error, pero hay que decirlo antes de entregarlo.
+  const bloques = ['pagina.hero.titular', 'pagina.sobre.texto',
+                   'pagina.horarios', 'pagina.ubicacion.direccion'];
+  const conBloque = bloques.some((ruta) =>
+    ruta.split('.').reduce((o, k) => (o == null ? o : o[k]), ficha));
+  if (!conBloque) {
+    avisos.push('Sin titular, sin descripción del negocio, sin horarios y sin '
+      + 'dirección: el entregable va a ser un catálogo suelto, no una página. '
+      + 'Ninguno se inventa — pídeselos antes de publicar.');
+  }
+
   // La dirección de arte. Solo tres valores; cualquier otra cosa la base la
   // ignora y cae en "taller", así que más vale decirlo aquí.
   const DIRECCIONES = ['mercado', 'boutique', 'taller'];

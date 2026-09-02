@@ -54,6 +54,7 @@ node crear-proyecto.js --cliente "Café Raíz" --base menu-con-panel-admin \
                        --logo "https://cliente.com/logo.svg" \
                        --banner "https://cliente.com/local.jpg"
 node crear-proyecto.js --ficha ruta/a/contexto.yml
+node crear-proyecto.js --cliente "Prueba" --base landing-modular --destino /tmp/prueba
 ```
 
 `--logo` y `--banner` son opcionales y solo aceptan `https://`, `/` o `./`

@@ -79,6 +79,48 @@
   .head .cartbtn{margin-left:auto;position:relative;background:var(--surface);border:1px solid var(--line);border-radius:30px;padding:11px 18px;font-weight:600;font-size:14px;display:flex;align-items:center;gap:9px;color:var(--ink);}
   .head .cartbtn .badge{background:var(--brand);color:#fff;border-radius:20px;min-width:20px;height:20px;font-size:11px;display:grid;place-items:center;padding:0 5px;font-family:'JetBrains Mono';}
 
+  /* ---- BLOQUES DE PÁGINA ----
+     Hero, sobre el negocio, horarios, dónde estamos y pie. Todos nacen
+     ocultos: si la ficha no los trae, no dejan hueco. `hidden` y
+     `.en-admin` ganan siempre. */
+  .hero{padding:calc(10px * var(--ritmo)) 0 calc(26px * var(--ritmo));
+     max-width:58ch;}
+  .hero h2{font-size:clamp(24px,4.2vw,36px);line-height:1.1;}
+  .hero p{margin:12px 0 0;color:var(--ink-soft);font-size:16px;line-height:1.55;}
+
+  .bloques{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));
+     gap:calc(20px * var(--ritmo));padding:calc(26px * var(--ritmo)) 0;
+     border-top:var(--borde) solid var(--line);}
+  .bloque h2{font-size:15px;font-family:var(--body);font-weight:600;
+     text-transform:uppercase;letter-spacing:.06em;color:var(--ink-soft);
+     margin-bottom:10px;}
+  .bloque p{margin:0;font-size:14.5px;line-height:1.6;color:var(--ink);}
+  .bloque .lista{list-style:none;margin:0;padding:0;font-size:14.5px;
+     line-height:1.9;color:var(--ink);}
+  .enlace{display:inline-block;margin-top:10px;color:var(--brand);
+     font-size:13.5px;font-weight:600;text-decoration:none;
+     border-bottom:1px solid currentColor;}
+  .enlace:hover{opacity:.75;}
+
+  .pie{border-top:var(--borde) solid var(--line);padding:22px 0 90px;}
+  .pie-in{display:flex;flex-wrap:wrap;gap:16px;align-items:center;
+     font-size:13.5px;color:var(--ink-soft);}
+  .pie-in b{font-family:var(--display);font-size:15px;color:var(--ink);}
+  .pie .enlace{margin-top:0;}
+
+  .hero[hidden],.bloques[hidden],.pie[hidden]{display:none;}
+  .hero.en-admin,.bloques.en-admin,.pie.en-admin{display:none;}
+
+  /* La dirección de arte también manda aquí, o el hero sería el mismo
+     rectángulo de texto para los tres mundos visuales. */
+  [data-dir="mercado"] .hero h2{text-transform:uppercase;}
+  [data-dir="mercado"] .bloque h2{border-bottom:2px solid var(--ink);
+     padding-bottom:6px;color:var(--ink);}
+  [data-dir="boutique"] .hero{max-width:44ch;padding-bottom:40px;}
+  [data-dir="boutique"] .hero h2{font-size:clamp(28px,5vw,44px);}
+  [data-dir="boutique"] .bloque h2{text-transform:none;letter-spacing:0;
+     font-family:var(--display);font-size:19px;color:var(--ink);}
+
   .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));
      gap:calc(16px * var(--ritmo));padding:24px 0 60px;}
   .card{background:var(--surface);border:var(--borde) solid var(--line);border-radius:var(--radius);overflow:hidden;display:flex;flex-direction:column;box-shadow:var(--sombra);}
@@ -167,7 +209,16 @@
       🛒 Carrito <span class="badge" id="count">0</span>
     </button>
   </div>
+  <!-- HERO. Nace oculto: sin titular no se muestra. -->
+  <section class="hero" id="hero" hidden></section>
+
   <div class="grid" id="grid"></div>
+
+  <!-- BLOQUES DE PÁGINA. Cada uno se pinta SOLO si la ficha lo trae. -->
+  <section class="bloques" id="bloques" hidden></section>
+
+  <!-- PIE. Contacto, horarios y dirección. Oculto si no hay nada que decir. -->
+  <footer class="pie" id="pie" hidden></footer>
 </div>
 
 <div class="overlay" id="overlay" onclick="closeCart()"></div>
@@ -309,6 +360,18 @@ const CONTEXT = {
           // banner. Un negocio que ya tiene logo no se entrega con una letra.
           logo:"", banner:"" },
   apis:{ pagos:"whatsapp", whatsapp_num:"573001234567", wompi_public_key:"" },  // prueba: cambia pagos a "wompi" y pon tu public key sandbox
+  /* LOS BLOQUES DE LA PÁGINA. Cada uno se pinta SOLO si trae contenido.
+     Vacío = no existe; nunca se rellena con texto de ejemplo. */
+  pagina:{
+    hero:{ titular:"Desayunos y café para llevar",
+           bajada:"Pide desde aquí y recoge en 15 minutos." },
+    sobre:{ titulo:"Sobre nosotros",
+            texto:"Cocina abierta desde 2019. Pan de masa madre propio y "
+                + "café de fincas de Nariño, tostado cada semana." },
+    horarios:["Lunes a viernes · 7:00 a 20:00","Sábados · 8:00 a 21:00"],
+    ubicacion:{ direccion:"Carrera 35 #8A-12, Provenza · Medellín" },
+    redes:{ instagram:"caferaiz.co" }
+  },
   moneda:"$"
 };
 
@@ -341,6 +404,83 @@ const PRODUCTOS = DATA.categorias.flatMap(c => c.productos || []);
 const r=document.documentElement.style;
 r.setProperty('--brand',CONTEXT.marca.primario);
 r.setProperty('--bg',CONTEXT.marca.secundario);
+/* ====================================================================
+   BLOQUES DE PÁGINA — lo que convierte un catálogo en un sitio.
+
+   Regla única y no negociable: un bloque sin contenido NO se pinta.
+   Ni con texto de ejemplo, ni con un "Próximamente", ni con una foto de
+   banco. Un hueco honesto se ve mejor que un relleno inventado, y además
+   le dice al dueño qué le falta mandar.
+   ==================================================================== */
+function pintarPagina(){
+  const p = (CONTEXT.pagina) || {};
+
+  // ── Hero ──
+  const hero = document.getElementById('hero');
+  if(hero){
+    const t = String(p.hero && p.hero.titular || '').trim();
+    const b = String(p.hero && p.hero.bajada || '').trim();
+    if(t || b){
+      hero.innerHTML = (t ? '<h2>'+esc(t)+'</h2>' : '')
+                     + (b ? '<p>'+esc(b)+'</p>' : '');
+      hero.hidden = false;
+    } else { hero.hidden = true; }
+  }
+
+  // ── Sobre el negocio · horarios · dónde estamos ──
+  const zona = document.getElementById('bloques');
+  if(zona){
+    const partes = [];
+
+    const texto = String(p.sobre && p.sobre.texto || '').trim();
+    if(texto){
+      const titulo = String(p.sobre.titulo || 'Sobre nosotros').trim();
+      partes.push('<div class="bloque"><h2>'+esc(titulo)+'</h2>'
+        + '<p>'+esc(texto)+'</p></div>');
+    }
+
+    const horarios = Array.isArray(p.horarios) ? p.horarios.filter(Boolean) : [];
+    if(horarios.length){
+      partes.push('<div class="bloque"><h2>Horarios</h2><ul class="lista">'
+        + horarios.map((h)=>'<li>'+esc(h)+'</li>').join('')
+        + '</ul></div>');
+    }
+
+    const dir = String(p.ubicacion && p.ubicacion.direccion || '').trim();
+    if(dir){
+      // El enlace al mapa se arma con la dirección; no hace falta API ni clave.
+      const mapa = 'https://www.google.com/maps/search/?api=1&query='
+        + encodeURIComponent(dir);
+      partes.push('<div class="bloque"><h2>Dónde estamos</h2><p>'+esc(dir)+'</p>'
+        + '<a class="enlace" href="'+esc(mapa)+'" target="_blank" rel="noopener">'
+        + 'Ver en el mapa</a></div>');
+    }
+
+    zona.innerHTML = partes.join('');
+    zona.hidden = partes.length === 0;
+  }
+
+  // ── Pie ──
+  const pie = document.getElementById('pie');
+  if(pie){
+    const trozos = [];
+    const wa = String(CONTEXT.apis && CONTEXT.apis.whatsapp_num || '').replace(/\D/g,'');
+    if(wa) trozos.push('<a class="enlace" href="https://wa.me/'+esc(wa)
+      + '" target="_blank" rel="noopener">WhatsApp</a>');
+    const ig = String(p.redes && p.redes.instagram || '').replace(/^@/,'').trim();
+    if(ig) trozos.push('<a class="enlace" href="https://instagram.com/'+esc(ig)
+      + '" target="_blank" rel="noopener">@'+esc(ig)+'</a>');
+    const dir = String(p.ubicacion && p.ubicacion.direccion || '').trim();
+    if(dir) trozos.push('<span>'+esc(dir)+'</span>');
+
+    if(trozos.length){
+      pie.innerHTML = '<div class="pie-in"><b>'+esc(CONTEXT.cliente)+'</b>'
+        + trozos.join('') + '</div>';
+      pie.hidden = false;
+    } else { pie.hidden = true; }
+  }
+}
+
 /** Las tres direcciones válidas. Cualquier otra cosa cae en "taller". */
 const DIRECCIONES = ['mercado', 'boutique', 'taller'];
 
@@ -352,6 +492,7 @@ function pintarMarca(){
   document.documentElement.setAttribute('data-dir', dir);
   pintarLogo(document.getElementById('logo'),m,CONTEXT.cliente);
   pintarBanner(document.getElementById('banner'),m,CONTEXT.cliente);
+  pintarPagina();
 }
 pintarMarca();
 /* @demo-only

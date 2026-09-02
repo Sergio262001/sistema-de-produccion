@@ -49,6 +49,12 @@ const RESPUESTAS = {
   fotos: 'si',
   catalogo: 'Tacos\nAl pastor | 12000 | Piña y cilantro\nCarnitas | 11500\n\n'
           + 'Bebidas\nAgua de horchata | 6000',
+  titular: 'Tacos al carbón, como en Monterrey',
+  bajada: 'Tortilla hecha a mano todos los días',
+  sobre: 'Mauricio aprendió con su abuela en Monterrey y abrió aquí en 2021.',
+  horarios: 'Martes a domingo · 12:00 a 22:00\nLunes · cerrado',
+  ubicacion: 'Calle 44 #70-15, Laureles · Medellín',
+  instagram: '@tacosmauricio',
   analitica: 'ninguna',
   soporte: 'plan_mensual',
   linea: 'starter',
@@ -109,6 +115,46 @@ test('ninguna respuesta del brief se pierde por el camino', () => {
   assert.equal(ficha.entrega.dominio, 'tacosmauricio.co');
   assert.equal(ficha.apis.whatsapp_num, '573666778839');
   assert.equal(ficha.base_de_datos.motor, 'supabase');
+});
+
+// ══════════ LOS BLOQUES DE PÁGINA ══════════
+// Antes de esto el entregable era cabecera + categorías + rejilla: un
+// catálogo, no un sitio.
+
+test('los bloques de página del cliente llegan al entregable', () => {
+  const { html, ficha } = cadena();
+  assert.ok(html.includes('Tacos al carbón, como en Monterrey'), 'falta el titular');
+  assert.ok(html.includes('Tortilla hecha a mano'), 'falta la bajada');
+  assert.ok(html.includes('aprendió con su abuela'), 'falta el "sobre nosotros"');
+  assert.ok(html.includes('Martes a domingo'), 'faltan los horarios');
+  assert.ok(html.includes('Calle 44 #70-15'), 'falta la dirección');
+  assert.deepEqual(ficha.pagina.horarios,
+    ['Martes a domingo · 12:00 a 22:00', 'Lunes · cerrado'],
+    'los horarios se guardan en lista, no en un solo texto');
+  assert.equal(ficha.pagina.redes.instagram, 'tacosmauricio',
+    'la arroba se quita: la pone el enlace');
+});
+
+test('NADA de la página del ejemplo se hereda', () => {
+  // Es el peor caso posible: el cliente vería su nombre encima de la
+  // historia, los horarios y la dirección de otro negocio.
+  const { html } = cadena();
+  for (const ajeno of ['Nariño y Huila', 'tostadora de 3 kilos',
+                       'Provenza', 'caferaiz', 'Café de origen']) {
+    assert.ok(!html.includes(ajeno), 'se coló del ejemplo: ' + ajeno);
+  }
+});
+
+test('sin respuestas de página no se pinta nada inventado', () => {
+  const limpias = { ...RESPUESTAS };
+  for (const k of ['titular', 'bajada', 'sobre', 'horarios', 'ubicacion', 'instagram']) {
+    delete limpias[k];
+  }
+  const { html, avisos } = cadena(limpias);
+  assert.match(html, /pagina:\{\}/,
+    'el bloque queda vacío: un hueco honesto, no un relleno');
+  assert.ok(avisos.some((a) => a.includes('catálogo suelto')),
+    'y hay que avisar que la entrega no es una página todavía');
 });
 
 test('el JavaScript del entregable compila', () => {

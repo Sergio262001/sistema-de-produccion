@@ -321,6 +321,23 @@ const P = {
   motor:     { q:'¿Ya tienes cuenta de base de datos?', t:'op', req:true,
                o:[['supabase','Sí, Supabase'],['firebase','Sí, Firebase'],
                   ['local','No — arrancamos sin ella y la conectamos después']] },
+  // Los bloques de la página. Sin estos, el entregable era cabecera +
+  // categorías + rejilla: un catálogo, no un sitio. Lo que quede vacío
+  // no se pinta — nunca se rellena con texto de ejemplo.
+  titular:   { q:'La frase grande de arriba', t:'texto',
+               a:'Lo primero que va a leer alguien que entre. Qué vendes y para quién, en una línea. Ej: "Pan de masa madre, horneado cada mañana en Laureles".' },
+  bajada:    { q:'Una línea más que explique', t:'texto',
+               a:'Va debajo del titular, en letra más pequeña. Puede ser el envío, el horario o lo que te hace distinto.' },
+  sobre:     { q:'Cuéntanos tu negocio en un párrafo', t:'larga',
+               a:'Quién está detrás, desde cuándo, por qué lo haces así. Tres o cuatro frases. Es lo que separa un negocio de una lista de precios.' },
+  horarios:  { q:'¿Qué horarios atiendes?', t:'larga',
+               a:'Uno por línea.',
+               ej:'Lunes a viernes · 8:00 a 18:00\nSábados · 9:00 a 14:00\nDomingos · cerrado' },
+  ubicacion: { q:'¿Cuál es la dirección del local?', t:'texto',
+               a:'Si vendes solo en línea y no atiendes público, marca "no aplica".' },
+  instagram: { q:'¿Tienes Instagram?', t:'texto',
+               a:'Solo el usuario, sin la arroba.' },
+
   // LA pregunta que faltaba en este formulario. Existía en lib/brief.js —
   // por eso el asistente del panel sí la hacía — pero aquí nunca se dibujó,
   // así que TODO brief que llenaba un cliente salía con el catálogo del
@@ -349,6 +366,9 @@ const PASOS = [
   { id:'marca',    t:'Marca',     h:'La marca',
     g:'Si todavía no tienes marca definida, no pasa nada: la diseñamos como parte del proyecto.',
     campos:['tienemarca','logo','banner','primario','secundario','inicial','tono','direccion'] },
+  { id:'pagina',   t:'Página',    h:'Tu página, no solo tu catálogo',
+    g:'Esto es lo que hace que tu sitio se sienta tuyo y no una lista de precios. Lo que dejes vacío simplemente no se muestra.',
+    campos:['titular','bajada','sobre','horarios','ubicacion','instagram'] },
   { id:'operacion',t:'Operación', h:'Cómo va a operar',
     g:'Cómo recibes pedidos y dónde viven los datos.',
     campos:['whatsapp','pagos','sensibles','motor'] },
