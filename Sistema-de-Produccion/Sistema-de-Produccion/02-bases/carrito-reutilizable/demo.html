@@ -4,16 +4,62 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Base: Carrito Reutilizable · Demo</title>
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;800&family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&family=Karla:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
   :root{
     --brand:#1F6B4A;--bg:#F3ECE0;--surface:#fff;--ink:#23201A;--ink-soft:#6B6359;
     --line:#E4DACA;--accent:#C2703D;--radius:16px;--sys-bg:#0C1322;--sys:#2F54FF;
     --display:'Fraunces',serif;--body:'Inter',sans-serif;
+    --mono:'JetBrains Mono',ui-monospace,monospace;
+
+    /* Valores por defecto = dirección "taller" (ver el bloque de abajo) */
+    --borde:1px;--sombra:0 6px 20px rgba(35,32,26,.08);
+    --peso-titulo:600;--tracking:-.01em;--ritmo:1;
+    --foto-alto:150px;--foto-prop:auto;
+    --precio-familia:var(--display);--precio-peso:600;--precio-tam:16px;
+    --boton-radio:9px;--boton-mayus:none;
   }
+
+  /* ══════════════════════════════════════════════════════════════
+     DIRECCIONES DE ARTE
+     Cambiar el color no cambia el diseño: dos clientes con paletas
+     distintas recibían la misma vitrina pintada de otro color. La
+     dirección cambia tipografía, escala, forma y ritmo.
+     Se elige en la ficha:  marca.direccion: mercado | boutique | taller
+     ══════════════════════════════════════════════════════════════ */
+
+  /* MERCADO — denso, alto contraste, el precio manda. */
+  [data-dir="mercado"]{
+    --display:'Archivo',system-ui,sans-serif;--body:'Archivo',system-ui,sans-serif;
+    --radius:3px;--borde:2px;--sombra:4px 4px 0 var(--ink);
+    --peso-titulo:800;--tracking:-.03em;--ritmo:.85;
+    --precio-familia:var(--display);--precio-peso:800;--precio-tam:20px;
+    --boton-radio:3px;--boton-mayus:uppercase;
+  }
+  [data-dir="mercado"] .card{border-color:var(--ink);}
+  [data-dir="mercado"] .logo{border-radius:4px;}
+
+  /* BOUTIQUE — aire, editorial, sin ruido. */
+  [data-dir="boutique"]{
+    --display:'Fraunces',Georgia,serif;--body:'Karla',system-ui,sans-serif;
+    --radius:0px;--borde:0px;--sombra:none;
+    --peso-titulo:600;--tracking:-.005em;--ritmo:1.4;
+    --foto-alto:auto;--foto-prop:3/4;
+    --precio-familia:var(--body);--precio-peso:500;--precio-tam:14.5px;
+    --boton-radio:0px;
+  }
+  [data-dir="boutique"] .card{background:transparent;}
+  [data-dir="boutique"] .card .ph{border-bottom:0;}
+  [data-dir="boutique"] .logo{border-radius:0;}
+  [data-dir="boutique"] .banner{border-radius:0;}
+
+  /* TALLER — ficha técnica, funcional. */
+  [data-dir="taller"]{--precio-familia:var(--mono);--precio-peso:500;}
+
   *{box-sizing:border-box;}
   body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--body);-webkit-font-smoothing:antialiased;}
-  h1,h2,h3{font-family:var(--display);margin:0;line-height:1.1;}
+  h1,h2,h3{font-family:var(--display);margin:0;line-height:1.1;
+     font-weight:var(--peso-titulo);letter-spacing:var(--tracking);}
   button{font-family:inherit;cursor:pointer;}
 
   .sysbar{background:var(--sys-bg);color:#C9D2EA;font-family:'JetBrains Mono',monospace;font-size:12.5px;}
@@ -33,11 +79,13 @@
   .head .cartbtn{margin-left:auto;position:relative;background:var(--surface);border:1px solid var(--line);border-radius:30px;padding:11px 18px;font-weight:600;font-size:14px;display:flex;align-items:center;gap:9px;color:var(--ink);}
   .head .cartbtn .badge{background:var(--brand);color:#fff;border-radius:20px;min-width:20px;height:20px;font-size:11px;display:grid;place-items:center;padding:0 5px;font-family:'JetBrains Mono';}
 
-  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:16px;padding:24px 0 60px;}
-  .card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;display:flex;flex-direction:column;}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));
+     gap:calc(16px * var(--ritmo));padding:24px 0 60px;}
+  .card{background:var(--surface);border:var(--borde) solid var(--line);border-radius:var(--radius);overflow:hidden;display:flex;flex-direction:column;box-shadow:var(--sombra);}
   /* La foto es lo que vende. Alto fijo para que la rejilla no salte
      mientras cargan, y object-fit para que ninguna salga deformada. */
-  .card .ph{width:100%;height:150px;object-fit:cover;display:block;
+  .card .ph{width:100%;height:var(--foto-alto);aspect-ratio:var(--foto-prop);
+     object-fit:cover;display:block;
      background:var(--bg);border-bottom:1px solid var(--line);}
   .card .ph.sinfoto{display:grid;place-items:center;font-size:46px;
      background:linear-gradient(135deg,#fff,var(--line));}
@@ -53,8 +101,11 @@
   .card h3{font-size:16px;font-family:var(--body);font-weight:600;}
   .card .d{font-size:12.5px;color:var(--ink-soft);margin:3px 0 12px;line-height:1.4;flex:1;}
   .card .row{display:flex;align-items:center;justify-content:space-between;gap:10px;}
-  .card .pr{font-family:var(--display);font-weight:600;font-size:18px;color:var(--brand);}
-  .add{background:var(--brand);color:#fff;border:0;border-radius:10px;padding:9px 14px;font-weight:600;font-size:13px;}
+  .card .pr{font-family:var(--precio-familia);font-weight:var(--precio-peso);
+     font-size:var(--precio-tam);color:var(--brand);}
+  .add{background:var(--brand);color:#fff;border:0;border-radius:var(--boton-radio);
+     padding:9px 14px;font-weight:600;font-size:13px;
+     text-transform:var(--boton-mayus);letter-spacing:.02em;}
   .add:active{transform:scale(.96);}
 
   /* drawer */
@@ -91,6 +142,12 @@
 <div class="sysbar"><div class="in">
   <span class="tag">base: carrito-reutilizable</span>
   <span>contexto: <b id="sysClient">Café Raíz</b></span>
+  <span class="tag">dirección</span>
+  <div class="toggle dirsw">
+    <button type="button" data-d="mercado">Mercado</button>
+    <button type="button" data-d="boutique">Boutique</button>
+    <button type="button" data-d="taller">Taller</button>
+  </div>
   <span class="tag">marca</span>
   <div class="toggle marcasw">
     <button type="button" class="on" onclick="verMarca(false)">Inicial</button>
@@ -247,6 +304,7 @@ async function abrirWompi(state,ctx){
 const CONTEXT = {
   cliente: "Café Raíz",
   marca:{ primario:"#1F6B4A", secundario:"#F3ECE0", inicial:"R",
+          direccion:"boutique",   // mercado | boutique | taller — ver el CSS
           // Logo y banner del cliente. Vacíos = inicial en un cuadro y sin
           // banner. Un negocio que ya tiene logo no se entrega con una letra.
           logo:"", banner:"" },
@@ -283,9 +341,17 @@ const PRODUCTOS = DATA.categorias.flatMap(c => c.productos || []);
 const r=document.documentElement.style;
 r.setProperty('--brand',CONTEXT.marca.primario);
 r.setProperty('--bg',CONTEXT.marca.secundario);
+/** Las tres direcciones válidas. Cualquier otra cosa cae en "taller". */
+const DIRECCIONES = ['mercado', 'boutique', 'taller'];
+
 function pintarMarca(){
-  pintarLogo(document.getElementById('logo'),CONTEXT.marca,CONTEXT.cliente);
-  pintarBanner(document.getElementById('banner'),CONTEXT.marca,CONTEXT.cliente);
+  const m = CONTEXT.marca;
+  // La dirección de arte cambia tipografía, escala, forma y ritmo — no solo
+  // color. Ver el bloque DIRECCIONES DE ARTE en el CSS.
+  const dir = DIRECCIONES.includes(m.direccion) ? m.direccion : 'taller';
+  document.documentElement.setAttribute('data-dir', dir);
+  pintarLogo(document.getElementById('logo'),m,CONTEXT.cliente);
+  pintarBanner(document.getElementById('banner'),m,CONTEXT.cliente);
 }
 pintarMarca();
 /* @demo-only
@@ -301,6 +367,16 @@ function verMarca(con){
   if(sw) sw.querySelectorAll('button').forEach((b,n)=>
     b.classList.toggle('on', n === (con ? 1 : 0)));
 }
+(function cablearDirecciones(){
+  const sw = document.querySelector('.dirsw');
+  if(!sw) return;
+  const marcar = (d) => sw.querySelectorAll('button').forEach((b) =>
+    b.classList.toggle('on', b.dataset.d === d));
+  sw.querySelectorAll('button').forEach((b) => {
+    b.onclick = () => { CONTEXT.marca.direccion = b.dataset.d; pintarMarca(); marcar(b.dataset.d); };
+  });
+  marcar(document.documentElement.getAttribute('data-dir'));
+})();
 /* @fin-demo */
 document.getElementById('biz').textContent=CONTEXT.cliente;
 document.getElementById('sysClient').textContent=CONTEXT.cliente;

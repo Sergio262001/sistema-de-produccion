@@ -117,6 +117,23 @@ export const PASOS = [
       { id: 'tono', campo: 'marca.tono', tipo: 'texto',
         pregunta: 'Dos o tres palabras que describan el tono',
         ayuda: 'Ej: "cercano y artesanal", "profesional y serio"' },
+
+      // LA pregunta de diseño. Cambiar el color no cambia el diseño: dos
+      // clientes con paletas distintas recibían el mismo sitio pintado de
+      // otro color. La dirección cambia tipografía, escala, forma y ritmo.
+      { id: 'direccion', campo: 'marca.direccion', tipo: 'opcion',
+        pregunta: '¿Cómo se tiene que sentir la página?',
+        ayuda: 'Esto no es el color: cambia la tipografía, el tamaño de los '
+             + 'precios, la forma de las esquinas y cuánto aire hay entre las '
+             + 'cosas. Es lo que hace que dos negocios no reciban lo mismo.',
+        opciones: [
+          { valor: 'mercado',
+            etiqueta: 'Directo y de barrio — el precio bien visible, sin adornos' },
+          { valor: 'boutique',
+            etiqueta: 'Cuidado y con aire — para lo que se cobra caro' },
+          { valor: 'taller',
+            etiqueta: 'Claro y funcional — que se lea rápido, como una ficha' },
+        ] },
     ],
   },
   {
@@ -413,6 +430,20 @@ export function respuestasAFicha(respuestasCrudas) {
         + 'no la imagen en sí. Verifica que se vea al abrirla sola en el navegador.');
     }
   }
+  // La dirección de arte. Solo tres valores; cualquier otra cosa la base la
+  // ignora y cae en "taller", así que más vale decirlo aquí.
+  const DIRECCIONES = ['mercado', 'boutique', 'taller'];
+  const dir = ficha.marca?.direccion;
+  if (dir && !DIRECCIONES.includes(dir)) {
+    delete ficha.marca.direccion;
+    avisos.push('La dirección de arte "' + dir + '" no existe. Las válidas son: '
+      + DIRECCIONES.join(', ') + '. Se descarta.');
+  } else if (!dir) {
+    avisos.push('Sin dirección de arte elegida: el entregable sale con la del '
+      + 'ejemplo de la base. Es una decisión de diseño, no un dato que falte — '
+      + 'elígela tú si el cliente no supo responder.');
+  }
+
   if (!ficha.marca?.logo) {
     avisos.push('Sin archivo de logo: se entrega con la inicial en un cuadro de '
       + 'color. Es un respaldo digno, pero pídeselo antes de publicar.');

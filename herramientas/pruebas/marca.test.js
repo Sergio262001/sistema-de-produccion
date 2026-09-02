@@ -141,6 +141,51 @@ for (const base of CON_LOGO) {
     assert.doesNotThrow(() => pintarBanner(null, { banner: 'https://x.co/a.jpg' }, 'X'));
   });
 
+  // ── DIRECCIONES DE ARTE ──
+  // Cambiar el color no cambia el diseño. Estas pruebas comprueban que la
+  // dirección de verdad mueve tipografía, forma y ritmo, y no es un
+  // atributo decorativo que no llega a ninguna regla.
+  test(base + ': define las tres direcciones de arte', () => {
+    const t = leerBase(base);
+    for (const d of ['mercado', 'boutique', 'taller']) {
+      assert.ok(t.includes('[data-dir="' + d + '"]'),
+        'falta la dirección "' + d + '"');
+    }
+  });
+
+  test(base + ': cada dirección cambia tipografía, forma y ritmo', () => {
+    const t = leerBase(base);
+    for (const d of ['mercado', 'boutique']) {
+      const bloque = t.slice(t.indexOf('[data-dir="' + d + '"]{'),
+                             t.indexOf('}', t.indexOf('[data-dir="' + d + '"]{')));
+      assert.match(bloque, /--display\s*:/, d + ' no cambia la tipografía');
+      assert.match(bloque, /--radius\s*:/, d + ' no cambia la forma');
+      assert.match(bloque, /--ritmo\s*:/, d + ' no cambia el ritmo');
+      assert.match(bloque, /--precio-/, d + ' no cambia cómo se ve el precio');
+    }
+  });
+
+  test(base + ': la dirección se lee de la ficha y se valida', () => {
+    const t = leerBase(base);
+    assert.match(t, /DIRECCIONES\s*=\s*\['mercado',\s*'boutique',\s*'taller'\]/,
+      'sin la lista, una dirección mal escrita pasaría sin avisar');
+    assert.match(t, /setAttribute\('data-dir'/,
+      'si no se pone el atributo, el CSS de la dirección no aplica nunca');
+    assert.match(t, /:\s*'taller'/, 'debe caer en taller si el valor no es válido');
+  });
+
+  // Un `style` en línea le gana a [data-dir]. Si applyTheme fija --display
+  // siempre, elegir "mercado" o "taller" no cambiaría absolutamente nada.
+  test(base + ': la marca no pisa la tipografía de la dirección', () => {
+    const t = leerBase(base);
+    const suelto = /^\s*(?:r|[a-z]+)\.setProperty\((['"])--display\1/m;
+    const linea = t.split('\n').find((l) => suelto.test(l));
+    if (linea) {
+      assert.match(linea, /if\s*\(/,
+        'setProperty("--display") sin condición anula la dirección de arte');
+    }
+  });
+
   test(base + ': el conmutador de la demo está marcado como andamiaje', () => {
     const t = leerBase(base);
     assert.match(t, /@demo-only/, 'si no, verMarca() viaja al cliente como código muerto');

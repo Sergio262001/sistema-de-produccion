@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Base: Menú con Panel Admin · Demo</title>
+<title>Fonda Del Centro</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;800&family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600&family=Karla:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -90,16 +90,6 @@
   .mono{font-family:'JetBrains Mono',monospace;}
 
   /* ---- system bar (explica la demo, no es parte del producto) ---- */
-  .sysbar{background:var(--sys-bg);color:#C9D2EA;font-family:'JetBrains Mono',monospace;font-size:12.5px;}
-  .sysbar .in{max-width:920px;margin:0 auto;padding:11px 20px;display:flex;align-items:center;gap:14px;flex-wrap:wrap;}
-  .sysbar b{color:#fff;font-weight:500;}
-  .sysbar .tag{background:#1B2438;border:1px solid #2A3654;border-radius:6px;padding:3px 9px;color:#9BB0E0;}
-  .sysbar .adapter{margin-left:auto;color:#8E9AB8;}
-  .sysbar .adapter b{color:#5FD0A6;}
-  .sysbar .adapter .hint{color:#56617E;}
-  .toggle{display:flex;background:#1B2438;border:1px solid #2A3654;border-radius:8px;overflow:hidden;}
-  .toggle button{background:transparent;border:0;color:#9BB0E0;font-family:'JetBrains Mono',monospace;font-size:12px;padding:6px 13px;}
-  .toggle button.on{background:var(--sys);color:#fff;}
 
   .app{max-width:920px;margin:0 auto;padding:0 20px;}
 
@@ -196,28 +186,11 @@
 <body>
 
 <!-- BARRA DE SISTEMA (demo): muestra qué adaptador y base de datos están activos -->
-<div class="sysbar">
-  <div class="in">
-    <span class="tag">base: menu-con-panel-admin</span>
-    <span>Contexto: <b id="sysClient">Café Raíz</b></span>
-    <div class="toggle">
-      <button type="button" id="tMenu" class="on" onclick="setView('menu')">Vista cliente</button>
-      <button type="button" id="tAdmin" onclick="setView('admin')">Panel admin</button>
-    </div>
-    <span class="tag">dirección</span>
-    <div class="toggle dirsw">
-      <button type="button" data-d="mercado">Mercado</button>
-      <button type="button" data-d="boutique">Boutique</button>
-      <button type="button" data-d="taller">Taller</button>
-    </div>
-    <span class="tag">marca</span>
-    <div class="toggle marcasw">
-      <button type="button" class="on" onclick="verMarca(false)">Inicial</button>
-      <button type="button" onclick="verMarca(true)">Logo y banner</button>
-    </div>
-    <span class="adapter">datos: <b id="sysAdapter">local</b> <span class="hint">→ listo para Supabase/Firebase</span></span>
-  </div>
-</div>
+
+<!-- Elementos de la barra de sistema del demo. Se conservan
+     ocultos porque el script los referencia; sin ellos el JS falla
+     y la página se queda en blanco. -->
+<div hidden><span id="sysClient"></span><span id="tMenu"></span><span id="tAdmin"></span><span id="sysAdapter"></span></div>
 
 <div class="app">
 
@@ -226,9 +199,9 @@
 
   <!-- HEADER DEL LOCAL (tematizado por contexto) -->
   <div class="mhead">
-    <div class="logo" id="logoBox">R</div>
+    <div class="logo" id="logoBox">F</div>
     <div>
-      <h1 id="bizName">Café Raíz</h1>
+      <h1 id="bizName">Fonda Del Centro</h1>
       <div class="sub" id="bizSub">Cafetería de especialidad <span class="dot">•</span> Bogotá</div>
     </div>
   </div>
@@ -245,7 +218,7 @@
     <!-- gate de acceso (base: auth) — se pinta si no hay sesión con el rol requerido -->
     <div class="loginbox" id="adminLogin">
       <h2>Acceder al panel</h2>
-      <div class="sub">Inicia sesión para editar la carta.<br>Demo: <b>admin@caferaiz.co</b> / <b>admin123</b></div>
+      <div class="sub">Inicia sesión para editar la carta.<br>Demo: <b>admin@fonda-del-centro.local</b> / <b>admin123</b></div>
       <form id="adminLoginForm">
         <input type="email" name="email" placeholder="correo@ejemplo.com" required>
         <input type="password" name="password" placeholder="Contraseña" required>
@@ -281,15 +254,15 @@
    1) CONTEXTO  — esto vendría de tu ficha contexto.proyecto.yml
    ==================================================================== */
 const CONTEXT = {
-  cliente: "Café Raíz",
+  cliente: "Fonda Del Centro",
   linea: "starter",
   marca: {
     primario:"#1F6B4A", secundario:"#F3ECE0", acento:"#C2703D",
     // display/body vacíos = manda la dirección de arte. Se llenan solo si
     // el cliente trae su propia tipografía de marca.
     display:"", body:"",
-    inicial:"R", subtitulo:"Cafetería de especialidad • Bogotá",
-    direccion:"boutique",   // mercado | boutique | taller — ver el CSS
+    inicial:"F", subtitulo:"Cafetería de especialidad • Bogotá",
+    direccion:"mercado",   // mercado | boutique | taller — ver el CSS
     // Logo y banner del cliente. Vacíos = se usa la inicial y no hay banner.
     // Una inicial en un cuadro sirve para la demo; un negocio que ya tiene
     // logo no se entrega con una letra.
@@ -346,7 +319,7 @@ const db = adapters[ adapters[CONTEXT.base_de_datos.motor] ? CONTEXT.base_de_dat
    CONTEXT.auth.motor, se usa supabaseAuth o firebaseAuth sin tocar
    el resto del panel.
    ==================================================================== */
-const ADMIN_USERS = [{ email:'admin@caferaiz.co', password:'admin123', rol:'admin', nombre:'Dueño' }];
+const ADMIN_USERS = [{ email:'admin@fonda-del-centro.local', password:'admin123', rol:'admin', nombre:'Dueño' }];
 let authUser = null;
 const localAuth = {
   async login(email,password){
@@ -445,36 +418,7 @@ function pintarLogo(el, m, cliente){
     el.textContent = (m && m.inicial) || "";
   }
 }
-/* @demo-only
-   Conmutador de la sysbar: enseña en vivo la diferencia entre entregar
-   con la inicial y entregar con el logo del cliente. Los marcadores de
-   arriba y abajo se los lleva crear-proyecto.js: al cliente no le llega
-   ni esta función ni los SVG de ejemplo. */
-function cablearDirecciones(){
-  const sw = document.querySelector('.dirsw');
-  if(!sw) return;
-  const marcar = (d) => sw.querySelectorAll('button').forEach((b) =>
-    b.classList.toggle('on', b.dataset.d === d));
-  sw.querySelectorAll('button').forEach((b) => {
-    b.onclick = () => {
-      CONTEXT.marca.direccion = b.dataset.d;
-      applyTheme();
-      renderMenu();          /* la escala de la foto cambia con la dirección */
-      marcar(b.dataset.d);
-    };
-  });
-  // Al abrir, el botón marcado tiene que coincidir con lo que dice la ficha.
-  marcar(document.documentElement.getAttribute('data-dir'));
-}
-function verMarca(con){
-  CONTEXT.marca.logo   = con ? "./logo-demo.svg"   : "";
-  CONTEXT.marca.banner = con ? "./banner-demo.svg" : "";
-  applyTheme();
-  const sw = document.querySelector(".marcasw");
-  if(sw) sw.querySelectorAll("button").forEach((b,n)=>
-    b.classList.toggle("on", n === (con ? 1 : 0)));
-}
-/* @fin-demo */
+
 function pintarBanner(el, m, cliente){
   if(!el) return;
   const src = urlSegura(m && m.banner);
@@ -494,7 +438,6 @@ function medio(it, clase="thumb"){
     ? `<img class="${clase}" src="${esc(src)}" alt="${esc(it.nombre||"")}" loading="lazy" decoding="async">`
     : `<div class="${clase} sinfoto" role="img" aria-label="${esc(it.nombre||"")}">${esc(it.emoji||"🍽️")}</div>`;
 }
-
 
 /* ====================================================================
    5) VISTA CLIENTE
@@ -614,9 +557,7 @@ document.getElementById('adminLoginForm').addEventListener('submit', async (e)=>
   applyTheme();
   DATA = await db.load();
   renderMenu();
-  /* @demo-only  el conmutador de direcciones es andamiaje de la demo */
-  if (typeof cablearDirecciones === 'function') cablearDirecciones();
-  /* @fin-demo */
+  
 })();
 </script>
 </body>

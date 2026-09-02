@@ -106,6 +106,11 @@ export function ponerEnContexto(html, marca = {}, cliente = '', ficha = {}) {
   campo('logo',   marca.logo);
   campo('banner', marca.banner);
 
+  // La dirección de arte. Sin esto, el entregable de todo cliente sale con
+  // la dirección del ejemplo, que es justo lo que hacía que dos negocios
+  // distintos recibieran la misma página pintada de otro color.
+  campo('direccion', marca.direccion);
+
   // Lo operativo: si esto se queda con los valores del ejemplo, el botón de
   // WhatsApp del cliente escribe al número de otro negocio.
   campo('motor',        ficha.base_de_datos?.motor);
@@ -578,6 +583,7 @@ if (process.argv[1] && process.argv[1].endsWith('crear-proyecto.js')) {
   if (args.inicial) opciones.marca.inicial = args.inicial;
   if (args.logo) opciones.marca.logo = args.logo;
   if (args.banner) opciones.marca.banner = args.banner;
+  if (args.direccion) opciones.marca.direccion = args.direccion;
 
   const r = crearProyecto(opciones);
   if (!r.ok) {
