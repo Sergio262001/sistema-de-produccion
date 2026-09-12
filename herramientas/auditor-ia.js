@@ -28,6 +28,11 @@ import { createInterface } from 'node:readline/promises';
 const AQUI = fileURLToPath(new URL('.', import.meta.url));
 const RAIZ = resolve(AQUI, '..');
 
+// El .env, igual que hace panel.js. Faltaba: la clave estaba en
+// herramientas/.env y el CLI decía "Falta ANTHROPIC_API_KEY" — solo el
+// panel la cargaba. Node lee el archivo sin dependencias desde 20.6.
+try { process.loadEnvFile(join(AQUI, '.env')); } catch { /* no hay .env, normal */ }
+
 // ── Catálogo de modelos y precios (USD por millón de tokens) ──
 export const MODELOS = {
   haiku:  { id: 'claude-haiku-4-5', entrada: 1.00, salida: 5.00,  etiqueta: 'Haiku 4.5 · el más barato' },

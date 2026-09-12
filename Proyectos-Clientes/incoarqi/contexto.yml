@@ -45,7 +45,7 @@ pagina:
     eyebrow: "Ingeniería · Construcción · Arquitectura · Innovación"
     titular: "Diseñamos, planeamos, construimos y transformamos"
     bajada:  "Soluciones integrales para convertir ideas en proyectos de alto valor."
-    cta:     "Hablemos de su proyecto"
+    cta:     "Hablemos de tu proyecto"
 
   servicios_titulo: "Nuestros servicios"
   servicios:
@@ -128,8 +128,11 @@ pagina:
     - "proceso"
     - "pie"
 
-  # De "usted": es una empresa hablándole a otra empresa.
-  leads_titulo: "Hablemos de su proyecto"
+  # TUTEO, no "usted". Lo señaló el auditor: el brochure del cliente dice
+  # "Entendemos TU necesidad", y yo había puesto "su proyecto" en el botón.
+  # Mezclar las dos personas en la misma página hace que INCOARQI parezca
+  # inconsistente. Manda la voz del cliente, no mi preferencia.
+  leads_titulo: "Hablemos de tu proyecto"
 
   sobre:
     titulo: "Por qué INCOARQI"

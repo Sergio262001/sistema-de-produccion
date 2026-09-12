@@ -1,17 +1,37 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600" role="img" aria-label="Marcador provisional de proyecto 1">
-  <!-- MARCADOR PROVISIONAL - NO SE PUBLICA. Se reemplaza por la foto real. -->
-  <rect width="800" height="600" fill="#16294D"/>
-  <g stroke="#C9A227" stroke-width="1" opacity=".14">
-    <path d="M0 100H800M0 200H800M0 300H800M0 400H800M0 500H800"/>
-    <path d="M100 0V600M200 0V600M300 0V600M400 0V600M500 0V600M600 0V600M700 0V600"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600" role="img" aria-label="Espacio reservado para la foto del proyecto 1">
+  <!-- ESPACIO RESERVADO - NO SE PUBLICA. Dibujo propio. -->
+  <defs>
+    <linearGradient id="f1-aire" x1="0" y1="0" x2=".4" y2="1">
+      <stop offset="0" stop-color="#1E3A66"/><stop offset="1" stop-color="#0E1B36"/>
+    </linearGradient>
+    <linearGradient id="f1-cara" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#E8EDF6" stop-opacity=".26"/>
+      <stop offset="1" stop-color="#E8EDF6" stop-opacity=".08"/>
+    </linearGradient>
+    <linearGradient id="f1-vid" x1="0" y1="0" x2=".7" y2="1">
+      <stop offset="0" stop-color="#8FB4E8" stop-opacity=".5"/>
+      <stop offset="1" stop-color="#8FB4E8" stop-opacity=".06"/>
+    </linearGradient>
+  </defs>
+  <rect width="800" height="600" fill="url(#f1-aire)"/>
+  <g stroke="#C9A227" stroke-width="1" opacity=".09">
+    <path d="M0 120H800M0 240H800M0 360H800M0 480H800"/>
+    <path d="M120 0V600M240 0V600M360 0V600M480 0V600M600 0V600M720 0V600"/>
   </g>
-  <g stroke="#C9D3E8" stroke-width="2.5" fill="none" opacity=".55">
-    <path d="M120 520V190l160-90 160 90v230"/>
-    <path d="M120 190l160 90 160-90"/>
-    <path d="M480 520V140h180v180"/>
+  <g opacity=".24"><rect x="120" y="180" width="130" height="420" fill="#9FB6D8"/></g>
+  <path d="M120 520V140l150-70v330z" fill="url(#f1-cara)"/>
+  <path d="M270 170l150 70v310H270z" fill="#050A16" opacity=".3"/>
+  <path d="M120 140l150 70 150-70-150-52z" fill="#E8EDF6" opacity=".14"/>
+  <g stroke="#C9A227" stroke-width="2" fill="none" opacity=".7">
+    <path d="M120 520V140l150-52 150 52v280"/>
+    <path d="M120 140l150 70 150-70"/>
   </g>
-  <rect x="120" y="400" width="70" height="60" fill="#C9A227" opacity=".5"/>
-  <path d="M60 520h680" stroke="#C9A227" stroke-width="3" opacity=".6"/>
-  <text x="60" y="80" font-family="ui-monospace,monospace" font-size="24" fill="#C9A227" letter-spacing="3" opacity=".8">PROYECTO 01</text>
-  <text x="60" y="112" font-family="ui-monospace,monospace" font-size="13" fill="#C9D3E8" letter-spacing="2" opacity=".5">FOTO PROVISIONAL</text>
+  <g fill="url(#f1-vid)">
+    <rect x="150" y="190" width="60" height="80"/>
+    <rect x="300" y="195" width="55" height="75"/>
+    <rect x="150" y="420" width="60" height="80"/>
+  </g>
+  <path d="M0 520h800" stroke="#C9A227" stroke-width="2" opacity=".3"/>
+  <text x="52" y="72" font-family="ui-monospace,monospace" font-size="21" fill="#C9A227" letter-spacing="4" opacity=".8">PROYECTO 01</text>
+  <text x="52" y="102" font-family="ui-monospace,monospace" font-size="12" fill="#C9D3E8" letter-spacing="2" opacity=".48">ESPACIO RESERVADO</text>
 </svg>

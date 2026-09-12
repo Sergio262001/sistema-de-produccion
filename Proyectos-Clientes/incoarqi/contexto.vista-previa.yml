@@ -1,16 +1,14 @@
 # ════════════════════════════════════════════════════════════
-#  VISTA PREVIA — NO ES LA FICHA DEL CLIENTE. NO SE PUBLICA.
+#  INCOARQI — VISTA PREVIA. NO ES LA FICHA DEL CLIENTE. NO SE PUBLICA.
+#  Se genera copiando contexto.yml y cambiando SOLO lo provisional, para que
 #
-#  Existe para poder VER la página completa antes de que INCOARQI mande su
-#  material. Todo lo que aquí es provisional está dibujado por el estudio y
-#  dice "FOTO PROVISIONAL" encima: no hay una sola foto de banco de imágenes
-#  ni un dato inventado del cliente.
+#  no se desincronice: la vista previa se quedó atrás una vez y salió sin
+#  iconos ni bloques de color, y parecía que el diseño no existía.
 #
-#  La ficha de verdad es `contexto.yml` y sigue limpia, con sus POR DEFINIR
-#  intactos. Así nada de este relleno puede llegar a la entrega por accidente.
-#
-#  Al recibir el material: se llena `contexto.yml`, se borra este archivo y
-#  la carpeta `vista-previa/`.
+#  El contenido de abajo está TRANSCRITO del brochure corporativo que
+#  entregó el cliente. No hay una palabra inventada. Lo que no venía en
+#  el brochure está marcado POR DEFINIR y hay que pedirlo — ver el
+#  README del proyecto.
 # ════════════════════════════════════════════════════════════
 
 cliente:  "INCOARQI S.A.S."
@@ -19,49 +17,80 @@ base:     landing-modular
 linea:    starter
 
 marca:
-  primario:   "#16294D"
-  secundario: "#F7F7F5"
-  acento:     "#C9A227"
-  direccion:  taller
+  # Tomados del brochure: azul marino profundo + dorado.
+  # Los neutros NO son azules: si el suelo y la tinta fueran del matiz del
+  # acento, el dorado no tendría contra qué destacar (ver la skill
+  # direccion-de-arte → "los neutros se eligen, no se heredan").
+  primario:   "#16294D"      # azul marino del logo y los bloques
+  secundario: "#F7F7F5"      # suelo casi neutro, un pelo cálido
+  acento:     "#C9A227"      # dorado: el ÚNICO color saturado de la página
+  direccion:  taller         # ficha técnica: ingeniería, no boutique
   inicial:    "I"
-  logo:       "./vista-previa/logo.svg"      # PROVISIONAL
-  banner:     ""
+  logo:       "./vista-previa/logo.svg"        # PROVISIONAL
+  banner:     ""             # POR DEFINIR — la foto de portada del brochure
   subtitulo:  "Ingeniería · Construcción · Arquitectura · Innovación"
   tono:       "técnico, sobrio y confiable"
 
 pagina:
   hero:
+    # PORTADA OSCURA — pendiente de confirmar con el cliente.
+    # Queda en "oscuro" porque es la recomendación del estudio: su brochure
+    # es azul marino con fotografía grande, y la versión clara —aunque
+    # correcta— no se siente de INCOARQI.
+    # Si prefieren la clara, se cambia esta línea a "claro" y se regenera.
     fondo:   "oscuro"
+    # La foto de portada va aquí cuando la manden. Sin ella se ve el azul
+    # plano a sangre, que sigue siendo mejor que un hueco gris.
     foto:    "./vista-previa/portada.svg"    # PROVISIONAL
     eyebrow: "Ingeniería · Construcción · Arquitectura · Innovación"
     titular: "Diseñamos, planeamos, construimos y transformamos"
     bajada:  "Soluciones integrales para convertir ideas en proyectos de alto valor."
-    cta:     "Hablemos de su proyecto"
+    cta:     "Hablemos de tu proyecto"
 
   servicios_titulo: "Nuestros servicios"
   servicios:
     - titulo: "Ingeniería"
+      icono:  "regla"
       desc:   "Ingeniería civil, eléctrica e hidrosanitaria. Diseño estructural y de instalaciones. Presupuestos, APU y cantidades de obra. Análisis, diagnóstico y soluciones técnicas."
     - titulo: "Arquitectura y diseño"
+      icono:  "plano"
       desc:   "Diseño arquitectónico y de interiores. Modelado 3D y renders. Planos arquitectónicos y técnicos. Coordinación arquitectura - ingeniería."
     - titulo: "Construcción"
+      icono:  "grua"
       desc:   "Obra nueva y obra gris. Acabados arquitectónicos. Construcciones residenciales, comerciales e institucionales. Urbanismo y espacio público."
     - titulo: "Gerencia y gestión de proyectos"
+      icono:  "equipo"
       desc:   "Gerencia, dirección y residencia de obra. Supervisión técnica y administrativa. Control de costos, tiempo y calidad. Informes, actas y seguimiento."
     - titulo: "Presupuestos y control de costos"
+      icono:  "calculadora"
       desc:   "Presupuestos de obra. Análisis de precios unitarios (APU). Control presupuestal. Seguimiento y proyección de costos."
     - titulo: "Planeación y programación"
+      icono:  "calendario"
       desc:   "Programación de obra. Cronogramas y curvas de avance. Control de rendimientos. Reprogramaciones y seguimiento."
 
   diferencial_titulo: "Nuestro diferencial"
   diferencial:
-    - { titulo: "Integración", texto: "Integramos ingeniería, arquitectura, construcción y gestión en una misma visión." }
-    - { titulo: "Planeación",  texto: "Analizamos antes de construir para tomar mejores decisiones." }
-    - { titulo: "Control",     texto: "Seguimos y controlamos cada etapa del proyecto." }
-    - { titulo: "Calidad",     texto: "Cumplimos estándares técnicos y normativos." }
-    - { titulo: "Innovación",  texto: "Utilizamos tecnología y metodologías que optimizan procesos." }
-    - { titulo: "Compromiso",  texto: "Trabajamos de la mano con nuestros clientes con transparencia y responsabilidad." }
+    - titulo: "Integración"
+      icono:  "red"
+      texto:  "Integramos ingeniería, arquitectura, construcción y gestión en una misma visión."
+    - titulo: "Planeación"
+      icono:  "lupa"
+      texto:  "Analizamos antes de construir para tomar mejores decisiones."
+    - titulo: "Control"
+      icono:  "lista"
+      texto:  "Seguimos y controlamos cada etapa del proyecto."
+    - titulo: "Calidad"
+      icono:  "escudo"
+      texto:  "Cumplimos estándares técnicos y normativos."
+    - titulo: "Innovación"
+      icono:  "idea"
+      texto:  "Utilizamos tecnología y metodologías que optimizan procesos."
+    - titulo: "Compromiso"
+      icono:  "mano"
+      texto:  "Trabajamos de la mano con nuestros clientes con transparencia y responsabilidad."
 
+  # Los 8 pasos van numerados porque SON una secuencia: el orden es
+  # información que el cliente necesita entender.
   proceso_titulo: "Nuestro proceso"
   proceso:
     - { titulo: "Conocer",      texto: "Entendemos tu necesidad." }
@@ -73,8 +102,6 @@ pagina:
     - { titulo: "Controlar",    texto: "Monitoreamos avances y calidad." }
     - { titulo: "Entregar",     texto: "Verificamos y entregamos." }
 
-  # PROVISIONALES. Los pies dicen qué tipo de obra iría, no inventan un
-  # proyecto con nombre: eso lo pone el cliente.
   galeria_titulo: "Proyectos"
   galeria:
     - { src: "./vista-previa/obra-1.svg", pie: "Vivienda" }
@@ -86,18 +113,32 @@ pagina:
 
   sectores_titulo: "Sectores"
   sectores:
-    - "Vivienda"
-    - "Comercial"
-    - "Institucional"
-    - "Oficinas"
-    - "Urbanismo"
-    - "Industria"
-    - "Remodelaciones"
-    - "Adecuaciones locativas"
-    - "Mantenimiento"
-    - "Obras civiles"
+    - { nombre: "Vivienda",               icono: "casa" }
+    - { nombre: "Comercial",              icono: "tienda" }
+    - { nombre: "Institucional",          icono: "edificio" }
+    - { nombre: "Oficinas",               icono: "edificio" }
+    - { nombre: "Urbanismo",              icono: "arbol" }
+    - { nombre: "Industria",              icono: "fabrica" }
+    - { nombre: "Remodelaciones",         icono: "llave" }
+    - { nombre: "Adecuaciones locativas", icono: "regla" }
+    - { nombre: "Mantenimiento",          icono: "engranaje" }
+    - { nombre: "Obras civiles",          icono: "puente" }
 
-  leads_titulo: "Hablemos de su proyecto"
+  # LOS BLOQUES DE COLOR.
+  # El brochure de INCOARQI no es una hoja blanca: alterna azul marino y
+  # blanco, con diagonales doradas entre medio. Sin esa alternancia, siete
+  # secciones seguidas sobre el mismo fondo se leen como un documento, no
+  # como una página. Estas dos van sobre el azul de marca.
+  secciones_oscuras:
+    - "diferencial"
+    - "proceso"
+    - "pie"
+
+  # TUTEO, no "usted". Lo señaló el auditor: el brochure del cliente dice
+  # "Entendemos TU necesidad", y yo había puesto "su proyecto" en el botón.
+  # Mezclar las dos personas en la misma página hace que INCOARQI parezca
+  # inconsistente. Manda la voz del cliente, no mi preferencia.
+  leads_titulo: "Hablemos de tu proyecto"
 
   sobre:
     titulo: "Por qué INCOARQI"
@@ -106,26 +147,29 @@ pagina:
   ubicacion:
     direccion: ""
   redes:
-    instagram: ""
+    instagram: ""              # POR DEFINIR
 
 base_de_datos:
-  motor: local
+  motor: local                 # una landing no necesita base de datos
 
 apis:
   mensajeria:  whatsapp
-  # PROVISIONAL, para ver el botón flotante. NO es el número de INCOARQI:
-  # es el de la cotización, del estudio. Se cambia por el del cliente.
-  whatsapp_num: "573213116999"
+  # El brochure trae 300 123 4567, que es un número de relleno.
+  # NO se publica hasta que el cliente confirme el real.
+  whatsapp_num: "573213116999"   # PROVISIONAL: el del estudio, no el del cliente
   pagos:       ninguna
-  analitica:   ga4
-  ga4_id:      ""
+  analitica:   ga4             # incluido en la cotización
+  # El ID de medición de GA4. NO es un secreto (viaja en el HTML de todo
+  # sitio que use GA4), así que va aquí y no en el .env. Vacío = no se
+  # carga nada, ni una petición de red.
+  ga4_id:      ""              # POR DEFINIR
   correo:      "info@incoarqi.com"
 
 entrega:
-  dominio:  "incoarqi.com"
-  soporte:  ninguno
-  estado:   "vista previa"
+  dominio:  "incoarqi.com"     # recomendado en la cotización, sin comprar aún
+  soporte:  ninguno            # el plan de mantenimiento se cotizó aparte
+  estado:   "en construccion"
   creado:   "2026-09-12"
 
 env:
-  - GA4_ID
+  - GA4_ID                     # POR DEFINIR

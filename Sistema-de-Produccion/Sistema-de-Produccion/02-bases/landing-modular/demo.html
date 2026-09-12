@@ -414,12 +414,40 @@
   .paso p{color:var(--ink-soft);font-size:13.5px;line-height:1.55;}
 
   /* ---- GALERÍA ---- la foto es el contenido; el marco se quita del medio */
-  /* Tres columnas, no cuatro. Dos razones: con 6 fotos (lo que se pide al
-     cliente) cuatro columnas dejan dos huecos en la última fila, y una obra
-     se muestra mejor grande que pequeña. Se le piden 6, 9 o 12 para que las
-     filas siempre queden completas. */
-  .gal{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,290px),1fr));
-    gap:14px;}
+  /* ══════════════════════════════════════════════════════════════
+     COLLAGE, NO GRILLA
+
+     Seis fotos del mismo tamaño en una grilla uniforme es un catálogo de
+     miniaturas. El brochure del cliente pone las obras escalonadas y de
+     distinto tamaño, y eso es lo que hace que una se lea como la
+     importante y el conjunto como una composición.
+
+     Patrón de 6 en tres columnas: la primera ocupa dos columnas y dos
+     filas (es la obra que se muestra), la segunda y la tercera se apilan
+     a su derecha, y las tres últimas cierran la fila de abajo. Con 6, 9 o
+     12 fotos el bloque queda siempre completo — por eso se le piden
+     múltiplos de 3.
+
+     La primera versión daba también dos columnas a la cuarta, y con seis
+     fotos la última quedaba sola y pequeña en una fila propia: el
+     escalonado se leía como un descuadre, no como una composición.
+
+     Por debajo de 560 px vuelve a una columna: en un teléfono el
+     escalonado no se lee, solo encoge las fotos.
+     ══════════════════════════════════════════════════════════════ */
+  .gal{display:grid;grid-template-columns:repeat(3,1fr);
+    grid-auto-rows:168px;gap:14px;}
+  .gal-i:nth-child(6n+1){grid-column:span 2;grid-row:span 2;}
+  .gal-i img{height:100%;aspect-ratio:auto;}
+  @media(max-width:860px){
+    .gal{grid-template-columns:repeat(2,1fr);grid-auto-rows:150px;}
+    .gal-i:nth-child(6n+1){grid-column:span 2;grid-row:span 1;}
+  }
+  @media(max-width:560px){
+    .gal{grid-template-columns:1fr;grid-auto-rows:auto;}
+    .gal-i:nth-child(6n+1),.gal-i:nth-child(6n+4){grid-column:span 1;grid-row:span 1;}
+    .gal-i img{aspect-ratio:4/3;height:auto;}
+  }
   .gal-i{position:relative;padding:0;border:0;background:var(--line);
     border-radius:var(--radius);overflow:hidden;cursor:zoom-in;display:block;}
   .gal-i img{width:100%;aspect-ratio:4/3;object-fit:cover;display:block;
@@ -476,6 +504,7 @@
   /* ---- FORMULARIO ---- */
   form{max-width:480px;display:flex;flex-direction:column;gap:12px;}
   .campo label{display:block;font-size:13px;font-weight:600;margin-bottom:6px;}
+  .opc{font-weight:400;color:var(--ink-soft);}
   input,textarea{width:100%;padding:12px 14px;border:1px solid var(--line);
     border-radius:var(--radius);background:var(--surface);color:var(--ink);
     transition:border-color .14s;}
@@ -513,10 +542,47 @@
     .wrap{padding:0 18px;}
     .hero{padding:34px 0 26px;}
   }
+  /* ══════════════════════════════════════════════════════════════
+     REVELADO AL SCROLL
+
+     Una página sin una sola transición se siente muerta, y era buena parte
+     de lo que se leía como "simple": todo aparecía de golpe, ya quieto.
+     Cada bloque entra con un desplazamiento corto cuando le toca.
+
+     Sin librerías: `IntersectionObserver` pone la clase y el CSS hace el
+     resto. Y nace VISIBLE, no oculto — si el JavaScript falla o el
+     navegador es viejo, la página se ve completa en vez de en blanco.
+     Ese fallo ya dejó una entrega vacía una vez.
+     ══════════════════════════════════════════════════════════════ */
+  .aparece{opacity:1;transform:none;}
+  /* Solo se esconde si el JS confirmó que va a poder mostrarlo. */
+  .js-reveal .aparece{opacity:0;transform:translateY(18px);
+    transition:opacity .55s ease,transform .55s cubic-bezier(.2,.7,.3,1);}
+  .js-reveal .aparece.visible{opacity:1;transform:none;}
+  /* El escalonado dentro de un bloque: las tarjetas no entran todas juntas. */
+  .js-reveal .aparece .servicio,
+  .js-reveal .aparece .dif-i,
+  .js-reveal .aparece .paso,
+  .js-reveal .aparece .gal-i{opacity:0;transform:translateY(14px);
+    transition:opacity .5s ease,transform .5s cubic-bezier(.2,.7,.3,1);}
+  .js-reveal .aparece.visible .servicio,
+  .js-reveal .aparece.visible .dif-i,
+  .js-reveal .aparece.visible .paso,
+  .js-reveal .aparece.visible .gal-i{opacity:1;transform:none;}
+  .js-reveal .aparece.visible :nth-child(2){transition-delay:.06s;}
+  .js-reveal .aparece.visible :nth-child(3){transition-delay:.12s;}
+  .js-reveal .aparece.visible :nth-child(4){transition-delay:.18s;}
+  .js-reveal .aparece.visible :nth-child(5){transition-delay:.24s;}
+  .js-reveal .aparece.visible :nth-child(6){transition-delay:.3s;}
+
   /* Quien pidió menos movimiento no debería recibir más. */
   @media(prefers-reduced-motion:reduce){
     *{animation:none!important;transition:none!important;}
     .cta:hover{transform:none;}
+    .js-reveal .aparece,
+    .js-reveal .aparece .servicio,.js-reveal .aparece .dif-i,
+    .js-reveal .aparece .paso,.js-reveal .aparece .gal-i{
+      opacity:1!important;transform:none!important;}
   }
 </style>
 </head>
@@ -698,7 +764,10 @@
         <input id="lContacto" name="contacto" type="text" autocomplete="tel" required>
       </div>
       <div class="campo">
-        <label for="lMensaje">Cuéntanos qué necesitas</label>
+        <!-- Marcado como opcional a propósito y DICHO: un campo sin marca
+             se lee como obligatorio, y el que no sabe qué escribir se va.
+             Lo señaló la auditoría: antes no decía nada. -->
+        <label for="lMensaje">Cuéntanos qué necesitas <span class="opc">(opcional)</span></label>
         <textarea id="lMensaje" name="mensaje" rows="3"></textarea>
       </div>
       <button type="submit">Enviar</button>
@@ -1180,6 +1249,45 @@ function pintarNav(){
   cablearNav(visibles.map((s) => s.id));
 }
 
+/* EL REVELADO AL SCROLL.
+   La clase `js-reveal` se pone en <html> SOLO si el navegador trae
+   IntersectionObserver y la persona no pidió menos movimiento. Mientras no
+   esté, el CSS deja todo visible: si esto falla, la página se ve completa
+   en vez de en blanco. Una entrega ya salió vacía por confiar en que el JS
+   siempre corre. */
+function cablearRevelado(){
+  const menos = window.matchMedia
+    && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  if(menos || typeof IntersectionObserver !== "function") return;
+
+  const bloques = document.querySelectorAll(".hero, .seccion, footer");
+  if(!bloques.length) return;
+
+  document.documentElement.classList.add("js-reveal");
+  bloques.forEach((b) => b.classList.add("aparece"));
+
+  const visor = new IntersectionObserver((entradas) => {
+    entradas.forEach((e) => {
+      if(!e.isIntersecting) return;
+      e.target.classList.add("visible");
+      visor.unobserve(e.target);      // una vez y ya: no se re-anima al subir
+    });
+  }, { rootMargin: "0px 0px -12% 0px", threshold: 0.06 });
+
+  bloques.forEach((b) => visor.observe(b));
+
+  // La primera pantalla no se anima: lo que ya está a la vista al cargar
+  // tiene que estar a la vista, no aparecer con retraso.
+  requestAnimationFrame(() => {
+    bloques.forEach((b) => {
+      if(b.getBoundingClientRect().top < window.innerHeight * 0.9){
+        b.classList.add("visible");
+        visor.unobserve(b);
+      }
+    });
+  });
+}
+
 function cablearNav(ids){
   const nav = document.getElementById("nav");
   const btn = document.getElementById("menuBtn");
@@ -1262,6 +1370,7 @@ function applyTheme(){
   pintarLeads(); pintarWhatsApp(); pintarPie();
   // El menú va al final: necesita saber qué secciones quedaron visibles.
   pintarNav();
+  cablearRevelado();
 }
 
 /* ── Adaptador de datos (idéntico a src/data/local.adapter.js) ── */
