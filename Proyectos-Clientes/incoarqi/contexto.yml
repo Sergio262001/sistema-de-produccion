@@ -119,6 +119,10 @@ apis:
   whatsapp_num: "POR DEFINIR"
   pagos:       ninguna
   analitica:   ga4             # incluido en la cotización
+  # El ID de medición de GA4. NO es un secreto (viaja en el HTML de todo
+  # sitio que use GA4), así que va aquí y no en el .env. Vacío = no se
+  # carga nada, ni una petición de red.
+  ga4_id:      ""              # POR DEFINIR
   correo:      "info@incoarqi.com"
 
 entrega:

@@ -115,6 +115,10 @@ export function ponerBloquePagina(bloque, pagina) {
     // arman con datos del propio cliente o se omiten.
     if (texto(p.hero.eyebrow)) limpio.hero.eyebrow = texto(p.hero.eyebrow);
     limpio.hero.cta = texto(p.hero.cta) || 'Escríbenos';
+    // Portada oscura: solo "oscuro" la enciende; cualquier otra cosa es clara.
+    if (/^oscuro$/i.test(texto(p.hero.fondo))) limpio.hero.fondo = 'oscuro';
+    const foto = texto(p.hero.foto);
+    if (/^(https?:\/\/|\/|\.\/)/i.test(foto)) limpio.hero.foto = foto;
   }
   // Las listas de pares título/texto: servicios, diferencial y proceso.
   // Se limpian igual, así que se recorren igual.
@@ -171,6 +175,60 @@ export function ponerBloquePagina(bloque, pagina) {
 
   return bloque.slice(0, i) + 'pagina:' + JSON.stringify(limpio)
        + bloque.slice(fin + 1);
+}
+
+/**
+ * Los meta de SEO y de vista previa al compartir (Open Graph).
+ *
+ * VAN EN EL HTML ESTÁTICO, no inyectados por JS. Los rastreadores de
+ * WhatsApp, Facebook y LinkedIn leen el `<head>` **sin ejecutar
+ * JavaScript**: si estos valores se pintaran desde el CONTEXT al arrancar,
+ * el enlace compartido saldría con el texto del ejemplo. Es una de las
+ * cosas que se vendieron en la primera cotización real, así que tiene que
+ * funcionar de verdad, no parecer que funciona.
+ */
+export function ponerMeta(html, cliente, ficha = {}) {
+  let out = html;
+  const esc = (s) => String(s ?? '').replace(/[&<>"]/g,
+    (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+
+  const hero = ficha.pagina?.hero || {};
+  const limpio = (v) => {
+    const s = String(v ?? '').trim();
+    return /^por definir$/i.test(s) ? '' : s;
+  };
+
+  // La descripción: la bajada del hero, o el subtítulo de marca. Nunca la
+  // del ejemplo, y nunca inventada.
+  const descripcion = limpio(hero.bajada)
+    || limpio(ficha.pagina?.sobre?.texto).slice(0, 180)
+    || limpio(ficha.marca?.subtitulo);
+
+  const dominio = limpio(ficha.entrega?.dominio);
+  // "por comprar" es una respuesta, no un dominio: no se convierte en URL.
+  const url = dominio && !/^por comprar$/i.test(dominio) && !dominio.includes(' ')
+    ? 'https://' + dominio.replace(/^https?:\/\//i, '') : '';
+
+  const imagen = limpio(ficha.marca?.banner) || limpio(ficha.marca?.logo);
+
+  const meta = (clave, valor, atributo = 'property') => {
+    // Si no hay valor se deja el atributo VACÍO, no el del ejemplo: una
+    // vista previa con la descripción de otro negocio es peor que sin ella.
+    const re = new RegExp('(<meta\\s+' + atributo + '="' + clave
+      + '"\\s+content=")[^"]*(")', 'i');
+    if (re.test(out)) out = out.replace(re, '$1' + esc(valor) + '$2');
+  };
+
+  if (cliente) {
+    meta('og:title', cliente);
+    out = out.replace(/(<meta\s+name="description"\s+content=")[^"]*(")/i,
+      '$1' + esc(descripcion) + '$2');
+  }
+  meta('og:description', descripcion);
+  meta('og:image', imagen);
+  meta('og:url', url);
+
+  return out;
 }
 
 export function ponerEnContexto(html, marca = {}, cliente = '', ficha = {}) {
@@ -320,6 +378,10 @@ export function adaptarEntregable(html, marca, proyecto, fichaCompleta = {}) {
   // applyTheme() lee el objeto CONTEXT del script y lo sobreescribe todo al
   // arrancar. Si el CONTEXT no cambia, el cliente no cambia.
   out = ponerEnContexto(out, marca, proyecto, fichaCompleta);
+
+  // 3b-bis · Los meta de SEO y de compartir. Aparte del CONTEXT a propósito:
+  // estos los lee un rastreador que NO ejecuta JavaScript.
+  out = ponerMeta(out, proyecto, fichaCompleta);
 
   // 3c · EL CATÁLOGO REAL.
   // Si el cliente escribió sus categorías y productos, reemplazan a los del

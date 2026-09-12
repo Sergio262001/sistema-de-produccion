@@ -36,20 +36,21 @@ lleguen, aparece sola.
 
 ---
 
-## Una observación de diseño, para decidir juntos
+## Una decisión de diseño: portada clara u oscura
 
-El brochure de INCOARQI es **oscuro**: azul marino dominante, fotografía
-grande, dorado como acento. La página, tal como está armada, **salió clara**
-— fondo casi blanco con la tipografía técnica.
+**Las dos versiones están construidas.** Es un cambio de una línea en la
+configuración, no un rediseño, así que se puede ver y decidir sin costo.
 
-Funciona y es legible, pero **no se siente como su material corporativo.**
+| | Cómo se ve |
+|---|---|
+| **Clara** | Fondo casi blanco, tipografía técnica, el azul marino en los títulos y el dorado en los rótulos. Se lee muy rápido y se siente liviana |
+| **Oscura** *(recomendada)* | El azul marino a todo el ancho, el titular en blanco, el dorado en el rótulo y el botón. Con la foto de portada encima, velada para que el texto se lea. **Es su brochure traducido a web** |
 
-Con la foto de portada se puede hacer la portada **oscura**, como el brochure:
-la foto a todo el ancho, el azul marino encima y el titular en blanco con el
-dorado. Es la misma página, cambia la primera pantalla.
+Recomiendo la **oscura**: su material corporativo es oscuro y fotográfico, y
+la versión clara —aunque correcta— no se siente de INCOARQI.
 
-Es una decisión de dirección de arte, y por eso la pregunto en vez de
-decidirla: **¿portada clara (como está) u oscura (como el brochure)?**
+Con la foto de portada la diferencia es mucho mayor que sin ella, porque hoy
+la versión oscura muestra el azul plano donde iría la fotografía.
 
 ---
 

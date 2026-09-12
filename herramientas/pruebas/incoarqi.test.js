@@ -24,7 +24,8 @@ import { readFileSync, existsSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { join, resolve } from 'node:path';
 import { leerYaml } from '../lib/yaml.js';
-import { construirFicha, adaptarEntregable, ponerBloquePagina } from '../crear-proyecto.js';
+import { construirFicha, adaptarEntregable, ponerBloquePagina,
+         ponerMeta } from '../crear-proyecto.js';
 
 const AQUI = resolve(fileURLToPath(new URL('.', import.meta.url)), '..');
 const RAIZ = resolve(AQUI, '..');
@@ -212,6 +213,78 @@ test('el proceso conserva el ORDEN, que es la información', () => {
   });
   const i = r.indexOf('Conocer'), j = r.indexOf('Analizar'), k = r.indexOf('Entregar');
   assert.ok(i < j && j < k, 'un proceso desordenado no es un proceso');
+});
+
+// ══════════ LO QUE SE VENDIÓ EN LA COTIZACIÓN ══════════
+// No basta con que exista: la cotización lo cobró, así que tiene que
+// funcionar de verdad. Ninguna de estas tres cosas existía en la base.
+
+test('la base trae botón flotante de WhatsApp, Open Graph y GA4', () => {
+  const base = readFileSync(join(BASES, 'landing-modular', 'demo.html'), 'utf8');
+  assert.match(base, /id="wa"[^>]*hidden/,
+    'botón flotante de WhatsApp: vendido en la cotización, y nace oculto');
+  assert.match(base, /property="og:title"/, 'vista previa al compartir');
+  assert.match(base, /property="og:image"/);
+  assert.match(base, /name="description"/, 'SEO mínimo');
+  assert.match(base, /function cargarAnalitica\(/, 'Google Analytics');
+  assert.match(base, /googletagmanager\.com/);
+});
+
+test('los meta van en el HTML estático, no pintados por JS', () => {
+  // WhatsApp, Facebook y LinkedIn leen el <head> SIN ejecutar JavaScript.
+  // Si estos valores se inyectaran al arrancar, el enlace compartido saldría
+  // con el texto del ejemplo.
+  const base = readFileSync(join(BASES, 'landing-modular', 'demo.html'), 'utf8');
+  const cabeza = base.slice(0, base.indexOf('</head>'));
+  assert.match(cabeza, /property="og:title"/, 'los og deben estar en el <head>');
+  assert.ok(!/setAttribute\(\s*["']content["']/.test(base),
+    'no se pintan por JS: un rastreador no lo ejecutaría');
+});
+
+test('los meta toman los datos del cliente', (t) => {
+  if (!hayFicha) return t.skip('sin la ficha del cliente en disco');
+  const { html } = entregable();
+  const cabeza = html.slice(0, html.indexOf('</head>'));
+  assert.match(cabeza, /og:title" content="INCOARQI S\.A\.S\."/);
+  assert.match(cabeza, /content="Soluciones integrales para convertir ideas/);
+  assert.match(cabeza, /og:url" content="https:\/\/incoarqi\.com"/);
+  assert.ok(!cabeza.includes('Estudio Lumen'), 'quedó el título del ejemplo');
+});
+
+test('sin dominio confirmado no se inventa una URL', () => {
+  const plantilla = '<meta property="og:url" content="">';
+  // "por comprar" es una respuesta del cliente, no un dominio.
+  assert.match(ponerMeta(plantilla, 'X', { entrega: { dominio: 'por comprar' } }),
+    /content=""/);
+  assert.match(ponerMeta(plantilla, 'X', { entrega: { dominio: 'POR DEFINIR' } }),
+    /content=""/);
+  assert.match(ponerMeta(plantilla, 'X', { entrega: { dominio: 'ej.com' } }),
+    /content="https:\/\/ej\.com"/);
+});
+
+test('sin imagen, la vista previa queda vacía y no con la del ejemplo', () => {
+  const plantilla = '<meta property="og:image" content="https://ejemplo.co/otro.jpg">';
+  assert.match(ponerMeta(plantilla, 'X', {}), /content=""/,
+    'una vista previa con la foto de otro negocio es peor que sin foto');
+  assert.match(ponerMeta(plantilla, 'X', { marca: { banner: 'https://c.co/b.jpg' } }),
+    /content="https:\/\/c\.co\/b\.jpg"/);
+});
+
+test('el botón de WhatsApp no se pinta si el número está pendiente', (t) => {
+  if (!hayFicha) return t.skip('sin la ficha del cliente en disco');
+  // El de INCOARQI está POR DEFINIR: el botón existe en el marcado pero
+  // tiene que quedarse oculto. Un botón que escribe a un número que no
+  // existe es peor que no tener botón.
+  const { html } = entregable();
+  assert.match(html, /whatsapp_num:""/, 'el número debe quedar vacío, no heredado');
+  assert.match(html, /id="wa"[^>]*hidden/, 'y el botón nace oculto');
+});
+
+test('GA4 no hace una sola petición sin ID válido', () => {
+  const base = readFileSync(join(BASES, 'landing-modular', 'demo.html'), 'utf8');
+  const cuerpo = base.slice(base.indexOf('function cargarAnalitica'));
+  assert.match(cuerpo.slice(0, 400), /if\(!\/\^G-/,
+    'tiene que validar el formato del ID antes de cargar nada');
 });
 
 test('el material que falta queda escrito para el cliente', (t) => {
