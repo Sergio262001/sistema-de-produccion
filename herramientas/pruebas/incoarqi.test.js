@@ -287,6 +287,55 @@ test('GA4 no hace una sola petición sin ID válido', () => {
     'tiene que validar el formato del ID antes de cargar nada');
 });
 
+// ══════════ EL ENTREGABLE EXISTE EN SU CARPETA ══════════
+//
+// Se generó el proyecto a una carpeta temporal para probar sin ensuciar el
+// repositorio... y nunca se dejó en la del cliente. El dueño lo notó:
+// "no veo que hicieras el index". Un entregable que solo existe en /tmp no
+// es un entregable.
+
+test('el proyecto del cliente tiene su index.html en disco', () => {
+  const proyecto = join(RAIZ, 'Proyectos-Clientes', 'incoarqi');
+  assert.ok(existsSync(join(proyecto, 'index.html')),
+    'el entregable no existe: se quedó en la carpeta temporal');
+});
+
+test('el index en disco es el del cliente, no el del ejemplo', () => {
+  const idx = join(RAIZ, 'Proyectos-Clientes', 'incoarqi', 'index.html');
+  if (!existsSync(idx)) { assert.fail('falta el index.html del cliente'); }
+  const html = readFileSync(idx, 'utf8');
+  for (const suyo of ['INCOARQI', 'Gerencia y gestión', 'Adecuaciones locativas',
+                      '#16294D', '#C9A227']) {
+    assert.ok(html.includes(suyo), 'el index en disco no trae: ' + suyo);
+  }
+  for (const ajeno of ['Estudio Lumen', 'POR DEFINIR', '573001234567',
+                       'sysbar', '@demo-only']) {
+    assert.ok(!html.includes(ajeno), 'el index en disco trae basura: ' + ajeno);
+  }
+});
+
+test('el index del cliente abre con doble clic', () => {
+  // Sin imports ES: por file:// no funcionan, y la cotización promete una
+  // página que se pueda revisar sin levantar un servidor.
+  const idx = join(RAIZ, 'Proyectos-Clientes', 'incoarqi', 'index.html');
+  if (!existsSync(idx)) { assert.fail('falta el index.html del cliente'); }
+  const html = readFileSync(idx, 'utf8');
+  assert.ok(!/<script[^>]*type="module"/.test(html), 'un módulo ES no carga por file://');
+  const bloques = [...html.matchAll(/<script(?![^>]*\bsrc=)[^>]*>([\s\S]*?)<\/script>/gi)];
+  for (const b of bloques) assert.doesNotThrow(() => new Function(b[1]));
+});
+
+test('la ficha curada NO la sobreescribió el generador', () => {
+  // El generador escribe su propio contexto.yml, plano y sin comentarios.
+  // El del cliente lleva la trazabilidad de la cotización y el por qué de
+  // cada POR DEFINIR: ese es el que tiene que sobrevivir.
+  if (!hayFicha) return;
+  const t = readFileSync(FICHA, 'utf8');
+  assert.match(t, /EL PRIMER CLIENTE REAL/,
+    'se perdió la ficha curada: la reemplazó la del generador');
+  assert.match(t, /TRANSCRITO del brochure/);
+});
+
 test('el material que falta queda escrito para el cliente', (t) => {
   const doc = join(RAIZ, 'Proyectos-Clientes', 'incoarqi', 'QUE-NECESITO-DE-USTEDES.md');
   if (!existsSync(doc)) return t.skip('sin el documento del cliente');

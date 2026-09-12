@@ -33,6 +33,15 @@ marca:
 
 pagina:
   hero:
+    # PORTADA OSCURA — pendiente de confirmar con el cliente.
+    # Queda en "oscuro" porque es la recomendación del estudio: su brochure
+    # es azul marino con fotografía grande, y la versión clara —aunque
+    # correcta— no se siente de INCOARQI.
+    # Si prefieren la clara, se cambia esta línea a "claro" y se regenera.
+    fondo:   "oscuro"
+    # La foto de portada va aquí cuando la manden. Sin ella se ve el azul
+    # plano a sangre, que sigue siendo mejor que un hueco gris.
+    foto:    ""                # POR DEFINIR
     eyebrow: "Ingeniería · Construcción · Arquitectura · Innovación"
     titular: "Diseñamos, planeamos, construimos y transformamos"
     bajada:  "Soluciones integrales para convertir ideas en proyectos de alto valor."
