@@ -50,31 +50,43 @@ pagina:
   servicios_titulo: "Nuestros servicios"
   servicios:
     - titulo: "Ingeniería"
+      icono:  "regla"
       desc:   "Ingeniería civil, eléctrica e hidrosanitaria. Diseño estructural y de instalaciones. Presupuestos, APU y cantidades de obra. Análisis, diagnóstico y soluciones técnicas."
     - titulo: "Arquitectura y diseño"
+      icono:  "plano"
       desc:   "Diseño arquitectónico y de interiores. Modelado 3D y renders. Planos arquitectónicos y técnicos. Coordinación arquitectura - ingeniería."
     - titulo: "Construcción"
+      icono:  "grua"
       desc:   "Obra nueva y obra gris. Acabados arquitectónicos. Construcciones residenciales, comerciales e institucionales. Urbanismo y espacio público."
     - titulo: "Gerencia y gestión de proyectos"
+      icono:  "equipo"
       desc:   "Gerencia, dirección y residencia de obra. Supervisión técnica y administrativa. Control de costos, tiempo y calidad. Informes, actas y seguimiento."
     - titulo: "Presupuestos y control de costos"
+      icono:  "calculadora"
       desc:   "Presupuestos de obra. Análisis de precios unitarios (APU). Control presupuestal. Seguimiento y proyección de costos."
     - titulo: "Planeación y programación"
+      icono:  "calendario"
       desc:   "Programación de obra. Cronogramas y curvas de avance. Control de rendimientos. Reprogramaciones y seguimiento."
 
   diferencial_titulo: "Nuestro diferencial"
   diferencial:
     - titulo: "Integración"
+      icono:  "red"
       texto:  "Integramos ingeniería, arquitectura, construcción y gestión en una misma visión."
     - titulo: "Planeación"
+      icono:  "lupa"
       texto:  "Analizamos antes de construir para tomar mejores decisiones."
     - titulo: "Control"
+      icono:  "lista"
       texto:  "Seguimos y controlamos cada etapa del proyecto."
     - titulo: "Calidad"
+      icono:  "escudo"
       texto:  "Cumplimos estándares técnicos y normativos."
     - titulo: "Innovación"
+      icono:  "idea"
       texto:  "Utilizamos tecnología y metodologías que optimizan procesos."
     - titulo: "Compromiso"
+      icono:  "mano"
       texto:  "Trabajamos de la mano con nuestros clientes con transparencia y responsabilidad."
 
   # Los 8 pasos van numerados porque SON una secuencia: el orden es
@@ -95,16 +107,26 @@ pagina:
 
   sectores_titulo: "Sectores"
   sectores:
-    - "Vivienda"
-    - "Comercial"
-    - "Institucional"
-    - "Oficinas"
-    - "Urbanismo"
-    - "Industria"
-    - "Remodelaciones"
-    - "Adecuaciones locativas"
-    - "Mantenimiento"
-    - "Obras civiles"
+    - { nombre: "Vivienda",               icono: "casa" }
+    - { nombre: "Comercial",              icono: "tienda" }
+    - { nombre: "Institucional",          icono: "edificio" }
+    - { nombre: "Oficinas",               icono: "edificio" }
+    - { nombre: "Urbanismo",              icono: "arbol" }
+    - { nombre: "Industria",              icono: "fabrica" }
+    - { nombre: "Remodelaciones",         icono: "llave" }
+    - { nombre: "Adecuaciones locativas", icono: "regla" }
+    - { nombre: "Mantenimiento",          icono: "engranaje" }
+    - { nombre: "Obras civiles",          icono: "puente" }
+
+  # LOS BLOQUES DE COLOR.
+  # El brochure de INCOARQI no es una hoja blanca: alterna azul marino y
+  # blanco, con diagonales doradas entre medio. Sin esa alternancia, siete
+  # secciones seguidas sobre el mismo fondo se leen como un documento, no
+  # como una página. Estas dos van sobre el azul de marca.
+  secciones_oscuras:
+    - "diferencial"
+    - "proceso"
+    - "pie"
 
   # De "usted": es una empresa hablándole a otra empresa.
   leads_titulo: "Hablemos de su proyecto"

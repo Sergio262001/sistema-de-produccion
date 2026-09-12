@@ -125,13 +125,16 @@ export function ponerBloquePagina(bloque, pagina) {
   for (const clave of ['servicios', 'diferencial', 'proceso']) {
     const lista = (Array.isArray(p[clave]) ? p[clave] : [])
       .map((s) => ({ titulo: texto(s?.titulo), desc: texto(s?.desc),
-                     texto: texto(s?.texto) }))
+                     texto: texto(s?.texto), icono: texto(s?.icono) }))
       .filter((s) => s.titulo)
       .map((s) => {
         // `servicios` usa `desc`; `diferencial` y `proceso` usan `texto`.
         const out = { titulo: s.titulo };
         if (clave === 'servicios') { if (s.desc || s.texto) out.desc = s.desc || s.texto; }
         else if (s.texto || s.desc) out.texto = s.texto || s.desc;
+        // El icono es el nombre de un símbolo del sprite. La base descarta
+        // los que no existen, así que aquí solo se filtra la forma.
+        if (/^[a-z]{2,20}$/.test(s.icono)) out.icono = s.icono;
         return out;
       });
     if (lista.length) {
@@ -153,12 +156,28 @@ export function ponerBloquePagina(bloque, pagina) {
 
   if (texto(p.leads_titulo)) limpio.leads_titulo = texto(p.leads_titulo);
 
+  // Los sectores aceptan texto suelto o { nombre, icono }. Mezclar los dos
+  // formatos en la misma lista está bien.
   const sectores = (Array.isArray(p.sectores) ? p.sectores : [])
-    .map(texto).filter(Boolean);
+    .map((s) => {
+      if (typeof s === 'string') return texto(s);
+      const nombre = texto(s?.nombre);
+      if (!nombre) return '';
+      const ic = texto(s?.icono);
+      return /^[a-z]{2,20}$/.test(ic) ? { nombre, icono: ic } : nombre;
+    })
+    .filter(Boolean);
   if (sectores.length) {
     limpio.sectores = sectores;
     if (texto(p.sectores_titulo)) limpio.sectores_titulo = texto(p.sectores_titulo);
   }
+
+  // Qué secciones van sobre el color de marca. Solo nombres conocidos: una
+  // sección inventada dejaría un bloque oscuro vacío.
+  const SECCIONES = ['servicios', 'diferencial', 'proceso', 'galeria', 'sectores', 'pie'];
+  const oscuras = (Array.isArray(p.secciones_oscuras) ? p.secciones_oscuras : [])
+    .map(texto).filter((s) => SECCIONES.includes(s));
+  if (oscuras.length) limpio.secciones_oscuras = oscuras;
   if (texto(p.sobre?.texto)) {
     limpio.sobre = { titulo: texto(p.sobre.titulo) || 'Sobre nosotros',
                      texto: texto(p.sobre.texto) };

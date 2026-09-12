@@ -215,9 +215,62 @@
     transition:transform .14s ease,box-shadow .14s ease,opacity .14s ease;}
   .cta:hover{opacity:.92;transform:translateY(-1px);}
 
+  .sprite{position:absolute;}
+
+  /* ---- ICONOS DE LÍNEA ----
+     Heredan el color de la sección: navy sobre claro, blanco sobre oscuro.
+     El círculo es el mismo recurso gráfico del brochure corporativo. */
+  .ic{width:22px;height:22px;flex:none;}
+  .ic-caja{width:46px;height:46px;border-radius:50%;flex:none;
+    display:grid;place-items:center;background:var(--brand);color:#fff;
+    margin-bottom:14px;}
+  .ic-caja .ic{width:23px;height:23px;}
+  [data-dir="mercado"] .ic-caja{border-radius:4px;}
+  [data-dir="boutique"] .ic-caja{background:transparent;color:var(--brand);
+    border:1px solid var(--line);}
+
   /* ---- SECCIONES ---- */
   .seccion{padding:calc(44px * var(--ritmo)) 0;
     border-top:var(--borde) solid var(--line);}
+
+  /* ══════════════════════════════════════════════════════════════
+     BLOQUES DE COLOR Y DIAGONALES
+
+     El brochure de un cliente corporativo no es una hoja blanca con texto:
+     alterna bloques de color, y las transiciones son diagonales o curvas.
+     Esa alternancia es la que da ritmo a la página; sin ella, siete
+     secciones seguidas sobre el mismo fondo se leen como un documento.
+
+     Qué secciones van oscuras lo dice la ficha:
+       pagina.secciones_oscuras: [diferencial, galeria]
+     ══════════════════════════════════════════════════════════════ */
+  .seccion.oscura{
+    background:var(--brand);color:#fff;border-top:0;
+    /* Se sale del .wrap para ocupar todo el ancho de la ventana. */
+    margin:0 calc(50% - 50vw);
+    padding-left:calc(50vw - 50%);padding-right:calc(50vw - 50%);
+    padding-top:calc(66px * var(--ritmo));padding-bottom:calc(60px * var(--ritmo));
+    /* La diagonal: el recurso gráfico del brochure, en CSS y sin imágenes. */
+    clip-path:polygon(0 0, 100% 34px, 100% 100%, 0 calc(100% - 34px));
+    margin-top:calc(-34px + 0px);margin-bottom:-20px;}
+  .seccion.oscura + .seccion{border-top:0;}
+  .seccion.oscura > h2{color:#fff;}
+  .seccion.oscura .dif-i{border-top-color:var(--accent);}
+  .seccion.oscura .dif-i p,
+  .seccion.oscura .paso p,
+  .seccion.oscura .prosa{color:rgba(255,255,255,.78);}
+  .seccion.oscura .ic-caja{background:var(--accent);color:var(--brand);}
+  .seccion.oscura .paso-n{background:var(--accent);color:var(--brand);}
+  .seccion.oscura .sect li{background:transparent;border-color:rgba(255,255,255,.3);
+    color:rgba(255,255,255,.88);}
+  .seccion.oscura .enlace{color:var(--accent);}
+  [data-dir="boutique"] .seccion.oscura .ic-caja{border-color:rgba(255,255,255,.35);
+    background:transparent;color:var(--accent);}
+  /* En móvil la diagonal se achica: a 375 px, 34 px de sesgo se come el texto. */
+  @media(max-width:600px){
+    .seccion.oscura{clip-path:polygon(0 0, 100% 16px, 100% 100%, 0 calc(100% - 16px));
+      margin-top:-16px;}
+  }
   /* El título de sección con una regla corta debajo. Es el patrón que usan
      los brochures corporativos y le da al segundo color de marca un trabajo
      concreto en vez de dejarlo decorando. */
@@ -238,14 +291,24 @@
   .dif{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,240px),1fr));
     gap:calc(26px * var(--ritmo)) 30px;}
   .dif-i{border-top:2px solid var(--accent);padding-top:14px;}
-  .dif-i h3{font-size:16px;margin-bottom:7px;}
+  .dif-i h3{font-size:16px;margin-bottom:7px;display:flex;align-items:center;gap:9px;}
   .dif-i p{color:var(--ink-soft);font-size:14.5px;line-height:1.6;}
 
   /* ---- PROCESO ---- secuencia real: los números son información */
   .pasos{list-style:none;margin:0;padding:0;display:grid;
     grid-template-columns:repeat(auto-fit,minmax(min(100%,170px),1fr));
     gap:calc(24px * var(--ritmo)) 22px;counter-reset:none;}
+  /* La LÍNEA que une los pasos. Es lo que convierte ocho círculos numerados
+     en un proceso: sin ella son ocho cosas sueltas que además ya venían
+     numeradas. Se dibuja desde cada círculo hacia el siguiente, y el último
+     no la lleva. */
   .paso{position:relative;padding-top:38px;}
+  .paso::before{content:"";position:absolute;left:34px;top:14px;right:-22px;
+    height:2px;background:var(--line);}
+  .paso:last-child::before{display:none;}
+  .seccion.oscura .paso::before{background:rgba(255,255,255,.22);}
+  /* En una sola columna la línea horizontal no tiene sentido. */
+  @media(max-width:600px){ .paso::before{display:none;} }
   .paso-n{position:absolute;top:0;left:0;font-family:var(--mono);font-size:12px;
     font-weight:600;letter-spacing:.06em;color:#fff;background:var(--brand);
     width:30px;height:30px;border-radius:50%;display:grid;place-items:center;
@@ -300,6 +363,7 @@
   /* ---- SECTORES ---- etiquetas, no tarjetas: es una lista de ámbitos */
   .sect{list-style:none;margin:0;padding:0;display:flex;flex-wrap:wrap;gap:10px;}
   .sect li{border:1px solid var(--line);border-radius:var(--boton-radio);
+    display:flex;align-items:center;gap:8px;
     padding:9px 16px;font-size:14px;color:var(--ink-soft);background:var(--surface);}
 
   .prosa{max-width:62ch;font-size:16px;line-height:1.7;color:var(--ink);}
@@ -328,10 +392,26 @@
   .msg{min-height:20px;font-size:14px;color:var(--brand);}
   .msg.mal{color:var(--danger);}
 
-  footer{border-top:var(--borde) solid var(--line);padding:24px 0 60px;
-    display:flex;flex-wrap:wrap;gap:16px;align-items:center;
-    font-size:13.5px;color:var(--ink-soft);}
-  footer b{font-family:var(--display);font-size:15px;color:var(--ink);}
+  footer{border-top:var(--borde) solid var(--line);padding:26px 0 60px;
+    display:flex;flex-wrap:wrap;gap:18px 30px;align-items:flex-start;
+    justify-content:space-between;font-size:13.5px;color:var(--ink-soft);}
+  footer b{font-family:var(--display);font-size:16px;color:var(--ink);display:block;}
+  .pie-sub{display:block;margin-top:4px;font-size:12.5px;}
+  .pie-datos{display:flex;flex-wrap:wrap;gap:14px 22px;align-items:center;}
+  .pie-datos .enlace{margin-top:0;display:inline-flex;align-items:center;gap:7px;}
+
+  /* PIE OSCURO — el remate del brochure corporativo. Sin él la página
+     termina con el formulario flotando en blanco: se siente cortada, no
+     terminada. Se enciende con `secciones_oscuras: [pie]`. */
+  footer.oscuro{background:var(--brand);color:rgba(255,255,255,.8);border-top:0;
+    margin:40px calc(50% - 50vw) 0;
+    padding:44px calc(50vw - 50%) 40px;
+    clip-path:polygon(0 26px, 100% 0, 100% 100%, 0 100%);}
+  footer.oscuro b{color:#fff;}
+  footer.oscuro .enlace{color:var(--accent);}
+  @media(max-width:600px){
+    footer.oscuro{clip-path:polygon(0 14px, 100% 0, 100% 100%, 0 100%);}
+  }
 
   @media(max-width:600px){
     .wrap{padding:0 18px;}
@@ -347,6 +427,125 @@
 <body>
 
 <a class="saltar" href="#contenido">Saltar al contenido</a>
+
+<!-- ══════════════════════════════════════════════════════════════
+     ICONOS DE LÍNEA — el sistema gráfico, no adorno.
+
+     Un emoji como icono de sección es una de las marcas más claras de
+     plantilla generada, y además no dice nada del negocio. Estos son
+     dibujos de línea sobre `currentColor`, así que heredan el color de
+     la sección donde caen (navy sobre claro, blanco sobre oscuro).
+
+     Cada servicio, diferencial o sector dice cuál usa por nombre
+     (`icono: "grua"`). Si el nombre no existe, no se pinta ninguno —
+     no se cae a un icono genérico que mienta sobre el contenido.
+     ══════════════════════════════════════════════════════════════ -->
+<svg class="sprite" width="0" height="0" aria-hidden="true" focusable="false">
+  <defs>
+    <g id="ic-base" fill="none" stroke="currentColor" stroke-width="1.6"
+       stroke-linecap="round" stroke-linejoin="round"></g>
+  </defs>
+  <symbol id="i-regla" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+     stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M3 17 17 3l4 4L7 21z"/><path d="M7 13l2 2M11 9l2 2"/>
+  </symbol>
+  <symbol id="i-plano" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+     stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M3 6h18v13H3z"/><path d="M3 10h7v9M14 10h7M14 14h7"/>
+  </symbol>
+  <symbol id="i-casa" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+     stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M3 11l9-7 9 7"/><path d="M5 10v10h14V10"/><path d="M10 20v-6h4v6"/>
+  </symbol>
+  <symbol id="i-grua" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+     stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M5 21V4"/><path d="M2 7h15"/><path d="M5 4l-3 3M5 4l12 3"/>
+    <path d="M11 7v4"/><path d="M9 11h4v3H9z"/><path d="M3 21h6"/>
+  </symbol>
+  <symbol id="i-equipo" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+     stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="9" cy="8" r="3"/><path d="M3 20a6 6 0 0112 0"/>
+    <path d="M16 6a3 3 0 010 6"/><path d="M18 20a5 5 0 00-3-4.6"/>
+  </symbol>
+  <symbol id="i-calculadora" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+     stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M5 3h14v18H5z"/><path d="M8 7h8"/>
+    <path d="M8 12h.01M12 12h.01M16 12h.01M8 16h.01M12 16h.01M16 16h.01"/>
+  </symbol>
+  <symbol id="i-calendario" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+     stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M4 6h16v15H4z"/><path d="M4 11h16"/><path d="M8 3v4M16 3v4"/>
+    <path d="M8 15h3"/>
+  </symbol>
+  <symbol id="i-engranaje" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+     stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="12" cy="12" r="3"/>
+    <path d="M12 2v3M12 19v3M2 12h3M19 12h3M5 5l2 2M17 17l2 2M19 5l-2 2M7 17l-2 2"/>
+  </symbol>
+  <symbol id="i-lista" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+     stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M6 4h12v17H6z"/><path d="M9 9h6M9 13h6M9 17h3"/>
+  </symbol>
+  <symbol id="i-escudo" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+     stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/><path d="M9 12l2 2 4-4"/>
+  </symbol>
+  <symbol id="i-idea" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+     stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M9 18h6"/><path d="M10 21h4"/>
+    <path d="M12 3a6 6 0 00-3 11v1h6v-1a6 6 0 00-3-11z"/>
+  </symbol>
+  <symbol id="i-mano" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+     stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M3 13c2-2 4-2 6 0l3 3"/><path d="M21 11c-2-2-4-2-6 0"/>
+    <path d="M12 16v5"/><circle cx="15" cy="6" r="3"/>
+  </symbol>
+  <symbol id="i-grafica" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+     stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M4 20h17"/><path d="M4 20V4"/><path d="M7 17l4-6 4 3 5-8"/>
+  </symbol>
+  <symbol id="i-red" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+     stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="12" cy="5" r="2.5"/><circle cx="5" cy="18" r="2.5"/>
+    <circle cx="19" cy="18" r="2.5"/><path d="M12 7.5v5M10 14l-3 2M14 14l3 2"/>
+  </symbol>
+  <symbol id="i-tienda" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+     stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M3 9l2-5h14l2 5"/><path d="M4 9v12h16V9"/><path d="M9 21v-6h6v6"/>
+  </symbol>
+  <symbol id="i-edificio" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+     stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M5 21V4h9v17"/><path d="M14 10h5v11"/>
+    <path d="M8 8h.01M11 8h.01M8 12h.01M11 12h.01M8 16h.01M11 16h.01M17 14h.01M17 18h.01"/>
+  </symbol>
+  <symbol id="i-arbol" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+     stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M12 21v-6"/><path d="M12 15a5 5 0 100-10 5 5 0 000 10z"/>
+    <path d="M4 21h16"/>
+  </symbol>
+  <symbol id="i-fabrica" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+     stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M3 21V11l5 3V11l5 3V9l6 3v9z"/><path d="M3 21h18"/><path d="M7 7V4"/>
+  </symbol>
+  <symbol id="i-llave" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+     stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M15 4a4 4 0 00-3 6.6L4 19l1.5 1.5 8.4-8.1A4 4 0 1015 4z"/>
+    <path d="M6 17l2 2"/>
+  </symbol>
+  <symbol id="i-puente" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+     stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M2 14h20"/><path d="M2 14c4-7 16-7 20 0"/>
+    <path d="M7 14v6M12 11v9M17 14v6"/>
+  </symbol>
+  <symbol id="i-lupa" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+     stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="11" cy="11" r="6"/><path d="M20 20l-4.5-4.5"/>
+  </symbol>
+  <symbol id="i-reloj" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+     stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="12" cy="12" r="8"/><path d="M12 8v4l3 2"/>
+  </symbol>
+</svg>
 
 <!-- Elementos de la barra de sistema del demo. Se conservan
      ocultos porque el script los referencia; sin ellos el JS falla
@@ -429,7 +628,7 @@ const CONTEXT = {
   /* LOS BLOQUES DE LA PÁGINA. Cada uno se pinta SOLO si trae contenido.
      Vacío = no existe; nunca se rellena con texto de ejemplo, ni con un
      "Próximamente", ni con foto de banco. */
-  pagina:{"hero":{"titular":"Diseñamos, planeamos, construimos y transformamos","bajada":"Soluciones integrales para convertir ideas en proyectos de alto valor.","eyebrow":"Ingeniería · Construcción · Arquitectura · Innovación","cta":"Hablemos de su proyecto","fondo":"oscuro"},"servicios":[{"titulo":"Ingeniería","desc":"Ingeniería civil, eléctrica e hidrosanitaria. Diseño estructural y de instalaciones. Presupuestos, APU y cantidades de obra. Análisis, diagnóstico y soluciones técnicas."},{"titulo":"Arquitectura y diseño","desc":"Diseño arquitectónico y de interiores. Modelado 3D y renders. Planos arquitectónicos y técnicos. Coordinación arquitectura - ingeniería."},{"titulo":"Construcción","desc":"Obra nueva y obra gris. Acabados arquitectónicos. Construcciones residenciales, comerciales e institucionales. Urbanismo y espacio público."},{"titulo":"Gerencia y gestión de proyectos","desc":"Gerencia, dirección y residencia de obra. Supervisión técnica y administrativa. Control de costos, tiempo y calidad. Informes, actas y seguimiento."},{"titulo":"Presupuestos y control de costos","desc":"Presupuestos de obra. Análisis de precios unitarios (APU). Control presupuestal. Seguimiento y proyección de costos."},{"titulo":"Planeación y programación","desc":"Programación de obra. Cronogramas y curvas de avance. Control de rendimientos. Reprogramaciones y seguimiento."}],"servicios_titulo":"Nuestros servicios","diferencial":[{"titulo":"Integración","texto":"Integramos ingeniería, arquitectura, construcción y gestión en una misma visión."},{"titulo":"Planeación","texto":"Analizamos antes de construir para tomar mejores decisiones."},{"titulo":"Control","texto":"Seguimos y controlamos cada etapa del proyecto."},{"titulo":"Calidad","texto":"Cumplimos estándares técnicos y normativos."},{"titulo":"Innovación","texto":"Utilizamos tecnología y metodologías que optimizan procesos."},{"titulo":"Compromiso","texto":"Trabajamos de la mano con nuestros clientes con transparencia y responsabilidad."}],"diferencial_titulo":"Nuestro diferencial","proceso":[{"titulo":"Conocer","texto":"Entendemos tu necesidad."},{"titulo":"Analizar","texto":"Evaluamos condiciones y alternativas."},{"titulo":"Diseñar","texto":"Desarrollamos la solución."},{"titulo":"Presupuestar","texto":"Calculamos costos y recursos."},{"titulo":"Planear","texto":"Definimos estrategia y programación."},{"titulo":"Construir","texto":"Ejecutamos con calidad y seguridad."},{"titulo":"Controlar","texto":"Monitoreamos avances y calidad."},{"titulo":"Entregar","texto":"Verificamos y entregamos."}],"proceso_titulo":"Nuestro proceso","leads_titulo":"Hablemos de su proyecto","sectores":["Vivienda","Comercial","Institucional","Oficinas","Urbanismo","Industria","Remodelaciones","Adecuaciones locativas","Mantenimiento","Obras civiles"],"sectores_titulo":"Sectores","sobre":{"titulo":"Por qué INCOARQI","texto":"Integramos conocimiento, experiencia e innovación para garantizar proyectos exitosos."}},
+  pagina:{"hero":{"titular":"Diseñamos, planeamos, construimos y transformamos","bajada":"Soluciones integrales para convertir ideas en proyectos de alto valor.","eyebrow":"Ingeniería · Construcción · Arquitectura · Innovación","cta":"Hablemos de su proyecto","fondo":"oscuro"},"servicios":[{"titulo":"Ingeniería","desc":"Ingeniería civil, eléctrica e hidrosanitaria. Diseño estructural y de instalaciones. Presupuestos, APU y cantidades de obra. Análisis, diagnóstico y soluciones técnicas.","icono":"regla"},{"titulo":"Arquitectura y diseño","desc":"Diseño arquitectónico y de interiores. Modelado 3D y renders. Planos arquitectónicos y técnicos. Coordinación arquitectura - ingeniería.","icono":"plano"},{"titulo":"Construcción","desc":"Obra nueva y obra gris. Acabados arquitectónicos. Construcciones residenciales, comerciales e institucionales. Urbanismo y espacio público.","icono":"grua"},{"titulo":"Gerencia y gestión de proyectos","desc":"Gerencia, dirección y residencia de obra. Supervisión técnica y administrativa. Control de costos, tiempo y calidad. Informes, actas y seguimiento.","icono":"equipo"},{"titulo":"Presupuestos y control de costos","desc":"Presupuestos de obra. Análisis de precios unitarios (APU). Control presupuestal. Seguimiento y proyección de costos.","icono":"calculadora"},{"titulo":"Planeación y programación","desc":"Programación de obra. Cronogramas y curvas de avance. Control de rendimientos. Reprogramaciones y seguimiento.","icono":"calendario"}],"servicios_titulo":"Nuestros servicios","diferencial":[{"titulo":"Integración","texto":"Integramos ingeniería, arquitectura, construcción y gestión en una misma visión.","icono":"red"},{"titulo":"Planeación","texto":"Analizamos antes de construir para tomar mejores decisiones.","icono":"lupa"},{"titulo":"Control","texto":"Seguimos y controlamos cada etapa del proyecto.","icono":"lista"},{"titulo":"Calidad","texto":"Cumplimos estándares técnicos y normativos.","icono":"escudo"},{"titulo":"Innovación","texto":"Utilizamos tecnología y metodologías que optimizan procesos.","icono":"idea"},{"titulo":"Compromiso","texto":"Trabajamos de la mano con nuestros clientes con transparencia y responsabilidad.","icono":"mano"}],"diferencial_titulo":"Nuestro diferencial","proceso":[{"titulo":"Conocer","texto":"Entendemos tu necesidad."},{"titulo":"Analizar","texto":"Evaluamos condiciones y alternativas."},{"titulo":"Diseñar","texto":"Desarrollamos la solución."},{"titulo":"Presupuestar","texto":"Calculamos costos y recursos."},{"titulo":"Planear","texto":"Definimos estrategia y programación."},{"titulo":"Construir","texto":"Ejecutamos con calidad y seguridad."},{"titulo":"Controlar","texto":"Monitoreamos avances y calidad."},{"titulo":"Entregar","texto":"Verificamos y entregamos."}],"proceso_titulo":"Nuestro proceso","leads_titulo":"Hablemos de su proyecto","sectores":[{"nombre":"Vivienda","icono":"casa"},{"nombre":"Comercial","icono":"tienda"},{"nombre":"Institucional","icono":"edificio"},{"nombre":"Oficinas","icono":"edificio"},{"nombre":"Urbanismo","icono":"arbol"},{"nombre":"Industria","icono":"fabrica"},{"nombre":"Remodelaciones","icono":"llave"},{"nombre":"Adecuaciones locativas","icono":"regla"},{"nombre":"Mantenimiento","icono":"engranaje"},{"nombre":"Obras civiles","icono":"puente"}],"sectores_titulo":"Sectores","secciones_oscuras":["diferencial","proceso","pie"],"sobre":{"titulo":"Por qué INCOARQI","texto":"Integramos conocimiento, experiencia e innovación para garantizar proyectos exitosos."}},
   apis: {
     mensajeria:"whatsapp", whatsapp_num:"",
     // El ID de medición de GA4. NO es un secreto: viaja en el HTML de
@@ -534,12 +733,37 @@ function pintarServicios(){
   const items = lista.filter((s)=>s && String(s.titulo||"").trim());
   if(!items.length){ el.hidden = true; return; }
   const titulo = String((CONTEXT.pagina.servicios_titulo)||"Lo que hacemos").trim();
+  fondoDe(el, "servicios");
   el.innerHTML = '<h2>'+esc(titulo)+'</h2><div class="servicios">'
-    + items.map((s)=>'<article class="servicio"><h3>'+esc(s.titulo)+'</h3>'
+    + items.map((s)=>'<article class="servicio">'
+        + icono(s.icono, true)
+        + '<h3>'+esc(s.titulo)+'</h3>'
         + (String(s.desc||"").trim() ? '<p>'+esc(s.desc)+'</p>' : '')
         + '</article>').join('')
     + '</div>';
   el.hidden = false;
+}
+
+/* Un icono del sprite, o nada. No hay icono genérico de respaldo: uno que
+   no corresponde al contenido miente, y es peor que no tener ninguno. */
+const ICONOS = ['regla','plano','casa','grua','equipo','calculadora','calendario',
+  'engranaje','lista','escudo','idea','mano','grafica','red','tienda','edificio',
+  'arbol','fabrica','llave','puente','lupa','reloj'];
+
+function icono(nombre, conCaja){
+  const n = String(nombre||"").trim().toLowerCase();
+  if(!ICONOS.includes(n)) return "";
+  const svg = '<svg class="ic" aria-hidden="true"><use href="#i-'+n+'"></use></svg>';
+  return conCaja ? '<span class="ic-caja">'+svg+'</span>' : svg;
+}
+
+/* ¿Esta sección va sobre el color de marca? Lo dice la ficha. */
+function esOscura(id){
+  const lista = (CONTEXT.pagina && CONTEXT.pagina.secciones_oscuras) || [];
+  return Array.isArray(lista) && lista.map(String).includes(id);
+}
+function fondoDe(el, id){
+  if(el) el.classList.toggle("oscura", esOscura(id));
 }
 
 /* DIFERENCIAL — por qué a nosotros. Lista de pares título/texto.
@@ -550,9 +774,11 @@ function pintarDiferencial(){
   const p = CONTEXT.pagina || {};
   const items = (p.diferencial || []).filter((d)=>d && String(d.titulo||"").trim());
   if(!items.length){ el.hidden = true; return; }
+  fondoDe(el, "diferencial");
   el.innerHTML = '<h2>'+esc(String(p.diferencial_titulo||"Nuestro diferencial").trim())+'</h2>'
     + '<div class="dif">'
-    + items.map((d)=>'<article class="dif-i"><h3>'+esc(d.titulo)+'</h3>'
+    + items.map((d)=>'<article class="dif-i">'
+        + '<h3>'+icono(d.icono)+esc(d.titulo)+'</h3>'
         + (String(d.texto||"").trim() ? '<p>'+esc(d.texto)+'</p>' : '')
         + '</article>').join('')
     + '</div>';
@@ -569,6 +795,7 @@ function pintarProceso(){
   const p = CONTEXT.pagina || {};
   const pasos = (p.proceso || []).filter((s)=>s && String(s.titulo||"").trim());
   if(!pasos.length){ el.hidden = true; return; }
+  fondoDe(el, "proceso");
   el.innerHTML = '<h2>'+esc(String(p.proceso_titulo||"Nuestro proceso").trim())+'</h2>'
     + '<ol class="pasos">'
     + pasos.map((s,i)=>'<li class="paso"><span class="paso-n">'
@@ -592,6 +819,7 @@ function pintarGaleria(){
     .filter((f)=>f.src);
   if(!fotos.length){ el.hidden = true; return; }
 
+  fondoDe(el, "galeria");
   el.innerHTML = '<h2>'+esc(String(p.galeria_titulo||"Proyectos").trim())+'</h2>'
     + '<div class="gal">'
     + fotos.map((f,i)=>'<button type="button" class="gal-i" data-i="'+i+'" '
@@ -628,11 +856,18 @@ function pintarSectores(){
   const el = document.getElementById("sectores");
   if(!el) return;
   const p = CONTEXT.pagina || {};
-  const lista = (p.sectores || []).map((s)=>String(s||"").trim()).filter(Boolean);
+  // Acepta texto suelto ("Vivienda") o { nombre, icono } para los que
+  // tengan uno. Mezclar los dos formatos en la misma lista está bien.
+  const lista = (p.sectores || [])
+    .map((s)=>(typeof s === "string" ? { nombre: s.trim(), icono: "" }
+                                     : { nombre: String((s&&s.nombre)||"").trim(),
+                                         icono: (s&&s.icono)||"" }))
+    .filter((s)=>s.nombre);
   if(!lista.length){ el.hidden = true; return; }
+  fondoDe(el, "sectores");
   el.innerHTML = '<h2>'+esc(String(p.sectores_titulo||"Sectores").trim())+'</h2>'
     + '<ul class="sect">'
-    + lista.map((s)=>'<li>'+esc(s)+'</li>').join('')
+    + lista.map((s)=>'<li>'+icono(s.icono)+esc(s.nombre)+'</li>').join('')
     + '</ul>';
   el.hidden = false;
 }
@@ -725,18 +960,39 @@ function pintarLeads(){
   if(t) el.textContent = t;
 }
 
+/* EL PIE — el remate de la página.
+   El brochure corporativo cierra con una franja del color de marca y los
+   datos de contacto. Sin eso, la página termina con el formulario flotando
+   en blanco y se siente cortada, no terminada. */
 function pintarPie(){
   const el = document.getElementById("pie");
   if(!el) return;
   const p = CONTEXT.pagina || {};
+  const a = CONTEXT.apis || {};
+
   const trozos = [];
-  const wa = String(CONTEXT.apis && CONTEXT.apis.whatsapp_num || "").replace(/\D/g,"");
+  const wa = String(a.whatsapp_num || "").replace(/\D/g,"");
   if(wa) trozos.push('<a class="enlace" href="https://wa.me/'+esc(wa)
-    + '" target="_blank" rel="noopener">WhatsApp</a>');
+    + '" target="_blank" rel="noopener">'
+    + icono("mano") + 'WhatsApp</a>');
+
+  const correo = String(a.correo || "").trim();
+  if(/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(correo)){
+    trozos.push('<a class="enlace" href="mailto:'+esc(correo)+'">'+esc(correo)+'</a>');
+  }
+
   const ig = String(p.redes && p.redes.instagram || "").replace(/^@/,"").trim();
   if(ig) trozos.push('<a class="enlace" href="https://instagram.com/'+esc(ig)
     + '" target="_blank" rel="noopener">@'+esc(ig)+'</a>');
-  el.innerHTML = '<b>'+esc(CONTEXT.cliente)+'</b>' + trozos.join('');
+
+  const dir = String(p.ubicacion && p.ubicacion.direccion || "").trim();
+  if(dir) trozos.push('<span>'+esc(dir)+'</span>');
+
+  const sub = String((CONTEXT.marca && CONTEXT.marca.subtitulo) || "").trim();
+  el.classList.toggle("oscuro", esOscura("pie"));
+  el.innerHTML = '<div class="pie-marca"><b>'+esc(CONTEXT.cliente)+'</b>'
+    + (sub ? '<span class="pie-sub">'+esc(sub)+'</span>' : '') + '</div>'
+    + (trozos.length ? '<div class="pie-datos">'+trozos.join('')+'</div>' : '');
 }
 
 /** Las tres direcciones válidas. Cualquier otra cosa cae en "taller". */
