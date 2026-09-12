@@ -24,7 +24,8 @@ import { crearAcceso, leerCookie } from './lib/acceso.js';
 import { configurarGoogle, urlDeEntrada, canjearCodigo } from './lib/google.js';
 import { CATALOGO, componer, fichaDeProyecto } from './lib/prompts.js';
 import { estadoAgente, correrAgente, MODELOS_AGENTE, MODELO_AGENTE,
-         PRESUPUESTO_POR_DEFECTO, PRESUPUESTO_MAXIMO } from './lib/agente.js';
+         PRESUPUESTO_POR_DEFECTO, PRESUPUESTO_MAXIMO,
+         COBROS, COBRO_POR_DEFECTO, ROLES } from './lib/agente.js';
 import { abrirHistorial } from './lib/historial.js';
 
 const AQUI = fileURLToPath(new URL('.', import.meta.url));
@@ -338,19 +339,26 @@ const servidor = createServer(async (req, res) => {
 
     // ─ Agente: estado
     if (ruta === '/api/agente/estado') {
-      const e = await estadoAgente();
+      const cobro = url.searchParams.get('cobro') || COBRO_POR_DEFECTO;
+      const e = await estadoAgente(cobro);
       return json(res, 200, {
         ...e,
         modelos: Object.entries(MODELOS_AGENTE).map(([k, v]) => ({ clave: k, etiqueta: v.etiqueta })),
         modeloPorDefecto: MODELO_AGENTE,
         presupuesto: PRESUPUESTO_POR_DEFECTO,
         presupuestoMaximo: PRESUPUESTO_MAXIMO,
+        cobroPorDefecto: COBRO_POR_DEFECTO,
+        cobros: Object.entries(COBROS).map(([k, v]) => ({ clave: k, etiqueta: v.etiqueta })),
+        roles: Object.entries(ROLES).map(([k, v]) => ({
+          clave: k, modelo: v.model, para: v.description,
+          escribe: (v.tools || []).includes('Write'),
+        })),
       });
     }
 
     // ─ Agente: conversación en vivo (Server-Sent Events)
     if (req.method === 'POST' && ruta === '/api/agente') {
-      const { mensaje, modelo, presupuesto, soloLectura } = await leerCuerpo(req);
+      const { mensaje, modelo, presupuesto, soloLectura, cobro, rol } = await leerCuerpo(req);
       if (!mensaje || !String(mensaje).trim()) {
         return json(res, 400, { error: 'Falta el mensaje.' });
       }
@@ -364,10 +372,14 @@ const servidor = createServer(async (req, res) => {
 
       try {
         const { costo, turnos } = await correrAgente(
-          { raiz: RAIZ, mensaje, modelo, presupuesto, soloLectura }, enviar);
+          { raiz: RAIZ, mensaje, modelo, presupuesto, soloLectura, cobro, rol }, enviar);
         historial.anotar({
           tipo: 'agente', resumen: String(mensaje).slice(0, 160),
-          costo, detalle: { modelo, turnos, soloLectura: Boolean(soloLectura) },
+          // En modo suscripción el costo por token es 0: lo que se gasta son
+          // los límites del plan. Se anota el modo para que el historial no
+          // parezca que todo salió gratis.
+          costo, detalle: { modelo, turnos, soloLectura: Boolean(soloLectura),
+                            cobro: cobro || COBRO_POR_DEFECTO, rol: rol || null },
         });
       } catch (e) {
         enviar({ tipo: 'error', mensaje: e.message });

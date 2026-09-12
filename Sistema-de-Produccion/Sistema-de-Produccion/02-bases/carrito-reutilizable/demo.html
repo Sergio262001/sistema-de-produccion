@@ -7,8 +7,12 @@
 <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;800&family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&family=Karla:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
   :root{
-    --brand:#1F6B4A;--bg:#F3ECE0;--surface:#fff;--ink:#23201A;--ink-soft:#6B6359;
-    --line:#E4DACA;--accent:#C2703D;--radius:16px;--sys-bg:#0C1322;--sys:#2F54FF;
+    /* NEUTROS ELEGIDOS. Compartía byte por byte la paleta crema+terracota
+       del menú — la firma del diseño generado por IA. Ahora suelo casi
+       neutro y acento ladrillo, igual que el menú pero un grado más frío:
+       esta base es para llevar, no para quedarse. */
+    --brand:#1F6B4A;--bg:#F5F5F3;--surface:#fff;--ink:#18191A;--ink-soft:#56585A;
+    --line:#E4E4E1;--accent:#8C3B2F;--radius:16px;--sys-bg:#0C1322;--sys:#2F54FF;
     --display:'Fraunces',serif;--body:'Inter',sans-serif;
     --mono:'JetBrains Mono',ui-monospace,monospace;
 
@@ -121,7 +125,7 @@
   [data-dir="boutique"] .bloque h2{text-transform:none;letter-spacing:0;
      font-family:var(--display);font-size:19px;color:var(--ink);}
 
-  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,240px),1fr));
      gap:calc(16px * var(--ritmo));padding:24px 0 60px;}
   .card{background:var(--surface);border:var(--borde) solid var(--line);border-radius:var(--radius);overflow:hidden;display:flex;flex-direction:column;box-shadow:var(--sombra);}
   /* La foto es lo que vende. Alto fijo para que la rejilla no salte
@@ -130,7 +134,10 @@
      object-fit:cover;display:block;
      background:var(--bg);border-bottom:1px solid var(--line);}
   .card .ph.sinfoto{display:grid;place-items:center;font-size:46px;
-     background:linear-gradient(135deg,#fff,var(--line));}
+     background:var(--bg);color:var(--ink-soft);opacity:.45;}
+  /* Un recuadro SIN foto no reclama la proporción de una foto real: en
+     boutique (3/4) dejaba un vacío enorme con un emoji flotando en medio. */
+  .sinfoto{aspect-ratio:3/2;height:auto;max-height:190px;}
   /* Banner del cliente: ancho completo, alto acotado, recorte centrado.
      `hidden` gana siempre — sin banner no debe quedar un hueco gris. */
   .banner{display:block;width:100%;max-height:240px;object-fit:cover;

@@ -7,6 +7,13 @@
 *.pem
 secrets.json
 
+# ─── Capturas ─────────────────────────────────────────────────
+# Los ojos del sistema (herramientas/capturar.js). Son artefactos: se
+# vuelven a generar en segundos y pesan cientos de KB cada una. Las del
+# tablero de referencias además son de sitios ajenos.
+capturas/
+*.captura-*.html
+
 # ─── Dependencias y builds ────────────────────────────────────
 node_modules/
 dist/

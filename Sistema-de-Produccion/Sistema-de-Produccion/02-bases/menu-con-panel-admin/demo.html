@@ -13,8 +13,17 @@
      Cambiar la marca de un cliente = cambiar la ficha, no el CSS.
      ==================================================================== */
   :root{
-    --brand:#1F6B4A; --brand-soft:#2C7C58; --bg:#F3ECE0; --surface:#FFFFFF;
-    --ink:#23201A; --ink-soft:#6B6359; --line:#E4DACA; --accent:#C2703D;
+    /* NEUTROS ELEGIDOS — y aquí había algo peor que un neutro heredado.
+       Antes: --bg #F3ECE0 (crema cálido), display Fraunces serif,
+       --accent #C2703D (terracota). Crema + serif + terracota es la firma
+       más reconocible del diseño generado por IA: el valor por defecto al
+       que cae cualquier modelo cuando le piden "algo elegante y artesanal".
+       No era una dirección de arte, era el default.
+       Ahora: suelo casi neutro con un susurro verde, y el acento pasa de
+       terracota pastel a ladrillo profundo — lee como tueste de café, no
+       como plantilla. */
+    --brand:#1F6B4A; --brand-soft:#2C7C58; --bg:#F4F5F2; --surface:#FFFFFF;
+    --ink:#161A17; --ink-soft:#555C56; --line:#E1E5DF; --accent:#8C3B2F;
     --radius:16px; --sys:#2F54FF; --sys-bg:#11182B;
     --display:'Fraunces',serif; --body:'Inter',sans-serif;
     --mono:'JetBrains Mono',ui-monospace,monospace;
@@ -181,7 +190,11 @@
   .thumb{width:var(--foto-lado);height:calc(var(--foto-lado) * var(--foto-prop));
      border-radius:var(--r-foto);flex:none;object-fit:cover;display:block;
      border:1px solid var(--line);background:var(--bg);}
-  .thumb.sinfoto{display:grid;place-items:center;font-size:38px;background:linear-gradient(135deg,#fff,var(--line));}
+  /* El respaldo sin foto no estira el ítem: en boutique la caja era 120×150
+     y el alto de cada plato lo mandaba el hueco, no el texto. Queda cuadrado
+     y discreto — se ve que falta la foto, pero no domina la carta. */
+  .thumb.sinfoto{display:grid;place-items:center;font-size:34px;background:var(--bg);
+     color:var(--ink-soft);opacity:.45;aspect-ratio:1;height:auto;max-height:96px;}
   @media(max-width:520px){.thumb{--foto-lado:76px;}.thumb.sinfoto{font-size:30px;}}
   .item .info{flex:1;min-width:0;}
   .item .nm{font-weight:600;font-size:16px;display:flex;align-items:center;gap:8px;}

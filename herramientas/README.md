@@ -43,6 +43,29 @@ node validar.js --json                # para scripts
 
 Sale con código 1 si hay errores — sirve como puerta antes de entregar.
 
+## Capturas — los ojos del sistema
+
+Hasta ahora el ciclo estaba abierto: se construía una página y **nadie la
+miraba**. Las 312 pruebas comprueban que el HTML compila, que los `id` existen
+y que el catálogo llegó. Ninguna lo ve.
+
+```bash
+node capturar.js <ruta.html|URL>       # una captura
+node capturar.js <ruta.html> --dirs    # una por dirección de arte
+node capturar.js <ruta> --movil        # 375 px, como un teléfono
+node capturar.js --bases               # las 5 bases con dirección
+node capturar.js --referencias         # el tablero de referencias
+```
+
+**Cero dependencias:** usa el Chrome (o Edge) que ya está instalado.
+Playwright traería 300 MB y su propio Chromium para hacer lo mismo. Las
+capturas van a `capturas/`, ignorada por git.
+
+La primera captura que se tomó encontró **cuatro defectos en diez segundos**,
+todos de geometría renderizada y todos con las pruebas en verde: huecos en la
+rejilla por `auto-fill`, recuadros sin foto de 427 px de alto, tarjetas
+hermanas desalineadas y el precio a un océano del nombre.
+
 ## Generador de proyectos
 
 Lo que antes tomaba ~2 horas a mano:
@@ -100,6 +123,49 @@ Medido sobre las 9 bases (~35.500 tokens de entrada):
 
 El `system` prompt va con `cache_control`, así que auditar varios archivos
 seguidos abarata mucho a partir del segundo.
+
+## El agente y sus roles
+
+El agente usa el Claude Agent SDK: Claude Code como librería, corriendo en tu
+máquina sobre tus archivos.
+
+### De dónde sale el dinero — tú eliges
+
+| Modo | Qué gasta | Para qué |
+|---|---|---|
+| **Mi suscripción** (por defecto) | los límites de tu plan de claude.ai, **$0 por token** | trabajar sentado frente al panel |
+| **API** | por token, con `ANTHROPIC_API_KEY` | tandas largas y desatendidas |
+
+Estaba forzado al modo API por un detalle: el `.env` tiene la clave, `panel.js`
+la carga en `process.env`, y el subproceso **hereda** `process.env`. La opción
+`env` del SDK reemplaza ese entorno, así que el modo suscripción le pasa uno
+igual pero **sin** la clave.
+
+### Los cuatro roles
+
+El dinero va donde está el criterio: **el que decide es el caro, el que ejecuta
+es más barato.**
+
+| Rol | Modelo | Puede |
+|---|---|---|
+| `disenador` | Opus 5 | leer, capturar, criticar · **no escribe código** |
+| `constructor` | Sonnet 5 | aplicar cambios |
+| `auditor` | Haiku 4.5 | correr el validador y las pruebas |
+| `redactor` | Sonnet 5 | copy en el tono de la ficha, siempre borrador |
+
+El diseñador **no tiene `Write`** a propósito: un rol que decide y además
+implementa se salta su propio criterio — escribe primero y justifica después.
+Sin manos tiene que decir qué cambiar y a qué valor, que es el entregable útil.
+
+### Las skills son el criterio del estudio
+
+Cinco, en `.claude/skills/` de la raíz del escritorio, para que las lean tanto
+Claude Code como el agente del panel: `direccion-de-arte`,
+`entregable-cliente`, `revision-visual`, `base-tecnica`, `ficha-de-contexto`.
+
+Antes no había ninguna, y aunque hubiera habido, **el agente no podía usarlas**:
+su lista blanca de herramientas no incluía `Skill` ni `Task`. No fallaba —
+simplemente no podía, y nadie se enteraba. Hay una prueba que lo vigila.
 
 ## Acceso
 
