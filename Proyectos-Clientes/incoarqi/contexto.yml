@@ -1,0 +1,131 @@
+# ════════════════════════════════════════════════════════════
+#  INCOARQI S.A.S. — landing page corporativa
+#  EL PRIMER CLIENTE REAL DEL SISTEMA.
+#
+#  Cotización 001-2026 · 8 sep 2026 · $300.000 COP neto
+#  Entrega: 5 a 7 días hábiles desde la recepción del material.
+#
+#  El contenido de abajo está TRANSCRITO del brochure corporativo que
+#  entregó el cliente. No hay una palabra inventada. Lo que no venía en
+#  el brochure está marcado POR DEFINIR y hay que pedirlo — ver el
+#  README del proyecto.
+# ════════════════════════════════════════════════════════════
+
+cliente:  "INCOARQI S.A.S."
+proyecto: "INCOARQI S.A.S."
+base:     landing-modular
+linea:    starter
+
+marca:
+  # Tomados del brochure: azul marino profundo + dorado.
+  # Los neutros NO son azules: si el suelo y la tinta fueran del matiz del
+  # acento, el dorado no tendría contra qué destacar (ver la skill
+  # direccion-de-arte → "los neutros se eligen, no se heredan").
+  primario:   "#16294D"      # azul marino del logo y los bloques
+  secundario: "#F7F7F5"      # suelo casi neutro, un pelo cálido
+  acento:     "#C9A227"      # dorado: el ÚNICO color saturado de la página
+  direccion:  taller         # ficha técnica: ingeniería, no boutique
+  inicial:    "I"
+  logo:       ""             # POR DEFINIR — pedir el logo en SVG o PNG transparente
+  banner:     ""             # POR DEFINIR — la foto de portada del brochure
+  subtitulo:  "Ingeniería · Construcción · Arquitectura · Innovación"
+  tono:       "técnico, sobrio y confiable"
+
+pagina:
+  hero:
+    eyebrow: "Ingeniería · Construcción · Arquitectura · Innovación"
+    titular: "Diseñamos, planeamos, construimos y transformamos"
+    bajada:  "Soluciones integrales para convertir ideas en proyectos de alto valor."
+    cta:     "Hablemos de su proyecto"
+
+  servicios_titulo: "Nuestros servicios"
+  servicios:
+    - titulo: "Ingeniería"
+      desc:   "Ingeniería civil, eléctrica e hidrosanitaria. Diseño estructural y de instalaciones. Presupuestos, APU y cantidades de obra. Análisis, diagnóstico y soluciones técnicas."
+    - titulo: "Arquitectura y diseño"
+      desc:   "Diseño arquitectónico y de interiores. Modelado 3D y renders. Planos arquitectónicos y técnicos. Coordinación arquitectura - ingeniería."
+    - titulo: "Construcción"
+      desc:   "Obra nueva y obra gris. Acabados arquitectónicos. Construcciones residenciales, comerciales e institucionales. Urbanismo y espacio público."
+    - titulo: "Gerencia y gestión de proyectos"
+      desc:   "Gerencia, dirección y residencia de obra. Supervisión técnica y administrativa. Control de costos, tiempo y calidad. Informes, actas y seguimiento."
+    - titulo: "Presupuestos y control de costos"
+      desc:   "Presupuestos de obra. Análisis de precios unitarios (APU). Control presupuestal. Seguimiento y proyección de costos."
+    - titulo: "Planeación y programación"
+      desc:   "Programación de obra. Cronogramas y curvas de avance. Control de rendimientos. Reprogramaciones y seguimiento."
+
+  diferencial_titulo: "Nuestro diferencial"
+  diferencial:
+    - titulo: "Integración"
+      texto:  "Integramos ingeniería, arquitectura, construcción y gestión en una misma visión."
+    - titulo: "Planeación"
+      texto:  "Analizamos antes de construir para tomar mejores decisiones."
+    - titulo: "Control"
+      texto:  "Seguimos y controlamos cada etapa del proyecto."
+    - titulo: "Calidad"
+      texto:  "Cumplimos estándares técnicos y normativos."
+    - titulo: "Innovación"
+      texto:  "Utilizamos tecnología y metodologías que optimizan procesos."
+    - titulo: "Compromiso"
+      texto:  "Trabajamos de la mano con nuestros clientes con transparencia y responsabilidad."
+
+  # Los 8 pasos van numerados porque SON una secuencia: el orden es
+  # información que el cliente necesita entender.
+  proceso_titulo: "Nuestro proceso"
+  proceso:
+    - { titulo: "Conocer",      texto: "Entendemos tu necesidad." }
+    - { titulo: "Analizar",     texto: "Evaluamos condiciones y alternativas." }
+    - { titulo: "Diseñar",      texto: "Desarrollamos la solución." }
+    - { titulo: "Presupuestar", texto: "Calculamos costos y recursos." }
+    - { titulo: "Planear",      texto: "Definimos estrategia y programación." }
+    - { titulo: "Construir",    texto: "Ejecutamos con calidad y seguridad." }
+    - { titulo: "Controlar",    texto: "Monitoreamos avances y calidad." }
+    - { titulo: "Entregar",     texto: "Verificamos y entregamos." }
+
+  galeria_titulo: "Proyectos"
+  galeria: []                  # POR DEFINIR — las fotos las manda el cliente
+
+  sectores_titulo: "Sectores"
+  sectores:
+    - "Vivienda"
+    - "Comercial"
+    - "Institucional"
+    - "Oficinas"
+    - "Urbanismo"
+    - "Industria"
+    - "Remodelaciones"
+    - "Adecuaciones locativas"
+    - "Mantenimiento"
+    - "Obras civiles"
+
+  # De "usted": es una empresa hablándole a otra empresa.
+  leads_titulo: "Hablemos de su proyecto"
+
+  sobre:
+    titulo: "Por qué INCOARQI"
+    texto:  "Integramos conocimiento, experiencia e innovación para garantizar proyectos exitosos."
+
+  ubicacion:
+    direccion: "POR DEFINIR"   # el brochure solo dice "Colombia"
+  redes:
+    instagram: ""              # POR DEFINIR
+
+base_de_datos:
+  motor: local                 # una landing no necesita base de datos
+
+apis:
+  mensajeria:  whatsapp
+  # El brochure trae 300 123 4567, que es un número de relleno.
+  # NO se publica hasta que el cliente confirme el real.
+  whatsapp_num: "POR DEFINIR"
+  pagos:       ninguna
+  analitica:   ga4             # incluido en la cotización
+  correo:      "info@incoarqi.com"
+
+entrega:
+  dominio:  "incoarqi.com"     # recomendado en la cotización, sin comprar aún
+  soporte:  ninguno            # el plan de mantenimiento se cotizó aparte
+  estado:   "en construccion"
+  creado:   "2026-09-12"
+
+env:
+  - GA4_ID                     # POR DEFINIR

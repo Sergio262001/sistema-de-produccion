@@ -49,6 +49,29 @@ function sinComentario(linea) {
   return linea;
 }
 
+/**
+ * Parte por comas las que están FUERA de comillas.
+ *
+ * Un `split(',')` a secas rompe `{ titulo: "Costos, tiempo y calidad" }`:
+ * la coma de dentro del texto no es un separador.
+ */
+function partirEnLinea(s) {
+  const partes = [];
+  let actual = '', comilla = null;
+  for (const c of String(s)) {
+    if (comilla) {
+      actual += c;
+      if (c === comilla) comilla = null;
+    } else if (c === '"' || c === "'") {
+      actual += c; comilla = c;
+    } else if (c === ',') {
+      partes.push(actual.trim()); actual = '';
+    } else actual += c;
+  }
+  if (actual.trim()) partes.push(actual.trim());
+  return partes;
+}
+
 export function leerYaml(texto) {
   const raiz = {};
   // pila de contextos: {indent, contenedor}
@@ -70,7 +93,43 @@ export function leerYaml(texto) {
     // ─ elemento de lista
     if (linea.startsWith('- ') || linea === '-') {
       if (!Array.isArray(actual)) continue;
-      actual.push(valorEscalar(linea.slice(1)));
+      const resto = linea.slice(1).trim();
+
+      // Elemento de lista que es un MAPA EN LÍNEA: "- { a: 1, b: 2 }".
+      // Cómodo para listas cortas y uniformes (los 8 pasos de un proceso).
+      if (resto.startsWith('{') && resto.endsWith('}')) {
+        const obj = {};
+        for (const par of partirEnLinea(resto.slice(1, -1))) {
+          const m = par.match(/^([\w.-]+)\s*:\s*(.*)$/);
+          if (m) obj[m[1]] = valorEscalar(m[2]);
+        }
+        actual.push(obj);
+        continue;
+      }
+
+      // Elemento de lista que es un MAPA EN BLOQUE:
+      //   - titulo: "Ingeniería"
+      //     desc:   "Civil, eléctrica…"
+      //
+      // Esto NO estaba soportado: el parser empujaba la línea entera como
+      // texto, así que `titulo: "Ingeniería"` llegaba como un string. Lo
+      // descubrió el primer cliente real: su ficha traía los 6 servicios, los
+      // 6 diferenciales y los 8 pasos del proceso, y al generar la landing no
+      // apareció ninguno. Una lista de servicios es lo más natural que puede
+      // pedir una ficha; que no se pudiera expresar era un hueco del formato.
+      const par = resto.match(/^([\w.-]+)\s*:\s*(.*)$/);
+      if (par) {
+        const obj = {};
+        obj[par[1]] = par[2] === '' ? {} : valorEscalar(par[2]);
+        actual.push(obj);
+        // Las líneas indentadas que siguen pertenecen a ESTE objeto. Se
+        // apila con la indentación del guion: lo que venga más adentro entra
+        // aquí, y el siguiente guion (misma indentación) lo desapila.
+        pila.push({ indent, cont: obj });
+        continue;
+      }
+
+      actual.push(valorEscalar(resto));
       continue;
     }
 

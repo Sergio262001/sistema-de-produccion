@@ -99,7 +99,14 @@ export function ponerBloquePagina(bloque, pagina) {
 
   const limpio = {};
   const p = pagina || {};
-  const texto = (v) => String(v ?? '').trim();
+  // `POR DEFINIR` es una nota interna para el estudio, NO un valor. Sin este
+  // filtro llega al HTML y el cliente ve "Dónde estamos: POR DEFINIR" — que
+  // es justo lo que la marca pretendía evitar. Lo cazó el primer cliente
+  // real, cuya ficha tiene la dirección pendiente.
+  const texto = (v) => {
+    const s = String(v ?? '').trim();
+    return /^por definir$/i.test(s) ? '' : s;
+  };
   if (texto(p.hero?.titular) || texto(p.hero?.bajada)) {
     limpio.hero = {};
     if (texto(p.hero.titular)) limpio.hero.titular = texto(p.hero.titular);
@@ -109,12 +116,44 @@ export function ponerBloquePagina(bloque, pagina) {
     if (texto(p.hero.eyebrow)) limpio.hero.eyebrow = texto(p.hero.eyebrow);
     limpio.hero.cta = texto(p.hero.cta) || 'Escríbenos';
   }
-  const servicios = (Array.isArray(p.servicios) ? p.servicios : [])
-    .map((s) => ({ titulo: texto(s?.titulo), desc: texto(s?.desc) }))
-    .filter((s) => s.titulo);
-  if (servicios.length) {
-    limpio.servicios = servicios;
-    if (texto(p.servicios_titulo)) limpio.servicios_titulo = texto(p.servicios_titulo);
+  // Las listas de pares título/texto: servicios, diferencial y proceso.
+  // Se limpian igual, así que se recorren igual.
+  for (const clave of ['servicios', 'diferencial', 'proceso']) {
+    const lista = (Array.isArray(p[clave]) ? p[clave] : [])
+      .map((s) => ({ titulo: texto(s?.titulo), desc: texto(s?.desc),
+                     texto: texto(s?.texto) }))
+      .filter((s) => s.titulo)
+      .map((s) => {
+        // `servicios` usa `desc`; `diferencial` y `proceso` usan `texto`.
+        const out = { titulo: s.titulo };
+        if (clave === 'servicios') { if (s.desc || s.texto) out.desc = s.desc || s.texto; }
+        else if (s.texto || s.desc) out.texto = s.texto || s.desc;
+        return out;
+      });
+    if (lista.length) {
+      limpio[clave] = lista;
+      if (texto(p[clave + '_titulo'])) limpio[clave + '_titulo'] = texto(p[clave + '_titulo']);
+    }
+  }
+
+  // La galería: acepta texto suelto o { src, pie }. La URL la filtra la base
+  // con urlSegura(), pero aquí se descarta lo que claramente no es una.
+  const galeria = (Array.isArray(p.galeria) ? p.galeria : [])
+    .map((f) => (typeof f === 'string' ? { src: texto(f), pie: '' }
+                                       : { src: texto(f?.src), pie: texto(f?.pie) }))
+    .filter((f) => /^(https?:\/\/|\/|\.\/)/i.test(f.src));
+  if (galeria.length) {
+    limpio.galeria = galeria;
+    if (texto(p.galeria_titulo)) limpio.galeria_titulo = texto(p.galeria_titulo);
+  }
+
+  if (texto(p.leads_titulo)) limpio.leads_titulo = texto(p.leads_titulo);
+
+  const sectores = (Array.isArray(p.sectores) ? p.sectores : [])
+    .map(texto).filter(Boolean);
+  if (sectores.length) {
+    limpio.sectores = sectores;
+    if (texto(p.sectores_titulo)) limpio.sectores_titulo = texto(p.sectores_titulo);
   }
   if (texto(p.sobre?.texto)) {
     limpio.sobre = { titulo: texto(p.sobre.titulo) || 'Sobre nosotros',
@@ -146,11 +185,28 @@ export function ponerEnContexto(html, marca = {}, cliente = '', ficha = {}) {
 
   let bloque = out.slice(i, fin + 3);
 
+  /**
+   * Campos donde heredar el valor del ejemplo es PELIGROSO, no cosmético.
+   *
+   * Para el subtítulo o el tono, dejar el del ejemplo es un defecto de estilo.
+   * Para un teléfono o un dominio es otra cosa: el botón de WhatsApp del
+   * cliente escribiría a un negocio que no es el suyo.
+   *
+   * Lo encontró el primer cliente real. Su ficha tiene el WhatsApp como
+   * `POR DEFINIR` (el brochure traía un número de relleno), y `campo()`
+   * se saltaba el reemplazo — dejando en su landing el número del café del
+   * ejemplo. Aquí se BORRA en vez de heredarse; las bases ya no pintan el
+   * enlace cuando el número viene vacío.
+   */
+  const BORRAR_SI_FALTA = new Set(['whatsapp_num', 'dominio', 'correo']);
+
   const campo = (clave, valor) => {
-    if (valor === undefined || valor === null || valor === '' || valor === 'POR DEFINIR') return;
+    const falta = valor === undefined || valor === null || valor === ''
+      || valor === 'POR DEFINIR';
+    if (falta && !BORRAR_SI_FALTA.has(clave)) return;
     bloque = bloque.replace(
       new RegExp('(\\b' + clave + '\\s*:\\s*)"[^"]*"'),
-      '$1' + cita(valor)
+      '$1' + cita(falta ? '' : valor)
     );
   };
 
@@ -655,6 +711,16 @@ if (process.argv[1] && process.argv[1].endsWith('crear-proyecto.js')) {
       base: f.base || (Array.isArray(f.bases) ? f.bases[0] : undefined) || args.base,
       linea: f.linea,
       marca: f.marca || {},
+      // LA FICHA COMPLETA, no cuatro campos.
+      //
+      // Esto leía solo cliente/base/linea/marca y tiraba el resto: los
+      // bloques de página, las apis, la entrega. Con el primer cliente real
+      // (INCOARQI) salió a la luz — se generó su landing y no tenía ni el
+      // titular, ni los servicios, ni el proceso, ni los sectores.
+      //
+      // Es el mismo fallo que ya había pasado por el otro camino, cuando de
+      // 19 respuestas del brief sobrevivían 5. Dos caminos, el mismo error.
+      ficha: f,
     };
   }
   if (args.primario) opciones.marca.primario = args.primario;

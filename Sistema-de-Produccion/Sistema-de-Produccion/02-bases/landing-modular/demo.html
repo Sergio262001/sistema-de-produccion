@@ -23,6 +23,12 @@
        puro y negro casi puro, y el #2F54FF es lo único con color en pantalla. */
     --brand:#2F54FF;--bg:#FFFFFF;--surface:#FAFAFA;--ink:#0A0A0B;
     --ink-soft:#5A5A5F;--line:#E5E5E5;--danger:#B23A2E;
+    /* El SEGUNDO color de marca, para las identidades que tienen dos (un
+       azul institucional y un dorado, por ejemplo). Por defecto es el mismo
+       acento que la marca, así que una base sin acento se ve igual que antes.
+       Lo pidió el primer cliente real: la mitad de su identidad es el dorado,
+       y la landing no tenía dónde ponerlo. */
+    --accent:var(--brand);
 
     /* Valores por defecto = dirección "taller" */
     --display:'IBM Plex Sans',system-ui,sans-serif;
@@ -73,6 +79,24 @@
   [data-dir="taller"] .servicio{border-top:1px solid var(--line);padding-top:16px;}
   [data-dir="taller"] .servicio h3{font-family:var(--body);}
 
+  /* Las cuatro secciones nuevas también responden a la dirección, o serían
+     el mismo bloque para los tres mundos visuales. */
+  [data-dir="mercado"] .dif-i{border-top-width:4px;border-top-color:var(--ink);}
+  [data-dir="mercado"] .paso-n{border-radius:3px;}
+  [data-dir="mercado"] .sect li{border-width:2px;border-color:var(--ink);
+    color:var(--ink);font-weight:600;}
+  [data-dir="mercado"] .gal-i:hover img{transform:none;}
+
+  [data-dir="boutique"] .dif-i{border-top:1px solid var(--line);}
+  [data-dir="boutique"] .dif-i h3{font-family:var(--display);font-size:19px;}
+  [data-dir="boutique"] .paso-n{background:transparent;color:var(--ink-soft);
+    border:1px solid var(--line);font-family:var(--body);}
+  [data-dir="boutique"] .paso h3{text-transform:none;letter-spacing:0;
+    font-family:var(--display);font-size:17px;}
+  [data-dir="boutique"] .sect li{border:0;border-bottom:1px solid var(--line);
+    border-radius:0;padding:8px 2px;}
+  [data-dir="boutique"] .gal{gap:22px;}
+
   *{box-sizing:border-box;}
   body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--body);
     -webkit-font-smoothing:antialiased;line-height:1.5;}
@@ -122,7 +146,7 @@
   .hero{padding:calc(56px * var(--ritmo)) 0 calc(40px * var(--ritmo));}
   .eyebrow{font-family:var(--eyebrow-familia);font-size:12px;
     text-transform:var(--eyebrow-mayus);letter-spacing:.09em;
-    color:var(--brand);margin-bottom:18px;display:block;}
+    color:var(--accent);margin-bottom:18px;display:block;}
   .hero h1{font-size:clamp(34px,7vw,68px);max-width:var(--hero-ancho);}
   .hero .lead{margin-top:20px;max-width:52ch;font-size:clamp(16px,2vw,19px);
     color:var(--ink-soft);line-height:1.55;}
@@ -135,8 +159,13 @@
   /* ---- SECCIONES ---- */
   .seccion{padding:calc(44px * var(--ritmo)) 0;
     border-top:var(--borde) solid var(--line);}
+  /* El título de sección con una regla corta debajo. Es el patrón que usan
+     los brochures corporativos y le da al segundo color de marca un trabajo
+     concreto en vez de dejarlo decorando. */
   .seccion > h2{font-size:clamp(22px,3.4vw,30px);margin-bottom:26px;
-    max-width:24ch;}
+    max-width:24ch;padding-bottom:12px;position:relative;}
+  .seccion > h2::after{content:"";position:absolute;left:0;bottom:0;
+    width:52px;height:3px;background:var(--accent);}
   .seccion[hidden]{display:none;}
 
   /* Servicios: lista, no tarjetas con emoji. El emoji como icono es de las
@@ -145,6 +174,52 @@
     gap:calc(26px * var(--ritmo)) 30px;}
   .servicio h3{font-size:18px;margin-bottom:8px;}
   .servicio p{color:var(--ink-soft);font-size:14.5px;line-height:1.6;}
+
+  /* ---- DIFERENCIAL ---- conjunto, no secuencia: sin numerar */
+  .dif{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,240px),1fr));
+    gap:calc(26px * var(--ritmo)) 30px;}
+  .dif-i{border-top:2px solid var(--accent);padding-top:14px;}
+  .dif-i h3{font-size:16px;margin-bottom:7px;}
+  .dif-i p{color:var(--ink-soft);font-size:14.5px;line-height:1.6;}
+
+  /* ---- PROCESO ---- secuencia real: los números son información */
+  .pasos{list-style:none;margin:0;padding:0;display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(min(100%,170px),1fr));
+    gap:calc(24px * var(--ritmo)) 22px;counter-reset:none;}
+  .paso{position:relative;padding-top:38px;}
+  .paso-n{position:absolute;top:0;left:0;font-family:var(--mono);font-size:12px;
+    font-weight:600;letter-spacing:.06em;color:#fff;background:var(--brand);
+    width:30px;height:30px;border-radius:50%;display:grid;place-items:center;
+    font-variant-numeric:tabular-nums;}
+  .paso h3{font-size:14.5px;text-transform:uppercase;letter-spacing:.05em;
+    margin-bottom:6px;}
+  .paso p{color:var(--ink-soft);font-size:13.5px;line-height:1.55;}
+
+  /* ---- GALERÍA ---- la foto es el contenido; el marco se quita del medio */
+  .gal{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,220px),1fr));
+    gap:12px;}
+  .gal-i{position:relative;padding:0;border:0;background:var(--line);
+    border-radius:var(--radius);overflow:hidden;cursor:zoom-in;display:block;}
+  .gal-i img{width:100%;aspect-ratio:4/3;object-fit:cover;display:block;
+    transition:transform .3s ease;}
+  .gal-i:hover img{transform:scale(1.04);}
+  .gal-p{position:absolute;left:0;right:0;bottom:0;padding:20px 12px 10px;
+    font-size:12.5px;color:#fff;text-align:left;
+    background:linear-gradient(transparent,rgba(0,0,0,.72));}
+
+  .lupa{border:0;padding:0;background:transparent;max-width:min(94vw,1100px);}
+  .lupa::backdrop{background:rgba(0,0,0,.88);}
+  .lupa img{display:block;max-width:100%;max-height:82vh;object-fit:contain;
+    border-radius:var(--radius);}
+  .lupa-pie{color:#fff;font-size:13.5px;margin-top:10px;text-align:center;}
+  .lupa-x{position:absolute;top:8px;right:10px;width:38px;height:38px;border:0;
+    border-radius:50%;background:rgba(0,0,0,.55);color:#fff;font-size:24px;
+    line-height:1;cursor:pointer;}
+
+  /* ---- SECTORES ---- etiquetas, no tarjetas: es una lista de ámbitos */
+  .sect{list-style:none;margin:0;padding:0;display:flex;flex-wrap:wrap;gap:10px;}
+  .sect li{border:1px solid var(--line);border-radius:var(--boton-radio);
+    padding:9px 16px;font-size:14px;color:var(--ink-soft);background:var(--surface);}
 
   .prosa{max-width:62ch;font-size:16px;line-height:1.7;color:var(--ink);}
   .lista{list-style:none;margin:0;padding:0;font-size:15px;line-height:2;}
@@ -215,6 +290,10 @@
 <main class="wrap" id="contenido">
   <section class="hero" id="hero" hidden></section>
   <section class="seccion" id="servicios" hidden></section>
+  <section class="seccion" id="diferencial" hidden></section>
+  <section class="seccion" id="proceso" hidden></section>
+  <section class="seccion" id="galeria" hidden></section>
+  <section class="seccion" id="sectores" hidden></section>
   <section class="seccion" id="sobre" hidden></section>
   <section class="seccion" id="datos" hidden></section>
 
@@ -241,6 +320,14 @@
   <footer id="pie"></footer>
 </main>
 
+<!-- Ampliación de la galería. Nace oculto y solo existe si hay galería.
+     `dialog` nativo: trae el cierre con Escape y el foco atrapado sin JS. -->
+<dialog class="lupa" id="lupa" aria-label="Foto ampliada">
+  <button type="button" class="lupa-x" id="lupaX" aria-label="Cerrar">×</button>
+  <img id="lupaImg" alt="">
+  <p class="lupa-pie" id="lupaPie"></p>
+</dialog>
+
 <script>
 /* ════════════════════════════════════════════════════════════
    1) CONTEXTO — vendría de la ficha contexto.proyecto.yml
@@ -248,7 +335,11 @@
 const CONTEXT = {
   cliente: "Estudio Lumen",
   marca: {
-    primario:"#2F54FF", secundario:"#F5F7FB", inicial:"E",
+    primario:"#2F54FF", secundario:"#FFFFFF", inicial:"E",
+    // El segundo color de marca. Vacío = igual al primario, y la página se
+    // ve monocromática. Una identidad con dos colores (azul institucional +
+    // dorado, por ejemplo) lo usa para el eyebrow y las reglas de sección.
+    acento:"",
     direccion:"boutique",   // mercado | boutique | taller — ver el CSS
     logo:"", banner:""
   },
@@ -366,6 +457,101 @@ function pintarServicios(){
   el.hidden = false;
 }
 
+/* DIFERENCIAL — por qué a nosotros. Lista de pares título/texto.
+   No lleva números: no es una secuencia, es un conjunto. */
+function pintarDiferencial(){
+  const el = document.getElementById("diferencial");
+  if(!el) return;
+  const p = CONTEXT.pagina || {};
+  const items = (p.diferencial || []).filter((d)=>d && String(d.titulo||"").trim());
+  if(!items.length){ el.hidden = true; return; }
+  el.innerHTML = '<h2>'+esc(String(p.diferencial_titulo||"Nuestro diferencial").trim())+'</h2>'
+    + '<div class="dif">'
+    + items.map((d)=>'<article class="dif-i"><h3>'+esc(d.titulo)+'</h3>'
+        + (String(d.texto||"").trim() ? '<p>'+esc(d.texto)+'</p>' : '')
+        + '</article>').join('')
+    + '</div>';
+  el.hidden = false;
+}
+
+/* PROCESO — los pasos, EN ORDEN.
+   Aquí los números SÍ van: el contenido es una secuencia real y el orden
+   es información que el lector necesita. En una lista que no es secuencia
+   (los servicios, los sectores) numerar es adorno y no se hace. */
+function pintarProceso(){
+  const el = document.getElementById("proceso");
+  if(!el) return;
+  const p = CONTEXT.pagina || {};
+  const pasos = (p.proceso || []).filter((s)=>s && String(s.titulo||"").trim());
+  if(!pasos.length){ el.hidden = true; return; }
+  el.innerHTML = '<h2>'+esc(String(p.proceso_titulo||"Nuestro proceso").trim())+'</h2>'
+    + '<ol class="pasos">'
+    + pasos.map((s,i)=>'<li class="paso"><span class="paso-n">'
+        + String(i+1).padStart(2,"0") + '</span>'
+        + '<h3>'+esc(s.titulo)+'</h3>'
+        + (String(s.texto||"").trim() ? '<p>'+esc(s.texto)+'</p>' : '')
+        + '</li>').join('')
+    + '</ol>';
+  el.hidden = false;
+}
+
+/* GALERÍA — las fotos de los proyectos, con ampliación.
+   Toda URL pasa por urlSegura(): las fotos las manda el cliente. */
+function pintarGaleria(){
+  const el = document.getElementById("galeria");
+  if(!el) return;
+  const p = CONTEXT.pagina || {};
+  const fotos = (p.galeria || [])
+    .map((f)=>({ src: urlSegura(typeof f === "string" ? f : f && f.src),
+                 pie: String((f && f.pie) || "").trim() }))
+    .filter((f)=>f.src);
+  if(!fotos.length){ el.hidden = true; return; }
+
+  el.innerHTML = '<h2>'+esc(String(p.galeria_titulo||"Proyectos").trim())+'</h2>'
+    + '<div class="gal">'
+    + fotos.map((f,i)=>'<button type="button" class="gal-i" data-i="'+i+'" '
+        + 'aria-label="Ampliar' + (f.pie ? ": "+esc(f.pie) : "") + '">'
+        + '<img src="'+esc(f.src)+'" alt="'+esc(f.pie)+'" loading="lazy" decoding="async">'
+        + (f.pie ? '<span class="gal-p">'+esc(f.pie)+'</span>' : '')
+        + '</button>').join('')
+    + '</div>';
+  el.hidden = false;
+
+  // La ampliación. Si el navegador no trae <dialog>, el clic simplemente
+  // no hace nada: la galería sigue siendo una galería.
+  const lupa = document.getElementById("lupa");
+  const img = document.getElementById("lupaImg");
+  const pie = document.getElementById("lupaPie");
+  if(!lupa || !img || typeof lupa.showModal !== "function") return;
+  el.querySelectorAll(".gal-i").forEach((b)=>{
+    b.onclick = () => {
+      const f = fotos[Number(b.dataset.i)];
+      if(!f) return;
+      img.src = f.src; img.alt = f.pie;
+      if(pie) pie.textContent = f.pie;
+      lupa.showModal();
+    };
+  });
+  const cerrar = document.getElementById("lupaX");
+  if(cerrar) cerrar.onclick = () => lupa.close();
+  // Clic en el fondo cierra: es lo que la gente intenta primero.
+  lupa.onclick = (e) => { if(e.target === lupa) lupa.close(); };
+}
+
+/* SECTORES — dónde trabajamos. Rejilla de etiquetas, sin numerar. */
+function pintarSectores(){
+  const el = document.getElementById("sectores");
+  if(!el) return;
+  const p = CONTEXT.pagina || {};
+  const lista = (p.sectores || []).map((s)=>String(s||"").trim()).filter(Boolean);
+  if(!lista.length){ el.hidden = true; return; }
+  el.innerHTML = '<h2>'+esc(String(p.sectores_titulo||"Sectores").trim())+'</h2>'
+    + '<ul class="sect">'
+    + lista.map((s)=>'<li>'+esc(s)+'</li>').join('')
+    + '</ul>';
+  el.hidden = false;
+}
+
 function pintarSobre(){
   const el = document.getElementById("sobre");
   if(!el) return;
@@ -402,6 +588,16 @@ function pintarDatos(){
   el.hidden = false;
 }
 
+/* El título de contacto es configurable: una empresa B2B trata de "usted" y
+   el hardcode decía "tu". El CTA del hero salía de la ficha y este no, así
+   que la misma página tuteaba y ustedeaba a la vez. */
+function pintarLeads(){
+  const el = document.getElementById("leadsTitulo");
+  if(!el) return;
+  const t = String((CONTEXT.pagina && CONTEXT.pagina.leads_titulo) || "").trim();
+  if(t) el.textContent = t;
+}
+
 function pintarPie(){
   const el = document.getElementById("pie");
   if(!el) return;
@@ -423,6 +619,8 @@ function applyTheme(){
   const m = CONTEXT.marca || {}, r = document.documentElement.style;
   if(m.primario) r.setProperty('--brand', m.primario);
   if(m.secundario) r.setProperty('--bg', m.secundario);
+  // Vacío a propósito = sin segundo color, y la página queda monocromática.
+  if(m.acento) r.setProperty('--accent', m.acento);
   // La tipografía la manda la DIRECCIÓN. Esto es un estilo en línea y le
   // gana a [data-dir], así que solo se aplica si el cliente trae la suya.
   if(m.display) r.setProperty('--display', m.display);
@@ -437,7 +635,9 @@ function applyTheme(){
   document.getElementById('sysClient').textContent = CONTEXT.cliente;
   document.getElementById('sysDB').textContent = CONTEXT.base_de_datos.motor;
 
-  pintarHero(); pintarServicios(); pintarSobre(); pintarDatos(); pintarPie();
+  pintarHero(); pintarServicios(); pintarDiferencial(); pintarProceso();
+  pintarGaleria(); pintarSectores(); pintarSobre(); pintarDatos();
+  pintarLeads(); pintarPie();
 }
 
 /* ── Adaptador de datos (idéntico a src/data/local.adapter.js) ── */
