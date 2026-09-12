@@ -19,7 +19,7 @@ abajo es lo único que falta.
 | Qué | Formato |
 |---|---|
 | **Foto de portada** | Horizontal, mínimo 1600 px de ancho. La del brochure (la casa moderna) sirve, en su tamaño original |
-| **Fotos de proyectos** | De 6 a 12, horizontales, mínimo 1200 px. Con el nombre del proyecto si lo tienen |
+| **Fotos de proyectos** | **6, 9 o 12** — múltiplos de 3, para que las filas de la galería queden completas. Horizontales, mínimo 1200 px. Con el nombre del proyecto si lo tienen |
 
 **Sobre las fotos de proyectos:** la sección "Galería de proyectos" está
 construida y funcionando, pero **hoy no aparece** porque no hay fotos. La

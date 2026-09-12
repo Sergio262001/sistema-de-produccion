@@ -267,8 +267,12 @@
   .paso p{color:var(--ink-soft);font-size:13.5px;line-height:1.55;}
 
   /* ---- GALERÍA ---- la foto es el contenido; el marco se quita del medio */
-  .gal{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,220px),1fr));
-    gap:12px;}
+  /* Tres columnas, no cuatro. Dos razones: con 6 fotos (lo que se pide al
+     cliente) cuatro columnas dejan dos huecos en la última fila, y una obra
+     se muestra mejor grande que pequeña. Se le piden 6, 9 o 12 para que las
+     filas siempre queden completas. */
+  .gal{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,290px),1fr));
+    gap:14px;}
   .gal-i{position:relative;padding:0;border:0;background:var(--line);
     border-radius:var(--radius);overflow:hidden;cursor:zoom-in;display:block;}
   .gal-i img{width:100%;aspect-ratio:4/3;object-fit:cover;display:block;

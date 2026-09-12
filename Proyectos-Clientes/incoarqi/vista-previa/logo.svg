@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" role="img"
+     aria-label="Marcador provisional de logo">
+  <!-- MARCADOR PROVISIONAL — NO SE PUBLICA.
+       Dibujo propio para ver cómo cae un logo real en la cabecera.
+       Se reemplaza por el logo de INCOARQI en SVG o PNG transparente. -->
+  <g stroke="#16294D" stroke-width="7" fill="none" stroke-linejoin="round">
+    <path d="M22 96V52l20-14v58"/>
+    <path d="M52 96V38l23-16 23 16v58"/>
+    <path d="M64 96V70h22v26"/>
+  </g>
+  <rect x="66" y="72" width="18" height="14" fill="#C9A227"/>
+  <path d="M14 104h92" stroke="#C9A227" stroke-width="6" stroke-linecap="round"/>
+</svg>

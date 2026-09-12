@@ -16,7 +16,8 @@
 import { readFileSync, existsSync, mkdirSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { capturar, capturarDirecciones, nombreDe, encontrarNavegador } from './lib/captura.js';
+import { capturar, capturarMovil, capturarDirecciones, nombreDe,
+         encontrarNavegador } from './lib/captura.js';
 
 const AQUI = fileURLToPath(new URL('.', import.meta.url));
 const RAIZ = resolve(AQUI, '..');
@@ -142,8 +143,12 @@ async function principal() {
   }
 
   const salida = a.salida ? resolve(a.salida) : join(carpeta, nombreDe(objetivo));
-  const r = await capturar({ entrada: objetivo, salida, ancho, alto,
-                             espera: Number(a.espera) || undefined });
+  // El móvil va por otro camino: Chrome no baja de ~500 px de ventana, así
+  // que se mete la página en un iframe del ancho real del teléfono.
+  const r = a.movil
+    ? await capturarMovil({ entrada: objetivo, salida, ancho, alto })
+    : await capturar({ entrada: objetivo, salida, ancho, alto,
+                       espera: Number(a.espera) || undefined });
   anunciar(r, salida.replace(RAIZ, '.'));
   console.log('');
   if (!r.ok) process.exit(1);

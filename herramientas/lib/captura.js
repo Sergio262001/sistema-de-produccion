@@ -142,6 +142,47 @@ export function capturar({ entrada, salida, ancho = 1280, alto = 1400, espera })
 }
 
 /**
+ * CAPTURA MÓVIL DE VERDAD.
+ *
+ * `--window-size=375` NO da un viewport de 375 px: Chrome tiene un ancho
+ * mínimo de ventana (500 px en Windows) y lo ignora por debajo de ahí. La
+ * imagen se guarda con el ancho pedido, así que recorta la diferencia — y
+ * el resultado parece una página con el texto cortado.
+ *
+ * Casi reporté eso como defecto del entregable de un cliente. Lo delató una
+ * sonda que midió `clientWidth`: la ventana decía 500, no 375.
+ *
+ * La solución sin dependencias: meter la página en un `<iframe>` del ancho
+ * real del teléfono, dentro de una ventana más grande. El iframe tiene su
+ * propio viewport, así que los `@media` se evalúan contra 375 px de verdad.
+ */
+export async function capturarMovil({ entrada, salida, ancho = 375, alto = 1200 }) {
+  const dentro = aDireccion(entrada);
+  const marco = join(tmpdir(), 'marco-movil-' + Date.now() + '.html');
+
+  // `srcdoc` no serviría: el iframe necesita cargar el archivo con sus
+  // rutas relativas (los SVG de la galería viven al lado del index).
+  writeFileSync(marco, [
+    '<!DOCTYPE html><html><head><meta charset="utf-8">',
+    '<style>html,body{margin:0;padding:0;background:#fff;}',
+    'iframe{width:' + ancho + 'px;height:' + alto + 'px;border:0;display:block;}',
+    '</style></head><body>',
+    '<iframe src="' + dentro.replace(/"/g, '&quot;') + '"></iframe>',
+    '</body></html>',
+  ].join('\n'), 'utf8');
+
+  try {
+    // La ventana va un poco más ancha que el iframe porque Chrome no baja de
+    // ~500 px; la imagen se recorta después al ancho del iframe.
+    const r = await capturar({ entrada: marco, salida,
+                               ancho: Math.max(ancho, 520), alto, espera: 5000 });
+    return { ...r, ancho };
+  } finally {
+    try { rmSync(marco, { force: true }); } catch { /* ya no está */ }
+  }
+}
+
+/**
  * Captura la MISMA base una vez por dirección de arte.
  *
  * Es la comparación que de verdad sirve: tres mundos visuales sobre el mismo

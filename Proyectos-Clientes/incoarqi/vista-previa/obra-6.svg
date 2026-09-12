@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600" role="img" aria-label="Marcador provisional de proyecto 6">
+  <!-- MARCADOR PROVISIONAL - NO SE PUBLICA. Se reemplaza por la foto real. -->
+  <rect width="800" height="600" fill="#16294D"/>
+  <g stroke="#C9A227" stroke-width="1" opacity=".14">
+    <path d="M0 100H800M0 200H800M0 300H800M0 400H800M0 500H800"/>
+    <path d="M100 0V600M200 0V600M300 0V600M400 0V600M500 0V600M600 0V600M700 0V600"/>
+  </g>
+  <g stroke="#C9D3E8" stroke-width="2.5" fill="none" opacity=".55">
+    <path d="M120 520V690l160-90 160 90v230"/>
+    <path d="M120 690l160 90 160-90"/>
+    <path d="M480 520V640h180v680"/>
+  </g>
+  <rect x="620" y="400" width="70" height="60" fill="#C9A227" opacity=".5"/>
+  <path d="M60 520h680" stroke="#C9A227" stroke-width="3" opacity=".6"/>
+  <text x="60" y="80" font-family="ui-monospace,monospace" font-size="24" fill="#C9A227" letter-spacing="3" opacity=".8">PROYECTO 06</text>
+  <text x="60" y="112" font-family="ui-monospace,monospace" font-size="13" fill="#C9D3E8" letter-spacing="2" opacity=".5">FOTO PROVISIONAL</text>
+</svg>

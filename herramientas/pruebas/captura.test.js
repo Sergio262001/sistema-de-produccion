@@ -16,8 +16,9 @@ import { existsSync, rmSync, mkdtempSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { readFileSync } from 'node:fs';
 import { encontrarNavegador, aDireccion, nombreDe, capturar,
-         capturarDirecciones, DIRECCIONES } from '../lib/captura.js';
+         capturarMovil, capturarDirecciones, DIRECCIONES } from '../lib/captura.js';
 
 const AQUI = resolve(fileURLToPath(new URL('.', import.meta.url)), '..');
 const BASES = resolve(AQUI, '..', 'Sistema-de-Produccion', 'Sistema-de-Produccion', '02-bases');
@@ -106,6 +107,49 @@ test('captura una base real y deja un PNG con peso', async (t) => {
     // Un PNG de una página con contenido pesa decenas de KB. Si pesa 2 KB,
     // se capturó una página en blanco y la prueba tiene que fallar.
     assert.ok(r.bytes > 10000, 'la captura pesa ' + r.bytes + ' bytes: página vacía');
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+});
+
+// ══════════ EL MÓVIL — la captura que mentía ══════════
+//
+// `--window-size=375` NO da un viewport de 375 px: Chrome no baja de ~500 px
+// de ancho de ventana y lo ignora, pero guarda la imagen con el ancho pedido
+// — recortando la diferencia. El resultado parece una página con el texto
+// cortado a la derecha.
+//
+// Casi reporté eso como defecto del entregable de un cliente. Lo delató una
+// sonda que midió clientWidth en la propia página: decía 500, no 375.
+
+test('la captura móvil mete la página en un iframe del ancho real', () => {
+  // Es el corazón del arreglo: el iframe SÍ tiene su propio viewport, así que
+  // los @media se evalúan contra el ancho del teléfono de verdad.
+  const fuente = readFileSync(new URL('../lib/captura.js', import.meta.url), 'utf8');
+  const cuerpo = fuente.slice(fuente.indexOf('export async function capturarMovil'),
+                              fuente.indexOf('export async function capturarDirecciones'));
+  assert.match(cuerpo, /<iframe/, 'sin iframe, el viewport vuelve a ser el de la ventana');
+  assert.match(cuerpo, /width:' \+ ancho \+ 'px/,
+    'el iframe tiene que medir el ancho pedido, no el de la ventana');
+  assert.match(cuerpo, /Math\.max\(ancho, 52\d\)/,
+    'la ventana va más ancha que el iframe porque Chrome no baja de ~500 px');
+});
+
+test('la captura móvil no deja el marco temporal tirado', async (t) => {
+  if (!hayNavegador) return t.skip('sin Chrome ni Edge instalado');
+  const { readdirSync } = await import('node:fs');
+  const antes = readdirSync(tmpdir()).filter((n) => n.startsWith('marco-movil-')).length;
+  const dir = mkdtempSync(join(tmpdir(), 'cap-mov-'));
+  try {
+    const r = await capturarMovil({
+      entrada: join(BASES, 'landing-modular', 'demo.html'),
+      salida: join(dir, 'movil.png'), ancho: 375, alto: 700,
+    });
+    assert.equal(r.ok, true, r.error);
+    assert.ok(r.bytes > 5000, 'la captura móvil pesa ' + r.bytes + ' bytes');
+    assert.equal(r.ancho, 375, 'debe reportar el ancho del teléfono, no el de la ventana');
+    const despues = readdirSync(tmpdir()).filter((n) => n.startsWith('marco-movil-')).length;
+    assert.equal(despues, antes, 'quedó un marco temporal sin borrar');
   } finally {
     rmSync(dir, { recursive: true, force: true });
   }

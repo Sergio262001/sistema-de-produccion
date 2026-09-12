@@ -1,0 +1,60 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900" role="img"
+     aria-label="Marcador provisional de portada">
+  <!-- ══════════════════════════════════════════════════════════
+       MARCADOR PROVISIONAL — NO SE PUBLICA.
+       Dibujo propio, no una foto de banco de imágenes: sirve para ver la
+       FORMA de la portada oscura mientras llega la fotografía real de
+       INCOARQI. Se reemplaza por su foto y se borra esta carpeta.
+       ══════════════════════════════════════════════════════════ -->
+  <defs>
+    <linearGradient id="cielo" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#1E3560"/>
+      <stop offset="1" stop-color="#0E1B33"/>
+    </linearGradient>
+  </defs>
+  <rect width="1600" height="900" fill="url(#cielo)"/>
+
+  <!-- Retícula de plano, muy tenue -->
+  <g stroke="#C9A227" stroke-width="1" opacity=".10">
+    <path d="M0 100H1600M0 200H1600M0 300H1600M0 400H1600M0 500H1600M0 600H1600M0 700H1600M0 800H1600"/>
+    <path d="M100 0V900M200 0V900M300 0V900M400 0V900M500 0V900M600 0V900M700 0V900M800 0V900M900 0V900M1000 0V900M1100 0V900M1200 0V900M1300 0V900M1400 0V900M1500 0V900"/>
+  </g>
+
+  <!-- Siluetas de edificación, de fondo a frente -->
+  <g opacity=".30" fill="#C9D3E8">
+    <rect x="1120" y="250" width="150" height="650"/>
+    <rect x="1300" y="330" width="120" height="570"/>
+  </g>
+  <g opacity=".55" fill="#8FA3C6">
+    <rect x="880" y="380" width="210" height="520"/>
+    <rect x="1440" y="430" width="130" height="470"/>
+  </g>
+
+  <!-- Volumen principal, en líneas: lee como render en proceso -->
+  <g stroke="#C9A227" stroke-width="2.5" fill="none" opacity=".9">
+    <path d="M300 860V470l260-150 260 150v390"/>
+    <path d="M300 470l260 150 260-150"/>
+    <path d="M560 620v240"/>
+    <path d="M360 860V620h160v240"/>
+    <path d="M600 700h180v100H600z"/>
+    <path d="M600 830h180"/>
+  </g>
+  <g stroke="#FFFFFF" stroke-width="1.5" fill="none" opacity=".35">
+    <path d="M180 860h1240"/>
+    <path d="M240 860V520l320-190 320 190v340"/>
+  </g>
+
+  <!-- Grúa, que es el signo universal de "en construcción" -->
+  <g stroke="#C9A227" stroke-width="2" fill="none" opacity=".65">
+    <path d="M1020 860V180"/>
+    <path d="M880 220h300"/>
+    <path d="M1020 180l-140 40M1020 180l160 40"/>
+    <path d="M960 220v70"/>
+    <path d="M940 290h40v34h-40z"/>
+  </g>
+
+  <text x="80" y="110" font-family="ui-monospace,monospace" font-size="21"
+        fill="#C9A227" letter-spacing="4" opacity=".75">FOTO PROVISIONAL</text>
+  <text x="80" y="146" font-family="ui-monospace,monospace" font-size="15"
+        fill="#C9D3E8" letter-spacing="2" opacity=".55">SE REEMPLAZA POR LA FOTOGRAFIA DE INCOARQI</text>
+</svg>
