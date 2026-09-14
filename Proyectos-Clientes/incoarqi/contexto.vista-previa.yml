@@ -1,9 +1,9 @@
 # ════════════════════════════════════════════════════════════
 #  INCOARQI — VISTA PREVIA. NO ES LA FICHA DEL CLIENTE. NO SE PUBLICA.
-#  Se genera copiando contexto.yml y cambiando SOLO lo provisional, para que
+#  EL PRIMER CLIENTE REAL DEL SISTEMA.
 #
-#  no se desincronice: la vista previa se quedó atrás una vez y salió sin
-#  iconos ni bloques de color, y parecía que el diseño no existía.
+#  Cotización 001-2026 · 8 sep 2026 · $300.000 COP neto
+#  Entrega: 5 a 7 días hábiles desde la recepción del material.
 #
 #  El contenido de abajo está TRANSCRITO del brochure corporativo que
 #  entregó el cliente. No hay una palabra inventada. Lo que no venía en
@@ -26,7 +26,7 @@ marca:
   acento:     "#C9A227"      # dorado: el ÚNICO color saturado de la página
   direccion:  taller         # ficha técnica: ingeniería, no boutique
   inicial:    "I"
-  logo:       "./vista-previa/logo.svg"        # PROVISIONAL
+  logo:       "./vista-previa/logo.svg"     # PROVISIONAL
   banner:     ""             # POR DEFINIR — la foto de portada del brochure
   subtitulo:  "Ingeniería · Construcción · Arquitectura · Innovación"
   tono:       "técnico, sobrio y confiable"
@@ -41,7 +41,7 @@ pagina:
     fondo:   "oscuro"
     # La foto de portada va aquí cuando la manden. Sin ella se ve el azul
     # plano a sangre, que sigue siendo mejor que un hueco gris.
-    foto:    "./vista-previa/portada.svg"    # PROVISIONAL
+    foto:    "./vista-previa/portada.svg" # PROVISIONAL
     eyebrow: "Ingeniería · Construcción · Arquitectura · Innovación"
     titular: "Diseñamos, planeamos, construimos y transformamos"
     bajada:  "Soluciones integrales para convertir ideas en proyectos de alto valor."
@@ -140,9 +140,19 @@ pagina:
   # inconsistente. Manda la voz del cliente, no mi preferencia.
   leads_titulo: "Hablemos de tu proyecto"
 
+  # FRANJA INMERSIVA — banda de imagen a sangre con la frase del brochure.
+  # El espacio de la foto se reserva en el diseño: sin ella queda la banda
+  # del color de marca, que igual da el corte de ritmo.
+  franja:
+    frase: "Integramos conocimiento, experiencia e innovación para garantizar proyectos exitosos."
+    firma: "INCOARQI S.A.S."
+    foto:  "./vista-previa/franja.svg"  # PROVISIONAL
+
   sobre:
     titulo: "Por qué INCOARQI"
-    texto:  "Integramos conocimiento, experiencia e innovación para garantizar proyectos exitosos."
+    texto:  "Integramos ingeniería, arquitectura, construcción y gestión en una misma visión: analizamos antes de construir, controlamos cada etapa y cumplimos los estándares técnicos y normativos. Trabajamos de la mano con nuestros clientes, con transparencia y responsabilidad."
+    # Esta foto ocupa MEDIA SECCIÓN, no una columna al lado del párrafo.
+    foto:   "./vista-previa/sobre.svg"   # PROVISIONAL
 
   ubicacion:
     direccion: ""
@@ -156,7 +166,7 @@ apis:
   mensajeria:  whatsapp
   # El brochure trae 300 123 4567, que es un número de relleno.
   # NO se publica hasta que el cliente confirme el real.
-  whatsapp_num: "573213116999"   # PROVISIONAL: el del estudio, no el del cliente
+  whatsapp_num: "573213116999"
   pagos:       ninguna
   analitica:   ga4             # incluido en la cotización
   # El ID de medición de GA4. NO es un secreto (viaja en el HTML de todo

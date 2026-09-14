@@ -181,6 +181,18 @@ export function ponerBloquePagina(bloque, pagina) {
   if (texto(p.sobre?.texto)) {
     limpio.sobre = { titulo: texto(p.sobre.titulo) || 'Sobre nosotros',
                      texto: texto(p.sobre.texto) };
+    // La foto de esta sección ocupa media pantalla: el espacio es
+    // estructura del diseño, no un adorno al lado del párrafo.
+    const f = texto(p.sobre.foto);
+    if (/^(https?:\/\/|\/|\.\/)/i.test(f)) limpio.sobre.foto = f;
+  }
+
+  // LA FRANJA INMERSIVA: una banda de imagen a sangre con una frase.
+  if (texto(p.franja?.frase)) {
+    limpio.franja = { frase: texto(p.franja.frase) };
+    if (texto(p.franja.firma)) limpio.franja.firma = texto(p.franja.firma);
+    const f = texto(p.franja.foto);
+    if (/^(https?:\/\/|\/|\.\/)/i.test(f)) limpio.franja.foto = f;
   }
   const horarios = (Array.isArray(p.horarios) ? p.horarios : [])
     .map(texto).filter(Boolean);

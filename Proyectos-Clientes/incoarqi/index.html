@@ -478,6 +478,67 @@
     display:flex;align-items:center;gap:8px;
     padding:9px 16px;font-size:14px;color:var(--ink-soft);background:var(--surface);}
 
+  /* ══════════════════════════════════════════════════════════════
+     EL ESPACIO DE LA FOTO SE DISEÑA, NO SE RELLENA
+
+     Una página donde las fotos son un añadido —una galería de miniaturas
+     al final— se siente plana aunque el resto esté bien. Una página
+     inmersiva se construye ALREDEDOR del espacio de la imagen: la foto es
+     estructura, no decoración.
+
+     Los tres recursos de abajo reservan ese espacio en el diseño. Y cada
+     uno tiene su versión SIN foto: el espacio no queda como un hueco gris
+     en la entrega, la sección se reacomoda a texto y sigue funcionando.
+     ══════════════════════════════════════════════════════════════ */
+
+  /* --- FRANJA a sangre completa con una frase encima --- */
+  .franja{position:relative;isolation:isolate;overflow:hidden;
+    margin:calc(20px * var(--ritmo)) calc(50% - 50vw);
+    padding:calc(96px * var(--ritmo)) calc(50vw - 50%);
+    min-height:340px;display:grid;align-content:center;
+    background:var(--brand);color:#fff;}
+  .franja[hidden]{display:none;}
+  .franja img{position:absolute;inset:0;width:100%;height:100%;
+    object-fit:cover;z-index:-2;}
+  .franja::before{content:"";position:absolute;inset:0;z-index:-1;
+    background:linear-gradient(75deg,
+      color-mix(in srgb, var(--brand) 90%, transparent),
+      color-mix(in srgb, var(--brand) 40%, transparent));}
+  @supports not (background: color-mix(in srgb, red 50%, transparent)){
+    .franja::before{background:linear-gradient(75deg,
+      rgba(0,0,0,.74), rgba(0,0,0,.32));}
+  }
+  .franja blockquote{margin:0;max-width:34ch;font-family:var(--display);
+    font-size:clamp(22px,3.6vw,34px);line-height:1.2;
+    font-weight:var(--peso-titulo);letter-spacing:var(--tracking);}
+  .franja .firma{display:block;margin-top:16px;font-family:var(--mono);
+    font-size:12px;letter-spacing:.09em;text-transform:uppercase;
+    color:var(--accent);}
+  [data-dir="mercado"] .franja blockquote{text-transform:uppercase;}
+  [data-dir="boutique"] .franja{padding-top:calc(120px * var(--ritmo));
+    padding-bottom:calc(120px * var(--ritmo));}
+
+  /* --- SECCIÓN PARTIDA: media imagen, medio texto --- */
+  .partida{display:grid;grid-template-columns:1fr 1fr;gap:0;align-items:stretch;
+    /* La imagen se sale del .wrap por su lado: media pantalla de foto, no
+       una foto metida en una columna de texto. */
+    margin-right:calc(50% - 50vw);}
+  .partida .lado-txt{padding:calc(34px * var(--ritmo)) 48px
+    calc(34px * var(--ritmo)) 0;align-self:center;}
+  .partida .lado-img{position:relative;min-height:380px;overflow:hidden;
+    background:var(--brand);border-radius:var(--radius) 0 0 var(--radius);}
+  .partida .lado-img img{position:absolute;inset:0;width:100%;height:100%;
+    object-fit:cover;}
+  [data-dir="mercado"] .partida .lado-img{border-radius:0;}
+  /* Sin foto: el texto toma el ancho completo y NO queda un hueco. */
+  .partida.sin-img{grid-template-columns:1fr;margin-right:0;}
+  .partida.sin-img .lado-txt{padding-right:0;}
+  @media(max-width:820px){
+    .partida{grid-template-columns:1fr;margin-right:0;}
+    .partida .lado-txt{padding:0 0 26px;}
+    .partida .lado-img{min-height:260px;border-radius:var(--radius);}
+  }
+
   .prosa{max-width:62ch;font-size:16px;line-height:1.7;color:var(--ink);}
   .lista{list-style:none;margin:0;padding:0;font-size:15px;line-height:2;}
   .dosc{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));
@@ -730,6 +791,14 @@
   <section class="seccion" id="proceso" hidden></section>
   <section class="seccion" id="galeria" hidden></section>
   <section class="seccion" id="sectores" hidden></section>
+  <!-- FRANJA INMERSIVA. Una banda de imagen a sangre con una frase encima.
+       Es el recurso que más aire de sitio da por menos trabajo, y el
+       espacio existe en el diseño aunque la foto llegue después. -->
+  <section class="franja" id="franja" hidden></section>
+
+  <!-- SOBRE EL NEGOCIO, en dos mitades: imagen a sangre y texto.
+       El espacio de la foto es la mitad de la sección, no un adorno al
+       lado del párrafo. Sin foto, el texto toma el ancho completo. -->
   <section class="seccion" id="sobre" hidden></section>
   <section class="seccion" id="datos" hidden></section>
 
@@ -794,7 +863,7 @@ const CONTEXT = {
   /* LOS BLOQUES DE LA PÁGINA. Cada uno se pinta SOLO si trae contenido.
      Vacío = no existe; nunca se rellena con texto de ejemplo, ni con un
      "Próximamente", ni con foto de banco. */
-  pagina:{"hero":{"titular":"Diseñamos, planeamos, construimos y transformamos","bajada":"Soluciones integrales para convertir ideas en proyectos de alto valor.","eyebrow":"Ingeniería · Construcción · Arquitectura · Innovación","cta":"Hablemos de tu proyecto","fondo":"oscuro"},"servicios":[{"titulo":"Ingeniería","desc":"Ingeniería civil, eléctrica e hidrosanitaria. Diseño estructural y de instalaciones. Presupuestos, APU y cantidades de obra. Análisis, diagnóstico y soluciones técnicas.","icono":"regla"},{"titulo":"Arquitectura y diseño","desc":"Diseño arquitectónico y de interiores. Modelado 3D y renders. Planos arquitectónicos y técnicos. Coordinación arquitectura - ingeniería.","icono":"plano"},{"titulo":"Construcción","desc":"Obra nueva y obra gris. Acabados arquitectónicos. Construcciones residenciales, comerciales e institucionales. Urbanismo y espacio público.","icono":"grua"},{"titulo":"Gerencia y gestión de proyectos","desc":"Gerencia, dirección y residencia de obra. Supervisión técnica y administrativa. Control de costos, tiempo y calidad. Informes, actas y seguimiento.","icono":"equipo"},{"titulo":"Presupuestos y control de costos","desc":"Presupuestos de obra. Análisis de precios unitarios (APU). Control presupuestal. Seguimiento y proyección de costos.","icono":"calculadora"},{"titulo":"Planeación y programación","desc":"Programación de obra. Cronogramas y curvas de avance. Control de rendimientos. Reprogramaciones y seguimiento.","icono":"calendario"}],"servicios_titulo":"Nuestros servicios","diferencial":[{"titulo":"Integración","texto":"Integramos ingeniería, arquitectura, construcción y gestión en una misma visión.","icono":"red"},{"titulo":"Planeación","texto":"Analizamos antes de construir para tomar mejores decisiones.","icono":"lupa"},{"titulo":"Control","texto":"Seguimos y controlamos cada etapa del proyecto.","icono":"lista"},{"titulo":"Calidad","texto":"Cumplimos estándares técnicos y normativos.","icono":"escudo"},{"titulo":"Innovación","texto":"Utilizamos tecnología y metodologías que optimizan procesos.","icono":"idea"},{"titulo":"Compromiso","texto":"Trabajamos de la mano con nuestros clientes con transparencia y responsabilidad.","icono":"mano"}],"diferencial_titulo":"Nuestro diferencial","proceso":[{"titulo":"Conocer","texto":"Entendemos tu necesidad."},{"titulo":"Analizar","texto":"Evaluamos condiciones y alternativas."},{"titulo":"Diseñar","texto":"Desarrollamos la solución."},{"titulo":"Presupuestar","texto":"Calculamos costos y recursos."},{"titulo":"Planear","texto":"Definimos estrategia y programación."},{"titulo":"Construir","texto":"Ejecutamos con calidad y seguridad."},{"titulo":"Controlar","texto":"Monitoreamos avances y calidad."},{"titulo":"Entregar","texto":"Verificamos y entregamos."}],"proceso_titulo":"Nuestro proceso","leads_titulo":"Hablemos de tu proyecto","sectores":[{"nombre":"Vivienda","icono":"casa"},{"nombre":"Comercial","icono":"tienda"},{"nombre":"Institucional","icono":"edificio"},{"nombre":"Oficinas","icono":"edificio"},{"nombre":"Urbanismo","icono":"arbol"},{"nombre":"Industria","icono":"fabrica"},{"nombre":"Remodelaciones","icono":"llave"},{"nombre":"Adecuaciones locativas","icono":"regla"},{"nombre":"Mantenimiento","icono":"engranaje"},{"nombre":"Obras civiles","icono":"puente"}],"sectores_titulo":"Sectores","secciones_oscuras":["diferencial","proceso","pie"],"sobre":{"titulo":"Por qué INCOARQI","texto":"Integramos conocimiento, experiencia e innovación para garantizar proyectos exitosos."}},
+  pagina:{"hero":{"titular":"Diseñamos, planeamos, construimos y transformamos","bajada":"Soluciones integrales para convertir ideas en proyectos de alto valor.","eyebrow":"Ingeniería · Construcción · Arquitectura · Innovación","cta":"Hablemos de tu proyecto","fondo":"oscuro"},"servicios":[{"titulo":"Ingeniería","desc":"Ingeniería civil, eléctrica e hidrosanitaria. Diseño estructural y de instalaciones. Presupuestos, APU y cantidades de obra. Análisis, diagnóstico y soluciones técnicas.","icono":"regla"},{"titulo":"Arquitectura y diseño","desc":"Diseño arquitectónico y de interiores. Modelado 3D y renders. Planos arquitectónicos y técnicos. Coordinación arquitectura - ingeniería.","icono":"plano"},{"titulo":"Construcción","desc":"Obra nueva y obra gris. Acabados arquitectónicos. Construcciones residenciales, comerciales e institucionales. Urbanismo y espacio público.","icono":"grua"},{"titulo":"Gerencia y gestión de proyectos","desc":"Gerencia, dirección y residencia de obra. Supervisión técnica y administrativa. Control de costos, tiempo y calidad. Informes, actas y seguimiento.","icono":"equipo"},{"titulo":"Presupuestos y control de costos","desc":"Presupuestos de obra. Análisis de precios unitarios (APU). Control presupuestal. Seguimiento y proyección de costos.","icono":"calculadora"},{"titulo":"Planeación y programación","desc":"Programación de obra. Cronogramas y curvas de avance. Control de rendimientos. Reprogramaciones y seguimiento.","icono":"calendario"}],"servicios_titulo":"Nuestros servicios","diferencial":[{"titulo":"Integración","texto":"Integramos ingeniería, arquitectura, construcción y gestión en una misma visión.","icono":"red"},{"titulo":"Planeación","texto":"Analizamos antes de construir para tomar mejores decisiones.","icono":"lupa"},{"titulo":"Control","texto":"Seguimos y controlamos cada etapa del proyecto.","icono":"lista"},{"titulo":"Calidad","texto":"Cumplimos estándares técnicos y normativos.","icono":"escudo"},{"titulo":"Innovación","texto":"Utilizamos tecnología y metodologías que optimizan procesos.","icono":"idea"},{"titulo":"Compromiso","texto":"Trabajamos de la mano con nuestros clientes con transparencia y responsabilidad.","icono":"mano"}],"diferencial_titulo":"Nuestro diferencial","proceso":[{"titulo":"Conocer","texto":"Entendemos tu necesidad."},{"titulo":"Analizar","texto":"Evaluamos condiciones y alternativas."},{"titulo":"Diseñar","texto":"Desarrollamos la solución."},{"titulo":"Presupuestar","texto":"Calculamos costos y recursos."},{"titulo":"Planear","texto":"Definimos estrategia y programación."},{"titulo":"Construir","texto":"Ejecutamos con calidad y seguridad."},{"titulo":"Controlar","texto":"Monitoreamos avances y calidad."},{"titulo":"Entregar","texto":"Verificamos y entregamos."}],"proceso_titulo":"Nuestro proceso","leads_titulo":"Hablemos de tu proyecto","sectores":[{"nombre":"Vivienda","icono":"casa"},{"nombre":"Comercial","icono":"tienda"},{"nombre":"Institucional","icono":"edificio"},{"nombre":"Oficinas","icono":"edificio"},{"nombre":"Urbanismo","icono":"arbol"},{"nombre":"Industria","icono":"fabrica"},{"nombre":"Remodelaciones","icono":"llave"},{"nombre":"Adecuaciones locativas","icono":"regla"},{"nombre":"Mantenimiento","icono":"engranaje"},{"nombre":"Obras civiles","icono":"puente"}],"sectores_titulo":"Sectores","secciones_oscuras":["diferencial","proceso","pie"],"sobre":{"titulo":"Por qué INCOARQI","texto":"Integramos ingeniería, arquitectura, construcción y gestión en una misma visión: analizamos antes de construir, controlamos cada etapa y cumplimos los estándares técnicos y normativos. Trabajamos de la mano con nuestros clientes, con transparencia y responsabilidad."},"franja":{"frase":"Integramos conocimiento, experiencia e innovación para garantizar proyectos exitosos.","firma":"INCOARQI S.A.S."}},
   apis: {
     mensajeria:"whatsapp", whatsapp_num:"",
     // El ID de medición de GA4. NO es un secreto: viaja en el HTML de
@@ -1038,14 +1107,45 @@ function pintarSectores(){
   el.hidden = false;
 }
 
+/* FRANJA INMERSIVA — una banda de imagen a sangre con una frase encima.
+   El espacio existe en el diseño aunque la foto llegue después: sin foto
+   queda la banda del color de marca, que sigue dando el corte de ritmo. */
+function pintarFranja(){
+  const el = document.getElementById("franja");
+  if(!el) return;
+  const f = (CONTEXT.pagina && CONTEXT.pagina.franja) || {};
+  const frase = String(f.frase||"").trim();
+  if(!frase){ el.hidden = true; return; }
+  const foto = urlSegura(f.foto);
+  const firma = String(f.firma||"").trim();
+  el.innerHTML = (foto ? '<img src="'+esc(foto)+'" alt="" loading="lazy" '
+      + 'decoding="async">' : '')
+    + '<blockquote>'+esc(frase)
+    + (firma ? '<span class="firma">'+esc(firma)+'</span>' : '')
+    + '</blockquote>';
+  el.hidden = false;
+}
+
+/* SOBRE EL NEGOCIO, en dos mitades. El espacio de la foto es la MITAD de
+   la sección: la imagen es estructura, no un adorno al lado del párrafo.
+   Sin foto, `.sin-img` devuelve el texto al ancho completo — el espacio se
+   reserva en el diseño, no se deja como un hueco en la entrega. */
 function pintarSobre(){
   const el = document.getElementById("sobre");
   if(!el) return;
   const s = (CONTEXT.pagina && CONTEXT.pagina.sobre) || {};
   const texto = String(s.texto||"").trim();
   if(!texto){ el.hidden = true; return; }
-  el.innerHTML = '<h2>'+esc(String(s.titulo||"Sobre nosotros").trim())+'</h2>'
-    + '<p class="prosa">'+esc(texto)+'</p>';
+  const foto = urlSegura(s.foto);
+  fondoDe(el, "sobre");
+  el.innerHTML = '<div class="partida'+(foto ? '' : ' sin-img')+'">'
+    + '<div class="lado-txt">'
+    +   '<h2>'+esc(String(s.titulo||"Sobre nosotros").trim())+'</h2>'
+    +   '<p class="prosa">'+esc(texto)+'</p>'
+    + '</div>'
+    + (foto ? '<div class="lado-img"><img src="'+esc(foto)+'" alt="" '
+        + 'loading="lazy" decoding="async"></div>' : '')
+    + '</div>';
   el.hidden = false;
 }
 
@@ -1220,7 +1320,7 @@ function cablearRevelado(){
     && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   if(menos || typeof IntersectionObserver !== "function") return;
 
-  const bloques = document.querySelectorAll(".hero, .seccion, footer");
+  const bloques = document.querySelectorAll(".hero, .seccion, .franja, footer");
   if(!bloques.length) return;
 
   document.documentElement.classList.add("js-reveal");
@@ -1326,7 +1426,7 @@ function applyTheme(){
   document.getElementById('sysDB').textContent = CONTEXT.base_de_datos.motor;
 
   pintarHero(); pintarServicios(); pintarDiferencial(); pintarProceso();
-  pintarGaleria(); pintarSectores(); pintarSobre(); pintarDatos();
+  pintarGaleria(); pintarSectores(); pintarFranja(); pintarSobre(); pintarDatos();
   pintarLeads(); pintarWhatsApp(); pintarPie();
   // El menú va al final: necesita saber qué secciones quedaron visibles.
   pintarNav();

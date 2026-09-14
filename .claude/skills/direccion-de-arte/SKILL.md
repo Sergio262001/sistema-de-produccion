@@ -38,6 +38,52 @@ es excelente; la piel ya es el default de la industria. Se replica el método.
 
 ---
 
+## La regla que más costó: el espacio de la foto SE DISEÑA
+
+**Las plantillas se construyen alrededor del espacio de la imagen. La foto
+es estructura, no decoración.** Instrucción permanente del dueño, después de
+rechazar tres versiones seguidas de una landing.
+
+Sus palabras: *"esto no tiene diseño, se ve super plano"* y *"está muy
+sencilla aún"*. Las tres versiones tenían buena tipografía, buen contraste y
+cero hallazgos del validador. **Y estaban mal**, porque la foto era un
+añadido —una galería de miniaturas al final— en vez de ser el esqueleto.
+
+### Los cinco recursos, en orden de impacto
+
+| Recurso | Qué es |
+|---|---|
+| **Hero a sangre** | Imagen ocupando la ventana, velo para que el texto se lea. **No** página blanca con texto encima |
+| **Franja** | Banda de imagen a todo el ancho entre secciones, con una frase encima. Lo que más aire de sitio da por menos trabajo |
+| **Sección partida** | Media pantalla de foto, medio texto. La imagen se sale del contenedor |
+| **Collage** | Galería escalonada: una grande, otras chicas. **Nunca** una grilla de miniaturas iguales |
+| **Bloques alternados** | Secciones sobre el color de marca, con diagonales entre medio. No todo sobre el mismo fondo |
+
+### Y la mitad que no se puede olvidar
+
+**Cada recurso lleva su versión SIN foto.** El espacio se reserva en el
+diseño, pero **no queda un hueco gris en la entrega publicada**: sin imagen,
+la sección se reacomoda a texto y sigue funcionando.
+
+```
+con foto   →  media pantalla de imagen, el texto al lado
+sin foto   →  el texto toma el ancho completo (.sin-img)
+```
+
+Eso concilia esta regla con la de `entregable-cliente` ("un bloque vacío no
+se pinta"): **reservar espacio en el diseño no es dejar huecos en la
+entrega.**
+
+### Lo que NO se hace para llenar ese espacio
+
+- Fotos de banco de imágenes.
+- **Fotos generadas por IA que representen obra del cliente.** Si es una
+  constructora, una foto inventada de un edificio que no construyeron es
+  portafolio falso — y el que queda expuesto es el cliente. Una foto de obra
+  es un dato del cliente, y los datos del cliente no se inventan.
+- Imágenes generadas **sí** valen para: marcadores de vista previa marcados
+  como tales, y texturas o fondos abstractos que no representan nada real.
+
 ## El método de paleta
 
 ### Un solo acento hace todo el trabajo
