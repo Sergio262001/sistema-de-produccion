@@ -26,8 +26,15 @@ funcionar, eso es lo primero que hay que volver a comprobar.**
 
 El juego completo de una landing (9 imágenes) cuesta **$0.099 USD**.
 
-**Falta probarlo con una clave real.** Todo lo demás está cubierto por
-pruebas; la llamada en sí no, porque cuesta dinero y necesita credencial.
+**Probado con una clave real el 2026-09-14.** Dos cosas salieron de ahí:
+
+1. **La API solo acepta `image/jpeg`**, no PNG — la documentación muestra
+   PNG en su ejemplo y devuelve `400`. Corregido.
+2. **La generación de imágenes necesita facturación habilitada.** Con el
+   plan gratuito devuelve `429`. El error ahora se explica en español y
+   dice exactamente qué hacer, en vez de mostrar el párrafo en inglés.
+
+Falta una tanda real cuando la cuenta tenga cuota.
 
 ---
 

@@ -181,15 +181,49 @@ export async function generarImagen({ ficha, tipo, carpeta, nombre,
 
   const { GoogleGenAI } = await import('@google/genai');
   const ai = new GoogleGenAI({ apiKey: claveDe() });
+
+  /**
+   * Los errores de la API, en español y con qué hacer.
+   *
+   * El mensaje crudo de un 429 es un párrafo en inglés con dos enlaces y
+   * no dice lo único que importa: que la generación de imágenes necesita
+   * facturación habilitada, y que el problema no es el código.
+   */
+  const explicar = (e) => {
+    const t = String(e?.message || e);
+    if (/\b429\b|quota|rate.?limit/i.test(t)) {
+      return new Error('Sin cuota para generar imágenes (429).\n'
+        + '    La clave es válida y la llamada llegó bien: lo que falta es\n'
+        + '    FACTURACIÓN habilitada en tu cuenta de Google.\n'
+        + '    → aistudio.google.com → Get API key → Set up Billing\n'
+        + '    El plan gratuito no incluye generación de imágenes.');
+    }
+    if (/\b40[13]\b|API key|unauthenticated|permission/i.test(t)) {
+      return new Error('La clave no sirve para esto (' + t.slice(0, 80) + ').\n'
+        + '    Revisa GOOGLE_GENAI_API_KEY en herramientas/.env');
+    }
+    if (/\b400\b/.test(t)) {
+      return new Error('La API rechazó la petición: ' + t.slice(0, 160) + '\n'
+        + '    Suele ser un formato que cambió. Revisa lib/imagenes.js.');
+    }
+    return e;
+  };
   const m = MODELOS_IMAGEN[modelo] || MODELOS_IMAGEN[MODELO_IMAGEN];
   const p = promptDesdeFicha(ficha, tipo, sujeto);
 
-  const interaccion = await ai.interactions.create({
+  // JPEG, no PNG. La documentación muestra `image/png` en su ejemplo, pero
+  // la API devuelve 400: "Supported values: 'image/jpeg'". Se descubrió
+  // probando con una clave real — es justamente el tipo de detalle que no
+  // se puede dar por bueno leyendo los docs.
+  let interaccion;
+  try {
+    interaccion = await ai.interactions.create({
     model: m.id,
     input: p.texto,
-    response_format: { type: 'image', mime_type: 'image/png',
-                       aspect_ratio: p.proporcion },
-  });
+    response_format: { type: 'image', mime_type: 'image/jpeg',
+                         aspect_ratio: p.proporcion },
+    });
+  } catch (e) { throw explicar(e); }
 
   const datos = interaccion?.output_image?.data;
   if (!datos) {
@@ -197,10 +231,11 @@ export async function generarImagen({ ficha, tipo, carpeta, nombre,
       + 'Puede haber rechazado el prompt: revisa el .txt y reformúlalo.');
   }
 
+
   mkdirSync(resolve(carpeta), { recursive: true });
   const base = (nombre || tipo) + '-provisional';
-  const png = join(resolve(carpeta), base + '.png');
-  writeFileSync(png, Buffer.from(datos, 'base64'));
+  const archivo = join(resolve(carpeta), base + '.jpg');
+  writeFileSync(archivo, Buffer.from(datos, 'base64'));
   writeFileSync(join(resolve(carpeta), base + '.txt'),
     ['# Imagen PROVISIONAL generada — NO SE PUBLICA.',
      '# Se reemplaza por la foto real del cliente.',
@@ -214,7 +249,7 @@ export async function generarImagen({ ficha, tipo, carpeta, nombre,
      p.texto,
      ''].join('\n'), 'utf8');
 
-  return { ok: true, archivo: png, prompt: p.texto, modelo: m.id };
+  return { ok: true, archivo, prompt: p.texto, modelo: m.id };
 }
 
 /** ¿Esta ruta apunta a material provisional? La usa el validador. */
