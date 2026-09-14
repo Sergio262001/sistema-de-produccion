@@ -283,7 +283,44 @@ export function reglaSintaxis({ ruta, texto }) {
 }
 
 // ── Registro ──────────────────────────────────────────────────
+/**
+ * MATERIAL PROVISIONAL QUE LLEGA A LA ENTREGA.
+ *
+ * Los marcadores de `vista-previa/` existen para enseñarle al cliente cómo
+ * va a quedar su página antes de que mande material. **No se publican**:
+ * son dibujos e imágenes generadas, no su obra.
+ *
+ * Hasta ahora lo único que lo impedía era que yo me acordara de sacarlos.
+ * Esta regla lo vuelve imposible: si el HTML del entregable referencia algo
+ * provisional, es ERROR y el validador no deja entregar.
+ *
+ * Es la contraparte de `lib/imagenes.js`: ahí se generan, aquí se garantiza
+ * que no salgan a producción.
+ */
+export function reglaProvisional({ ruta, lineas }) {
+  // El demo de la fábrica y la propia vista previa pueden referenciarlos:
+  // son justamente los sitios donde ese material vive.
+  const r = String(ruta).replace(/\\/g, '/');
+  if (/\/02-bases\//.test(r) || /\/vista-previa\//.test(r)) return [];
+  if (/-provisional\.[a-z]+$/i.test(r)) return [];
+
+  const out = [];
+  const vistos = new Set();
+  lineas.forEach((linea, i) => {
+    const m = linea.match(/["'(]([^"'()\s]*(?:vista-previa\/[^"'()\s]*|-provisional\.(?:png|jpe?g|webp|svg)))["')]/i);
+    if (!m || vistos.has(m[1])) return;
+    vistos.add(m[1]);                 // una vez por archivo referenciado
+    out.push(hallazgo(ruta, i + 1, 'error', 'provisional',
+      'Material PROVISIONAL en el entregable: ' + m[1],
+      'Los marcadores de vista-previa/ son dibujos e imágenes generadas, no la '
+      + 'obra del cliente. Publicarlos es presentar trabajo que no existe. '
+      + 'Reemplázalos por el material real o quita la sección.'));
+  });
+  return out;
+}
+
 export const REGLAS = [
+  { id: 'provisional',  fn: reglaProvisional,  extensiones: ['.html', '.js', '.css'] },
   { id: 'xss',          fn: reglaXss,          extensiones: ['.html', '.js'] },
   { id: 'token-muerto', fn: reglaTokensMuertos, extensiones: ['.html', '.css'] },
   { id: 'alt',          fn: reglaAlt,          extensiones: ['.html'] },

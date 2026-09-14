@@ -1,8 +1,37 @@
-# Plan · Conectar Gemini para imágenes
+# Imágenes generadas con Gemini
 
-Acordado el 2026-09-14. **No construido todavía** — se acabó el contexto de
-la sesión. Esto es lo que hay que hacer, con las decisiones ya tomadas para
-que la próxima sesión no las vuelva a discutir.
+**CONSTRUIDO el 2026-09-14.** Este documento era el plan; abajo queda como
+la explicación de por qué está hecho así.
+
+## Lo que quedó
+
+| Archivo | Qué hace |
+|---|---|
+| `herramientas/lib/imagenes.js` | Los 5 tipos, el prompt desde la ficha, la generación |
+| `herramientas/generar-imagenes.js` | El CLI, con `--estimar` y confirmación |
+| `lib/reglas.js` → `provisional` | **La barrera**: error si algo provisional llega al entregable |
+| `pruebas/imagenes.test.js` | 20 pruebas, la mitad sobre la barrera |
+
+```bash
+npm install @google/genai
+node generar-imagenes.js --ficha <ruta> --que todo --estimar
+```
+
+**Verificado contra la documentación el 2026-09-14:** el SDK es
+`@google/genai`, la llamada es `ai.interactions.create({ model, input,
+response_format })`, la imagen llega en `output_image.data` en base64, y los
+modelos son `gemini-3.1-flash-lite-image` (el más barato, por defecto),
+`gemini-3.1-flash-image` y `gemini-3-pro-image`. **Si algún día deja de
+funcionar, eso es lo primero que hay que volver a comprobar.**
+
+El juego completo de una landing (9 imágenes) cuesta **$0.099 USD**.
+
+**Falta probarlo con una clave real.** Todo lo demás está cubierto por
+pruebas; la llamada en sí no, porque cuesta dinero y necesita credencial.
+
+---
+
+## Por qué está hecho así
 
 ---
 

@@ -124,6 +124,47 @@ Medido sobre las 9 bases (~35.500 tokens de entrada):
 El `system` prompt va con `cache_control`, así que auditar varios archivos
 seguidos abarata mucho a partir del segundo.
 
+## Imágenes provisionales
+
+Para **enseñarle al cliente** cómo va a quedar su página antes de que mande
+material. Marcadores y texturas, no su obra.
+
+```bash
+npm install @google/genai                 # una vez, solo para esto
+node generar-imagenes.js --ficha <ruta> --que todo --estimar
+node generar-imagenes.js --ficha <ruta> --que portada
+node generar-imagenes.js --ficha <ruta> --que galeria --cuantas 6
+```
+
+El juego completo de una landing —portada, franja, sobre y 6 de galería—
+cuesta **$0.10 USD (~$400 COP)** con el modelo más barato. Estima antes,
+pide confirmación, y deja un `.txt` con el prompt exacto al lado de cada
+imagen para poder repetirla.
+
+**El prompt sale de la ficha**, no se escribe a mano: color de marca,
+titular y sectores del cliente. Y si la ficha no dice a qué se dedica, el
+prompt se queda genérico — **no se inventa un tipo de obra que no hace.**
+
+### La línea, y cómo se hace cumplir
+
+| Uso | |
+|---|---|
+| Marcadores de vista previa | ✅ |
+| Texturas y fondos abstractos | ✅ |
+| **Fotos de obra del sitio publicado** | ❌ |
+
+Una foto generada de un edificio **que el cliente no construyó**, puesta en
+su galería de proyectos, es portafolio falso. Si alguien llega preguntando
+por ese proyecto, no existe — y el que queda expuesto es el cliente.
+
+**La garantía no es acordarse:** el validador tiene una regla que convierte
+en **error** referenciar cualquier cosa de `vista-previa/` o terminada en
+`-provisional` desde un entregable. No se puede publicar aunque se quiera.
+
+Por eso todos los prompts de obra piden **render de visualización, no
+fotografía documental**: una imagen que se ve como render dice "esto es una
+propuesta"; una que se ve como foto miente.
+
 ## El agente y sus roles
 
 El agente usa el Claude Agent SDK: Claude Code como librería, corriendo en tu
