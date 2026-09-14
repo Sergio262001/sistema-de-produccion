@@ -264,23 +264,6 @@
   .hero.oscuro .hero-foto{position:absolute;inset:0;width:100%;height:100%;
     object-fit:cover;z-index:-2;}
 
-  /* SIN FOTO, una retícula de plano en vez de un rectángulo de color plano.
-     No finge una fotografía: es textura de marca, hecha con dos degradados
-     repetidos. Cuando llega la foto del cliente, queda debajo y no se ve.
-     Existe porque un hero de 500 px de color liso con el texto en la mitad
-     izquierda se lee como una sección sin terminar. */
-  .hero.oscuro:not(:has(.hero-foto))::after{
-    content:"";position:absolute;inset:0;z-index:-3;opacity:.5;
-    background-image:
-      repeating-linear-gradient(to right,
-        color-mix(in srgb, #fff 9%, transparent) 0 1px, transparent 1px 76px),
-      repeating-linear-gradient(to bottom,
-        color-mix(in srgb, #fff 9%, transparent) 0 1px, transparent 1px 76px);}
-  /* `:has` no está en todos los navegadores viejos; sin él la retícula
-     simplemente no se pinta y queda el color plano, que es el estado de antes. */
-  @supports not selector(:has(*)){
-    .hero.oscuro::after{content:none;}
-  }
   /* El velo: sin él, un titular blanco sobre una foto clara no se lee.
      Es más oscuro abajo, donde vive el texto. */
   .hero.oscuro::before{content:"";position:absolute;inset:0;z-index:-1;
@@ -502,6 +485,60 @@
      uno tiene su versión SIN foto: el espacio no queda como un hueco gris
      en la entrega, la sección se reacomoda a texto y sigue funcionando.
      ══════════════════════════════════════════════════════════════ */
+
+  /* ══════════════════════════════════════════════════════════════
+     TEXTURAS EN CSS — el espacio de la foto, cuando no hay foto
+
+     Esto existe por una razón concreta: el cliente casi nunca tiene las
+     fotos el día uno, y generar imágenes cuesta dinero que no siempre hay.
+     Un bloque de color liso donde iba una foto se lee como una sección sin
+     terminar; con textura se lee como una decisión.
+
+     Cero imágenes, cero peticiones, cero costo: son degradados repetidos.
+     Y cuando llega la foto del cliente queda encima y la textura no se ve.
+
+     Se elige en la ficha:  pagina.<seccion>.textura: plano | concreto | trama
+     ══════════════════════════════════════════════════════════════ */
+
+  /* PLANO — retícula técnica. Ingeniería, arquitectura, construcción. */
+  .tex-plano{
+    background-image:
+      repeating-linear-gradient(to right,
+        color-mix(in srgb, #fff 10%, transparent) 0 1px, transparent 1px 64px),
+      repeating-linear-gradient(to bottom,
+        color-mix(in srgb, #fff 10%, transparent) 0 1px, transparent 1px 64px),
+      repeating-linear-gradient(to right,
+        color-mix(in srgb, #fff 4%, transparent) 0 1px, transparent 1px 16px),
+      repeating-linear-gradient(to bottom,
+        color-mix(in srgb, #fff 4%, transparent) 0 1px, transparent 1px 16px);}
+
+  /* CONCRETO — bandas suaves en diagonal. Obra, industria, taller. */
+  .tex-concreto{
+    background-image:
+      repeating-linear-gradient(115deg,
+        color-mix(in srgb, #fff 5%, transparent) 0 2px,
+        transparent 2px 9px),
+      radial-gradient(120% 90% at 78% 12%,
+        color-mix(in srgb, #fff 9%, transparent), transparent 62%);}
+
+  /* TRAMA — puntos finos. Servicios, consultoría, salud: más neutra. */
+  .tex-trama{
+    background-image:
+      radial-gradient(color-mix(in srgb, #fff 16%, transparent) 1px,
+                      transparent 1.4px);
+    background-size:18px 18px;}
+
+  /* Sin `color-mix` la textura simplemente no se pinta y queda el color
+     liso, que es exactamente el estado anterior. Nada se rompe. */
+  @supports not (background: color-mix(in srgb, red 50%, transparent)){
+    .tex-plano,.tex-concreto,.tex-trama{background-image:none;}
+  }
+
+  /* La textura vive DETRÁS de la foto: cuando el cliente la manda, deja de
+     verse sola. Y detrás del velo, para que el texto no pierda contraste. */
+  .con-textura{position:relative;isolation:isolate;}
+  .con-textura > .textura{position:absolute;inset:0;z-index:-3;opacity:.85;
+    pointer-events:none;}
 
   /* --- FRANJA a sangre completa con una frase encima --- */
   .franja{position:relative;isolation:isolate;overflow:hidden;
@@ -989,11 +1026,12 @@ function pintarHero(){
   // un error de maquetación, no como una decisión.
   document.documentElement.setAttribute("data-portada", oscuro ? "oscura" : "clara");
 
-  el.className = "hero" + (oscuro ? " oscuro" : "");
+  el.className = "hero" + (oscuro ? " oscuro con-textura" : "");
   el.innerHTML =
       (oscuro && foto
         ? '<img class="hero-foto" src="'+esc(foto)+'" alt="" '
-          + 'decoding="async" fetchpriority="high">' : '')
+          + 'decoding="async" fetchpriority="high">'
+        : (oscuro ? textura(h.textura, "plano") : ''))
     + (eyebrow ? '<span class="eyebrow">'+esc(eyebrow)+'</span>' : '')
     + (t ? '<h1>'+esc(t)+'</h1>' : '')
     + (b ? '<p class="lead">'+esc(b)+'</p>' : '')
@@ -1017,6 +1055,19 @@ function pintarServicios(){
         + '</article>').join('')
     + '</div>';
   el.hidden = false;
+}
+
+/* LA TEXTURA de un bloque sin foto.
+   Cero imágenes y cero costo: son degradados repetidos. Se usa SOLO cuando
+   no hay foto — cuando el cliente la manda, la foto va encima y esto deja
+   de verse. Un valor desconocido no pinta nada, no cae a una textura que
+   nadie pidió. */
+const TEXTURAS = ['plano', 'concreto', 'trama'];
+
+function textura(nombre, porDefecto){
+  const n = String(nombre || porDefecto || '').trim().toLowerCase();
+  if(!TEXTURAS.includes(n)) return '';
+  return '<span class="textura tex-'+n+'" aria-hidden="true"></span>';
 }
 
 /* Un icono del sprite, o nada. No hay icono genérico de respaldo: uno que
@@ -1158,8 +1209,11 @@ function pintarFranja(){
   if(!frase){ el.hidden = true; return; }
   const foto = urlSegura(f.foto);
   const firma = String(f.firma||"").trim();
-  el.innerHTML = (foto ? '<img src="'+esc(foto)+'" alt="" loading="lazy" '
-      + 'decoding="async">' : '')
+  // Sin foto, la textura. Con foto, la foto — y la textura ni se pinta.
+  el.classList.add("con-textura");
+  el.innerHTML = (foto
+      ? '<img src="'+esc(foto)+'" alt="" loading="lazy" decoding="async">'
+      : textura(f.textura, "concreto"))
     + '<blockquote>'+esc(frase)
     + (firma ? '<span class="firma">'+esc(firma)+'</span>' : '')
     + '</blockquote>';
@@ -1177,14 +1231,23 @@ function pintarSobre(){
   const texto = String(s.texto||"").trim();
   if(!texto){ el.hidden = true; return; }
   const foto = urlSegura(s.foto);
+  // Sin foto pero con textura, la sección conserva sus dos mitades: el
+  // espacio de la imagen es estructura. Sin ninguna de las dos, el texto
+  // toma el ancho completo y no queda un hueco.
+  const tex = foto ? "" : textura(s.textura, "plano");
   fondoDe(el, "sobre");
-  el.innerHTML = '<div class="partida'+(foto ? '' : ' sin-img')+'">'
+  el.innerHTML = '<div class="partida'+((foto || tex) ? '' : ' sin-img')+'">'
     + '<div class="lado-txt">'
     +   '<h2>'+esc(String(s.titulo||"Sobre nosotros").trim())+'</h2>'
     +   '<p class="prosa">'+esc(texto)+'</p>'
     + '</div>'
-    + (foto ? '<div class="lado-img"><img src="'+esc(foto)+'" alt="" '
-        + 'loading="lazy" decoding="async"></div>' : '')
+    // El lado de la imagen SIEMPRE existe cuando hay textura: es la mitad
+    // de la sección, y dejarla en blanco sería el hueco que se quería
+    // evitar. Con `sin-img` (textura apagada) el texto toma todo el ancho.
+    + (foto
+        ? '<div class="lado-img"><img src="'+esc(foto)+'" alt="" '
+          + 'loading="lazy" decoding="async"></div>'
+        : (tex ? '<div class="lado-img con-textura">'+tex+'</div>' : ''))
     + '</div>';
   el.hidden = false;
 }

@@ -107,6 +107,11 @@ export function ponerBloquePagina(bloque, pagina) {
     const s = String(v ?? '').trim();
     return /^por definir$/i.test(s) ? '' : s;
   };
+  // La TEXTURA del bloque cuando no hay foto. Solo tres valores conocidos:
+  // uno inventado dejaria el bloque sin nada, que es el hueco que se evita.
+  const TEXTURAS = ['plano', 'concreto', 'trama'];
+  const tex = (v) => (TEXTURAS.includes(texto(v)) ? texto(v) : '');
+
   if (texto(p.hero?.titular) || texto(p.hero?.bajada)) {
     limpio.hero = {};
     if (texto(p.hero.titular)) limpio.hero.titular = texto(p.hero.titular);
@@ -119,6 +124,7 @@ export function ponerBloquePagina(bloque, pagina) {
     if (/^oscuro$/i.test(texto(p.hero.fondo))) limpio.hero.fondo = 'oscuro';
     const foto = texto(p.hero.foto);
     if (/^(https?:\/\/|\/|\.\/)/i.test(foto)) limpio.hero.foto = foto;
+    if (tex(p.hero.textura)) limpio.hero.textura = tex(p.hero.textura);
   }
   // Las listas de pares título/texto: servicios, diferencial y proceso.
   // Se limpian igual, así que se recorren igual.
@@ -185,6 +191,7 @@ export function ponerBloquePagina(bloque, pagina) {
     // estructura del diseño, no un adorno al lado del párrafo.
     const f = texto(p.sobre.foto);
     if (/^(https?:\/\/|\/|\.\/)/i.test(f)) limpio.sobre.foto = f;
+    if (tex(p.sobre.textura)) limpio.sobre.textura = tex(p.sobre.textura);
   }
 
   // LA FRANJA INMERSIVA: una banda de imagen a sangre con una frase.
@@ -193,6 +200,7 @@ export function ponerBloquePagina(bloque, pagina) {
     if (texto(p.franja.firma)) limpio.franja.firma = texto(p.franja.firma);
     const f = texto(p.franja.foto);
     if (/^(https?:\/\/|\/|\.\/)/i.test(f)) limpio.franja.foto = f;
+    if (tex(p.franja.textura)) limpio.franja.textura = tex(p.franja.textura);
   }
   const horarios = (Array.isArray(p.horarios) ? p.horarios : [])
     .map(texto).filter(Boolean);

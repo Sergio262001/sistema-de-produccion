@@ -42,6 +42,8 @@ pagina:
     # La foto de portada va aquí cuando la manden. Sin ella se ve el azul
     # plano a sangre, que sigue siendo mejor que un hueco gris.
     foto:    ""                # POR DEFINIR
+    # Mientras no haya foto: retícula de plano técnico. Es su mundo.
+    textura: "plano"
     eyebrow: "Ingeniería · Construcción · Arquitectura · Innovación"
     titular: "Diseñamos, planeamos, construimos y transformamos"
     bajada:  "Soluciones integrales para convertir ideas en proyectos de alto valor."
@@ -141,12 +143,14 @@ pagina:
     frase: "Integramos conocimiento, experiencia e innovación para garantizar proyectos exitosos."
     firma: "INCOARQI S.A.S."
     foto:  ""                  # POR DEFINIR — una foto de obra, horizontal
+    textura: "concreto"        # mientras no haya foto
 
   sobre:
     titulo: "Por qué INCOARQI"
     texto:  "Integramos ingeniería, arquitectura, construcción y gestión en una misma visión: analizamos antes de construir, controlamos cada etapa y cumplimos los estándares técnicos y normativos. Trabajamos de la mano con nuestros clientes, con transparencia y responsabilidad."
     # Esta foto ocupa MEDIA SECCIÓN, no una columna al lado del párrafo.
     foto:   ""                 # POR DEFINIR — equipo en obra o plano sobre mesa
+    textura: "plano"           # mientras no haya foto
 
   ubicacion:
     direccion: "POR DEFINIR"   # el brochure solo dice "Colombia"

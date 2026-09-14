@@ -59,6 +59,25 @@ añadido —una galería de miniaturas al final— en vez de ser el esqueleto.
 | **Collage** | Galería escalonada: una grande, otras chicas. **Nunca** una grilla de miniaturas iguales |
 | **Bloques alternados** | Secciones sobre el color de marca, con diagonales entre medio. No todo sobre el mismo fondo |
 
+### Cuando no hay foto y no hay presupuesto
+
+Es el caso normal, no la excepción: el cliente casi nunca tiene las fotos el
+día uno, y generar imágenes cuesta dinero que no siempre hay.
+
+**Textura en CSS.** Cero imágenes, cero peticiones, cero costo — son
+degradados repetidos. Un bloque de color liso donde iba una foto se lee como
+una sección sin terminar; con textura se lee como una decisión.
+
+```
+plano     retícula técnica     ingeniería, arquitectura, construcción
+concreto  bandas diagonales    obra, industria, taller
+trama     puntos finos         servicios, consultoría, salud
+```
+
+Se elige por bloque en la ficha (`pagina.<bloque>.textura`). **Va detrás de
+la foto**, así que cuando el cliente la manda, la textura deja de verse sola
+sin tocar una línea.
+
 ### Y la mitad que no se puede olvidar
 
 **Cada recurso lleva su versión SIN foto.** El espacio se reserva en el
