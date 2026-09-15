@@ -1,0 +1,197 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>INCOARQI · elige la plantilla</title>
+<!--
+  ════════════════════════════════════════════════════════════
+   VISTA PREVIA INTERNA. NO SE PUBLICA.
+
+   Tres plantillas de la misma landing. NO son tres colores: es la misma
+   marca, el mismo texto y los mismos servicios, maquetados de tres formas
+   distintas. Lo que cambia es DÓNDE VAN LAS COSAS.
+
+   Las fotos son marcadores dibujados a mano y llevan "IMAGEN PROVISIONAL"
+   encima. La plantilla se elige mirando la ESTRUCTURA, no la foto.
+  ════════════════════════════════════════════════════════════
+-->
+<style>
+  :root{
+    --marino:#16294D; --marino-2:#0E1B33; --dorado:#C9A227;
+    --linea:rgba(255,255,255,.14);
+    --mono:ui-monospace,"Cascadia Mono",Consolas,monospace;
+    --sans:"Segoe UI",system-ui,-apple-system,sans-serif;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+  body{margin:0;background:var(--marino-2);color:#fff;font-family:var(--sans);
+       line-height:1.55;-webkit-font-smoothing:antialiased}
+  .caja{max-width:1180px;margin:0 auto;padding:0 24px}
+
+  /* Cabecera ------------------------------------------------ */
+  header{padding:54px 0 34px;border-bottom:1px solid var(--linea)}
+  .rotulo{font-family:var(--mono);font-size:11px;letter-spacing:.22em;
+          text-transform:uppercase;color:var(--dorado);margin:0 0 14px}
+  h1{margin:0 0 14px;font-size:clamp(28px,4.4vw,46px);line-height:1.08;
+     font-weight:700;letter-spacing:-.02em;text-wrap:balance;max-width:20ch}
+  .bajada{margin:0;max-width:62ch;color:#C8D0E0;font-size:16px}
+  .aviso{margin:22px 0 0;padding:12px 16px;border-left:3px solid var(--dorado);
+         background:rgba(201,162,39,.09);font-size:14px;color:#E8DFC4;
+         max-width:72ch}
+
+  /* Las tres tarjetas ---------------------------------------- */
+  .tres{display:grid;gap:34px;padding:40px 0 20px;
+        grid-template-columns:repeat(auto-fit,minmax(min(100%,320px),1fr))}
+  .op{display:flex;flex-direction:column;background:var(--marino);
+      border:1px solid var(--linea);border-radius:4px;overflow:hidden}
+  /* clip-path ademas de overflow: un iframe escalado con transform se sale
+     del overflow:hidden en la captura de pantalla de Chrome. */
+  .marco{position:relative;aspect-ratio:3/4;background:#0A1326;clip-path:inset(0);
+         border-bottom:1px solid var(--linea);overflow:hidden}
+  /* La página real, encogida. 1280 px de ancho metidos en la tarjeta:
+     así se ve la MAQUETA, que es lo que se está eligiendo. */
+  .marco iframe{position:absolute;top:0;left:0;width:1280px;height:1820px;
+                border:0;transform-origin:0 0;pointer-events:none}
+  /* Ojo: .fallo declara display:grid, que le gana a [hidden]. Sin esta
+     regla el mensaje de respaldo se queda encima de la vista que si cargo. */
+  .fallo[hidden]{display:none}
+  .fallo{position:absolute;inset:0;display:grid;place-content:center;
+         text-align:center;padding:24px;font-size:13px;color:#8F9CB5;
+         font-family:var(--mono)}
+  .op h2{margin:0;padding:20px 22px 4px;font-size:20px;letter-spacing:-.01em}
+  .op .para{margin:0;padding:0 22px;font-family:var(--mono);font-size:11px;
+            letter-spacing:.14em;text-transform:uppercase;color:var(--dorado)}
+  .op p.txt{margin:10px 0 0;padding:0 22px;color:#C2CBDC;font-size:14.5px;flex:1}
+  .op ul{margin:14px 0 0;padding:0 22px;list-style:none;font-size:13.5px;
+         color:#9FADC6}
+  .op li{padding:6px 0;border-top:1px solid rgba(255,255,255,.07)}
+  .op li b{color:#E6EBF4;font-weight:600}
+  .abrir{margin:20px 22px 22px;display:inline-block;text-align:center;
+         background:var(--dorado);color:#241C00;text-decoration:none;
+         font-weight:700;padding:13px 18px;border-radius:3px;font-size:15px}
+  .abrir:hover{background:#D9B43A}
+  .abrir:focus-visible{outline:3px solid #fff;outline-offset:2px}
+
+  /* Cierre --------------------------------------------------- */
+  footer{border-top:1px solid var(--linea);margin-top:30px;padding:30px 0 70px;
+         color:#8F9CB5;font-size:14px}
+  footer b{color:#fff}
+  footer code{font-family:var(--mono);background:rgba(255,255,255,.08);
+              padding:2px 6px;border-radius:3px;color:#E8DFC4}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="caja">
+    <p class="rotulo">INCOARQI S.A.S. · vista previa interna</p>
+    <h1>La misma página, tres maquetas</h1>
+    <p class="bajada">No son tres colores. Es el mismo texto, la misma marca y
+      los mismos seis servicios, colocados de tres formas distintas. Lo que
+      cambia es <b>dónde van las cosas</b> — y eso depende del material que
+      tengan a la mano.</p>
+    <p class="aviso"><b>Las fotos de abajo son marcadores dibujados.</b> Dicen
+      “IMAGEN PROVISIONAL” encima porque no son obra de INCOARQI y nunca se
+      publican. Miren la estructura, no la imagen.</p>
+  </div>
+</header>
+
+<div class="caja">
+  <div class="tres">
+
+    <article class="op">
+      <div class="marco">
+        <iframe src="./torre.html" title="Plantilla torre" loading="lazy"
+                tabindex="-1" scrolling="no"></iframe>
+        <p class="fallo">Vista previa no disponible aquí.<br>Abre el archivo.</p>
+      </div>
+      <p class="para">Si hay UNA foto muy buena</p>
+      <h2>Torre</h2>
+      <p class="txt">La portada ocupa la pantalla completa y el texto se apoya
+        abajo, sobre la imagen. Es la que más se parece a la portada de su
+        brochure.</p>
+      <ul>
+        <li><b>Necesita:</b> una foto horizontal de obra terminada, en alta</li>
+        <li><b>Sin esa foto:</b> queda un azul enorme — no la elijan todavía</li>
+        <li><b>Se siente:</b> campaña, presencia, empresa grande</li>
+      </ul>
+      <a class="abrir" href="./torre.html">Ver la página completa</a>
+    </article>
+
+    <article class="op">
+      <div class="marco">
+        <iframe src="./revista.html" title="Plantilla revista" loading="lazy"
+                tabindex="-1" scrolling="no"></iframe>
+        <p class="fallo">Vista previa no disponible aquí.<br>Abre el archivo.</p>
+      </div>
+      <p class="para">Si hay VARIAS fotos decentes</p>
+      <h2>Revista</h2>
+      <p class="txt">La portada se parte en dos: el mensaje a la izquierda y la
+        imagen a la derecha. El titular se lee primero y la foto acompaña en vez
+        de competir.</p>
+      <ul>
+        <li><b>Necesita:</b> una foto vertical o cuadrada, más 4–6 de obra</li>
+        <li><b>Sin esa foto:</b> aguanta — media portada sigue siendo texto</li>
+        <li><b>Se siente:</b> editorial, cercano, se lee rápido</li>
+      </ul>
+      <a class="abrir" href="./revista.html">Ver la página completa</a>
+    </article>
+
+    <article class="op">
+      <div class="marco">
+        <iframe src="./ficha.html" title="Plantilla ficha" loading="lazy"
+                tabindex="-1" scrolling="no"></iframe>
+        <p class="fallo">Vista previa no disponible aquí.<br>Abre el archivo.</p>
+      </div>
+      <p class="para">Si todavía NO hay fotos</p>
+      <h2>Ficha</h2>
+      <p class="txt">La portada es una banda corta: el mensaje, el botón y de
+        una a los servicios. En vez de un espacio grande esperando una imagen,
+        el visitante llega al contenido en el primer scroll.</p>
+      <ul>
+        <li><b>Necesita:</b> nada más que el texto que ya está</li>
+        <li><b>Sin fotos:</b> es la única de las tres que no se nota</li>
+        <li><b>Se siente:</b> técnico, directo, ficha de ingeniería</li>
+      </ul>
+      <a class="abrir" href="./ficha.html">Ver la página completa</a>
+    </article>
+
+  </div>
+</div>
+
+<footer>
+  <div class="caja">
+    <p><b>La que está armada hoy es “ficha”</b>, porque INCOARQI todavía no
+      mandó material. Cambiar de plantilla es una línea en la ficha del
+      proyecto —<code>pagina.plantilla</code>— y regenerar: no se rehace la
+      página, no cuesta días.</p>
+    <p>Cuando lleguen las fotos de obra, la recomendación del estudio es
+      <b>torre</b>: es la que convierte una buena foto en portada.</p>
+  </div>
+</footer>
+
+<script>
+  // La maqueta se encoge al ancho de su tarjeta. Se recalcula al
+  // redimensionar porque las tarjetas cambian de ancho con la rejilla.
+  function encajar(){
+    document.querySelectorAll('.marco').forEach(function(m){
+      var f = m.querySelector('iframe');
+      if(!f) return;
+      f.style.transform = 'scale(' + (m.clientWidth / 1280) + ')';
+    });
+  }
+  encajar();
+  addEventListener('resize', encajar);
+  // El mensaje de respaldo solo estorba si el iframe sí cargó.
+  document.querySelectorAll('.marco iframe').forEach(function(f){
+    f.addEventListener('load', function(){
+      var p = f.parentNode.querySelector('.fallo');
+      if(p) p.hidden = true;
+    });
+  });
+</script>
+</body>
+</html>

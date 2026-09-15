@@ -112,6 +112,11 @@ export function ponerBloquePagina(bloque, pagina) {
   const TEXTURAS = ['plano', 'concreto', 'trama'];
   const tex = (v) => (TEXTURAS.includes(texto(v)) ? texto(v) : '');
 
+  // LA PLANTILLA: la estructura de la página, no su piel. Un valor
+  // desconocido cae en "ficha", que es la que funciona sin una sola foto.
+  const PLANTILLAS = ['torre', 'revista', 'ficha'];
+  if (PLANTILLAS.includes(texto(p.plantilla))) limpio.plantilla = texto(p.plantilla);
+
   if (texto(p.hero?.titular) || texto(p.hero?.bajada)) {
     limpio.hero = {};
     if (texto(p.hero.titular)) limpio.hero.titular = texto(p.hero.titular);

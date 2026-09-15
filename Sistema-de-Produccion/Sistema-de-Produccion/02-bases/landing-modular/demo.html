@@ -36,6 +36,9 @@
      Se elige en la ficha:  marca.direccion: mercado | boutique | taller
      ══════════════════════════════════════════════════════════════ */
   :root{
+    /* Alto real de la barra pegada. El valor de aquí es solo el respaldo
+       para el primer cuadro; medirBarra() lo reemplaza con el medido. */
+    --barra-alto:70px;
     /* NEUTROS ELEGIDOS. Esta base sigue el método de Linear/Stripe/Vercel:
        base monocromática de verdad + UN acento que hace todo el trabajo.
        Antes el suelo era #F5F7FB y la tinta #0F1626 — ambos azules, como el
@@ -161,8 +164,11 @@
      ══════════════════════════════════════════════════════════════ */
   html{scroll-behavior:smooth;}
   @media(prefers-reduced-motion:reduce){ html{scroll-behavior:auto;} }
-  /* Sin esto, el ancla deja el título debajo de la barra pegada. */
-  .seccion,.hero{scroll-margin-top:78px;}
+  /* Sin esto, el ancla deja el título debajo de la barra pegada.
+     El alto real lo mide el JS (medirBarra) y lo escribe en --barra-alto:
+     cambia con el ritmo de la dirección de arte y con el tamaño del logo,
+     así que un 78px fijo acertaba solo en una de las tres direcciones. */
+  .seccion,.hero{scroll-margin-top:calc(var(--barra-alto) + 8px);}
 
   .barra{position:sticky;top:0;z-index:30;background:var(--bg);
     border-bottom:1px solid transparent;transition:border-color .2s,box-shadow .2s;}
@@ -485,6 +491,88 @@
      uno tiene su versión SIN foto: el espacio no queda como un hueco gris
      en la entrega, la sección se reacomoda a texto y sigue funcionando.
      ══════════════════════════════════════════════════════════════ */
+
+  /* ══════════════════════════════════════════════════════════════
+     PLANTILLAS — estructuras distintas, no skins del mismo molde
+
+     Las DIRECCIONES de arte cambian tipografía, color y forma. Una
+     PLANTILLA cambia dónde van las cosas: el tamaño del hero, si la foto
+     va detrás o al lado, cómo se apilan las secciones.
+
+     Son lo que se le enseña al cliente para que elija — como escoger
+     plantilla en WordPress, pero sobre la misma base y los mismos bloques,
+     así que no hay dos productos que mantener.
+
+     Se elige en la ficha:  pagina.plantilla: torre | revista | ficha
+
+     Cada una se combina con las tres direcciones de arte y las tres
+     texturas: 3 × 3 × 3 son 27 caras distintas del mismo sistema.
+     ══════════════════════════════════════════════════════════════ */
+
+  /* TORRE — el hero ocupa la pantalla entera y el texto se apoya abajo.
+     La foto es el protagonista absoluto. Para quien tiene UNA imagen muy
+     buena: obra terminada, un local, un plato, un producto. */
+  [data-plantilla="torre"] .hero.oscuro{
+    min-height:100svh;display:grid;align-content:end;
+    padding-bottom:calc(74px * var(--ritmo));
+    /* La foto tiene que pasar POR DEBAJO de la barra. Sin este tirón el
+       hero arranca donde termina la barra y queda una franja lisa del
+       color del fondo encima de la portada: se lee como un error de
+       maquetación, no como una decisión. La barra es transparente hasta
+       que se pega, así que lo que se ve ahí arriba es la foto. */
+    margin-top:calc(-1 * var(--barra-alto));
+    padding-top:calc(var(--barra-alto) + 20px);}
+  @media(max-width:820px){
+    /* En el teléfono, una portada de pantalla completa no deja ver que hay
+       algo debajo. Se recorta lo justo para que asome la sección siguiente. */
+    [data-plantilla="torre"] .hero.oscuro{min-height:86svh;}
+  }
+  [data-plantilla="torre"] .hero h1{max-width:20ch;
+    font-size:clamp(38px,8.4vw,86px);}
+  [data-plantilla="torre"] .hero .lead{max-width:46ch;}
+  [data-plantilla="torre"] .hero.oscuro::before{
+    /* Velo de abajo hacia arriba: la foto respira arriba y el texto se lee. */
+    background:linear-gradient(to top,
+      color-mix(in srgb, var(--brand) 94%, transparent) 0%,
+      color-mix(in srgb, var(--brand) 55%, transparent) 46%,
+      color-mix(in srgb, var(--brand) 18%, transparent) 100%);}
+  [data-plantilla="torre"] .barra{background:transparent;}
+  [data-plantilla="torre"] .barra.pegada{background:var(--brand);}
+
+  /* REVISTA — hero partido: el texto a la izquierda y la foto a la derecha,
+     saliéndose por el borde. Editorial. Para quien tiene varias fotos
+     buenas y quiere que se vea el oficio, no una sola postal. */
+  [data-plantilla="revista"] .hero.oscuro{
+    display:grid;grid-template-columns:1.05fr .95fr;align-items:center;
+    gap:0;padding-top:calc(54px * var(--ritmo));
+    padding-bottom:calc(54px * var(--ritmo));}
+  [data-plantilla="revista"] .hero.oscuro > .hero-txt{grid-column:1;
+    padding-right:44px;}
+  [data-plantilla="revista"] .hero.oscuro .hero-foto,
+  [data-plantilla="revista"] .hero.oscuro .textura{
+    position:relative;inset:auto;grid-column:2;grid-row:1;
+    width:100%;height:100%;min-height:440px;z-index:0;
+    border-radius:var(--radius) 0 0 var(--radius);}
+  /* Sin capa de velo: la foto vive en su mitad y el texto en la suya. */
+  [data-plantilla="revista"] .hero.oscuro::before{content:none;}
+  [data-plantilla="revista"] .hero h1{font-size:clamp(30px,4.6vw,52px);
+    max-width:16ch;}
+  @media(max-width:820px){
+    [data-plantilla="revista"] .hero.oscuro{grid-template-columns:1fr;}
+    [data-plantilla="revista"] .hero.oscuro > .hero-txt{padding-right:0;
+      padding-bottom:26px;}
+    [data-plantilla="revista"] .hero.oscuro .hero-foto,
+    [data-plantilla="revista"] .hero.oscuro .textura{
+      grid-column:1;grid-row:2;min-height:240px;border-radius:var(--radius);}
+  }
+
+  /* FICHA — el hero es una banda, no una portada. Para quien NO tiene
+     fotos: en vez de un espacio grande vacío, se va rápido al contenido.
+     Es el más honesto cuando el cliente todavía no mandó material. */
+  [data-plantilla="ficha"] .hero.oscuro{
+    padding-top:calc(48px * var(--ritmo));
+    padding-bottom:calc(44px * var(--ritmo));}
+  [data-plantilla="ficha"] .hero h1{font-size:clamp(30px,5.2vw,54px);}
 
   /* ══════════════════════════════════════════════════════════════
      TEXTURAS EN CSS — el espacio de la foto, cuando no hay foto
@@ -816,6 +904,12 @@
     <button type="button" data-d="boutique">Boutique</button>
     <button type="button" data-d="taller">Taller</button>
   </div>
+  <span class="tag">plantilla</span>
+  <div class="toggle plansw">
+    <button type="button" data-p="torre">Torre</button>
+    <button type="button" data-p="revista">Revista</button>
+    <button type="button" data-p="ficha">Ficha</button>
+  </div>
   <span class="tag">leads: <b id="sysDB">local</b></span>
 </div></div>
 
@@ -1027,16 +1121,36 @@ function pintarHero(){
   document.documentElement.setAttribute("data-portada", oscuro ? "oscura" : "clara");
 
   el.className = "hero" + (oscuro ? " oscuro con-textura" : "");
+
+  // El texto va envuelto para que la plantilla "revista" pueda ponerlo en
+  // una columna y la foto en la otra. En las demás no cambia nada.
+  const bloqueTexto = '<div class="hero-txt">'
+    + (eyebrow ? '<span class="eyebrow">'+esc(eyebrow)+'</span>' : '')
+    + (t ? '<h1>'+esc(t)+'</h1>' : '')
+    + (b ? '<p class="lead">'+esc(b)+'</p>' : '')
+    + (cta ? '<a class="cta" href="#leads">'+esc(cta)+'</a>' : '')
+    + '</div>';
+
   el.innerHTML =
       (oscuro && foto
         ? '<img class="hero-foto" src="'+esc(foto)+'" alt="" '
           + 'decoding="async" fetchpriority="high">'
         : (oscuro ? textura(h.textura, "plano") : ''))
-    + (eyebrow ? '<span class="eyebrow">'+esc(eyebrow)+'</span>' : '')
-    + (t ? '<h1>'+esc(t)+'</h1>' : '')
-    + (b ? '<p class="lead">'+esc(b)+'</p>' : '')
-    + (cta ? '<a class="cta" href="#leads">'+esc(cta)+'</a>' : '');
+    + bloqueTexto;
   el.hidden = false;
+}
+
+/* LA PLANTILLA — la estructura, no la piel.
+   Se pone en <html> antes de pintar, porque el CSS de cada plantilla
+   cuelga de ahí. Un valor desconocido cae en "ficha", que es la que
+   funciona incluso sin una sola foto. */
+const PLANTILLAS = ['torre', 'revista', 'ficha'];
+
+function aplicarPlantilla(){
+  const p = String((CONTEXT.pagina && CONTEXT.pagina.plantilla) || '')
+    .trim().toLowerCase();
+  document.documentElement.setAttribute('data-plantilla',
+    PLANTILLAS.includes(p) ? p : 'ficha');
 }
 
 function pintarServicios(){
@@ -1475,6 +1589,21 @@ function cablearNav(ids){
     document.addEventListener("keydown", (e) => { if(e.key === "Escape") cerrar(); });
   }
 
+  // El alto REAL de la barra, en una variable CSS. De ahí salen dos cosas
+  // que antes estaban a ojo: el `scroll-margin-top` de las anclas y el
+  // tirón hacia arriba del hero de la plantilla "torre". Cambia con el
+  // ritmo de cada dirección de arte y con el logo, así que se mide.
+  function medirBarra(){
+    if(!barra) return;
+    document.documentElement.style.setProperty(
+      "--barra-alto", Math.round(barra.getBoundingClientRect().height) + "px");
+  }
+  medirBarra();
+  addEventListener("resize", medirBarra);
+  // El logo puede llegar después: cuando carga, la barra cambia de alto.
+  const img = barra && barra.querySelector("img");
+  if(img && !img.complete) img.addEventListener("load", medirBarra);
+
   // La barra se marca cuando deja de estar en su sitio.
   if(barra && typeof IntersectionObserver === "function"){
     const centinela = document.createElement("div");
@@ -1528,6 +1657,7 @@ function applyTheme(){
   document.getElementById('sysClient').textContent = CONTEXT.cliente;
   document.getElementById('sysDB').textContent = CONTEXT.base_de_datos.motor;
 
+  aplicarPlantilla();
   pintarHero(); pintarServicios(); pintarDiferencial(); pintarProceso();
   pintarGaleria(); pintarSectores(); pintarFranja(); pintarSobre(); pintarDatos();
   pintarLeads(); pintarWhatsApp(); pintarPie();
@@ -1583,6 +1713,21 @@ cargarAnalitica();
    Conmutador de la sysbar: enseña en vivo la diferencia entre las tres
    direcciones. Los marcadores de arriba y abajo se los lleva
    crear-proyecto.js: al cliente no le llega esta función. */
+(function cablearPlantillas(){
+  const sw = document.querySelector('.plansw');
+  if(!sw) return;
+  const marcar = (p) => sw.querySelectorAll('button').forEach((b) =>
+    b.classList.toggle('on', b.dataset.p === p));
+  sw.querySelectorAll('button').forEach((b) => {
+    b.onclick = () => {
+      CONTEXT.pagina.plantilla = b.dataset.p;
+      applyTheme();
+      marcar(b.dataset.p);
+    };
+  });
+  marcar(document.documentElement.getAttribute('data-plantilla'));
+})();
+
 (function cablearDirecciones(){
   const sw = document.querySelector('.dirsw');
   if(!sw) return;

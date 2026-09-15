@@ -1,6 +1,6 @@
 ---
 name: direccion-de-arte
-description: Cómo se decide y se ejecuta la dirección de arte de un entregable del estudio — paleta, tipografía, escala, ritmo. Úsala antes de tocar un token CSS, de elegir una tipografía o de opinar sobre si algo "se ve bien". Incluye la lista de defaults que están prohibidos porque delatan diseño generado.
+description: Cómo se decide y se ejecuta el diseño de un entregable del estudio — la plantilla (la maqueta: torre/revista/ficha) y la dirección de arte (la piel: paleta, tipografía, escala, ritmo). Úsala antes de tocar un token CSS, de elegir una tipografía o de opinar sobre si algo "se ve bien". Incluye la lista de defaults que están prohibidos porque delatan diseño generado.
 ---
 
 # Dirección de arte
@@ -11,6 +11,10 @@ entregable se sienta a plantilla aunque el contraste pase y el código esté bie
 
 Una dirección de arte cambia **tipografía, escala, forma, peso de línea y
 ritmo**. Se elige en la ficha: `marca.direccion`.
+
+Y encima de ella hay otra capa que tampoco es color: **la plantilla**
+(`pagina.plantilla`), que cambia dónde van las cosas. Las dos se eligen por
+separado — ver *"La plantilla NO es la dirección de arte"* más abajo.
 
 ---
 
@@ -102,6 +106,59 @@ entrega.**
   es un dato del cliente, y los datos del cliente no se inventan.
 - Imágenes generadas **sí** valen para: marcadores de vista previa marcados
   como tales, y texturas o fondos abstractos que no representan nada real.
+
+## La plantilla NO es la dirección de arte
+
+Son dos capas distintas y se eligen por separado en la ficha:
+
+```
+marca.direccion    mercado | boutique | taller     la PIEL     tipo, color, forma
+pagina.plantilla   torre   | revista  | ficha      el HUESO    dónde van las cosas
+```
+
+Esto salió de que el dueño pidiera *"plantillas cool, diferentes, como
+WordPress"* después de ver las tres direcciones de arte. Tenía razón: tres
+direcciones eran **el mismo sitio con otra ropa**. Cuando alguien elige un
+tema de WordPress no está eligiendo una paleta, está eligiendo una maqueta.
+
+Una plantilla se gana el nombre si mueve cosas de sitio. Si solo cambia
+colores, es piel. La prueba `pruebas/plantillas.test.js` lo exige: cada
+plantilla tiene que tocar propiedades de **layout** (`grid-template-columns`,
+`min-height`, `align-content`), no solo de color.
+
+### Las tres del sistema
+
+La plantilla se elige por el MATERIAL que tenga el cliente, no por gusto.
+
+| | Cuándo | Qué hace el hero |
+|---|---|---|
+| **`torre`** | Hay **una** foto muy buena | Pantalla completa, foto a sangre, texto apoyado abajo con velo de abajo hacia arriba. La barra empieza transparente y se pinta al pegarse |
+| **`revista`** | Hay **varias** fotos decentes | Partido en dos columnas: mensaje a la izquierda, imagen a la derecha saliéndose por el borde. Sin velo — cada cosa en su mitad. Se apila en el teléfono |
+| **`ficha`** | **No hay** fotos todavía | El hero es una banda corta y se va rápido al contenido. La única que no se nota sin material |
+
+**`ficha` es el valor por defecto y el que recibe cualquier valor
+desconocido**, porque es la única que funciona con un cliente que todavía no
+mandó nada — que es el estado normal el día uno.
+
+### Cómo se construye una plantilla nueva
+
+1. El CSS cuelga de `[data-plantilla="<nombre>"]` en `<html>`.
+2. `aplicarPlantilla()` se llama **antes** de `pintarHero()`. Si no, el hero
+   se maqueta con la plantilla anterior y hay un salto visible.
+3. El nombre se agrega a las **dos** listas `PLANTILLAS` — la de la base y la
+   de `crear-proyecto.js`. Si se separan, el generador deja pasar una
+   plantilla que la base no sabe pintar y el cliente recibe el hero por
+   defecto sin que nadie se entere.
+4. Cada plantilla necesita su `@media` de teléfono. Dos columnas de hero en
+   un móvil dejan el titular en cuatro letras de ancho.
+
+### Enseñarlas, no describirlas
+
+Al cliente no se le pregunta "¿torre o revista?". Se le manda
+`vista-previa/elige-plantilla.html`: las tres maquetas reales, encogidas,
+lado a lado, con el mismo texto. Se elige mirando, que es de lo que va esto.
+
+---
 
 ## El método de paleta
 
@@ -231,6 +288,8 @@ precio no puede quedar a media altura: la fila del precio va al fondo
 2. ¿Los neutros están elegidos, o son el acento diluido?
 3. ¿Se reconoce alguno de los prohibidos de arriba?
 4. ¿Las tres direcciones se ven **distintas** o es la misma con otra fuente?
-5. ¿Hay foco visible por teclado? ¿`prefers-reduced-motion`?
-6. ¿Lo miraste? Que compile no es que funcione, y que el contraste pase no es
+5. ¿La plantilla que elegiste corresponde al material que HAY? (`torre` sin
+   foto es un rectángulo de color de una pantalla de alto.)
+6. ¿Hay foco visible por teclado? ¿`prefers-reduced-motion`?
+7. ¿Lo miraste? Que compile no es que funcione, y que el contraste pase no es
    que se vea bien. Usa `revision-visual`.

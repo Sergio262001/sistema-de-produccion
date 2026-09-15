@@ -26,12 +26,19 @@ marca:
   acento:     "#C9A227"      # dorado: el ÚNICO color saturado de la página
   direccion:  taller         # ficha técnica: ingeniería, no boutique
   inicial:    "I"
-  logo:       "./vista-previa/logo.svg"     # PROVISIONAL
+  logo:       "./vista-previa/logo.svg"
   banner:     ""             # POR DEFINIR — la foto de portada del brochure
   subtitulo:  "Ingeniería · Construcción · Arquitectura · Innovación"
   tono:       "técnico, sobrio y confiable"
 
 pagina:
+  # LA PLANTILLA — la estructura de la página, no su piel.
+  #   torre    hero a pantalla completa, la foto manda
+  #   revista  hero partido: texto a un lado, foto al otro
+  #   ficha    hero en banda, se va rápido al contenido (sin fotos)
+  # Queda en "ficha" mientras INCOARQI no mande material. Con su foto de
+  # portada, "torre" es la que se parece al brochure.
+  plantilla: "ficha"
   hero:
     # PORTADA OSCURA — pendiente de confirmar con el cliente.
     # Queda en "oscuro" porque es la recomendación del estudio: su brochure
@@ -41,7 +48,9 @@ pagina:
     fondo:   "oscuro"
     # La foto de portada va aquí cuando la manden. Sin ella se ve el azul
     # plano a sangre, que sigue siendo mejor que un hueco gris.
-    foto:    "./vista-previa/portada.svg" # PROVISIONAL
+    foto:    "./vista-previa/portada.svg"
+    # Mientras no haya foto: retícula de plano técnico. Es su mundo.
+    textura: "plano"
     eyebrow: "Ingeniería · Construcción · Arquitectura · Innovación"
     titular: "Diseñamos, planeamos, construimos y transformamos"
     bajada:  "Soluciones integrales para convertir ideas en proyectos de alto valor."
@@ -146,13 +155,15 @@ pagina:
   franja:
     frase: "Integramos conocimiento, experiencia e innovación para garantizar proyectos exitosos."
     firma: "INCOARQI S.A.S."
-    foto:  "./vista-previa/franja.svg"  # PROVISIONAL
+    foto:  "./vista-previa/franja.svg"
+    textura: "concreto"        # mientras no haya foto
 
   sobre:
     titulo: "Por qué INCOARQI"
     texto:  "Integramos ingeniería, arquitectura, construcción y gestión en una misma visión: analizamos antes de construir, controlamos cada etapa y cumplimos los estándares técnicos y normativos. Trabajamos de la mano con nuestros clientes, con transparencia y responsabilidad."
     # Esta foto ocupa MEDIA SECCIÓN, no una columna al lado del párrafo.
-    foto:   "./vista-previa/sobre.svg"   # PROVISIONAL
+    foto:   "./vista-previa/sobre.svg"
+    textura: "plano"           # mientras no haya foto
 
   ubicacion:
     direccion: ""

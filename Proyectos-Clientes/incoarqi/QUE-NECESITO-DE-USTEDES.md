@@ -54,6 +54,30 @@ la versión oscura muestra el azul plano donde iría la fotografía.
 
 ---
 
+## La otra decisión: la maqueta
+
+Esto **no es el color, es dónde van las cosas.** Hicimos tres maquetas de la
+misma página, con su mismo texto y sus mismos servicios, para que la elijan
+mirando en vez de imaginándola.
+
+**Ábranla acá:** `vista-previa/elige-plantilla.html` (doble clic, no necesita
+internet). Las fotos que verán son dibujos nuestros con "IMAGEN PROVISIONAL"
+encima — miren la estructura, no la imagen.
+
+| Maqueta | Cuándo conviene |
+|---|---|
+| **Torre** | Cuando nos manden **una** foto de obra realmente buena. La portada ocupa la pantalla completa y el texto se apoya encima. Es la que más se parece a la carátula de su brochure |
+| **Revista** | Cuando haya **varias** fotos decentes. La portada se parte: el mensaje a la izquierda, la imagen a la derecha. El titular se lee primero |
+| **Ficha** *(la que está armada hoy)* | Mientras **no haya** fotos. La portada es una banda corta y se pasa de una a los servicios, sin dejar un espacio grande esperando una imagen |
+
+Está en **ficha** porque todavía no hay material. Cuando lleguen las fotos,
+la recomendación es **torre**: es la que convierte una buena foto en portada.
+
+Cambiar de maqueta es una línea de configuración y regenerar —
+**no se rehace la página y no cuesta días.**
+
+---
+
 ## Lo que ya está hecho y funcionando
 
 - Las 7 secciones de la cotización: portada, servicios, diferencial, proceso,

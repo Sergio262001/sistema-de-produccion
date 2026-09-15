@@ -32,6 +32,13 @@ marca:
   tono:       "técnico, sobrio y confiable"
 
 pagina:
+  # LA PLANTILLA — la estructura de la página, no su piel.
+  #   torre    hero a pantalla completa, la foto manda
+  #   revista  hero partido: texto a un lado, foto al otro
+  #   ficha    hero en banda, se va rápido al contenido (sin fotos)
+  # Queda en "ficha" mientras INCOARQI no mande material. Con su foto de
+  # portada, "torre" es la que se parece al brochure.
+  plantilla: "ficha"
   hero:
     # PORTADA OSCURA — pendiente de confirmar con el cliente.
     # Queda en "oscuro" porque es la recomendación del estudio: su brochure

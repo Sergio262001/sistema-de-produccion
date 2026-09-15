@@ -13,6 +13,7 @@ Generado desde la base `landing-modular` el 2026-09-12.
 | **[`QUE-NECESITO-DE-USTEDES.md`](./QUE-NECESITO-DE-USTEDES.md)** | **Listo para mandarle al cliente.** Qué falta, en qué formato y qué bloquea la entrega |
 | [`contexto.yml`](./contexto.yml) | La ficha. El contenido está **transcrito del brochure**, sin una palabra inventada. Los `POR DEFINIR` dicen qué pedir |
 | `index.html` | El entregable. Abre con doble clic — no necesita servidor |
+| **[`vista-previa/elige-plantilla.html`](./vista-previa/elige-plantilla.html)** | Las **tres maquetas** de la misma página, lado a lado. Doble clic. Es lo que se le enseña al cliente para que elija |
 | `contexto.vista-previa.yml` + `vista-previa/` | **NO SE PUBLICA.** Marcadores dibujados por el estudio para ver la página antes de que llegue el material. Se borran al recibirlo |
 
 ### Tres cosas bloquean publicar
@@ -22,12 +23,18 @@ Generado desde la base `landing-modular` el 2026-09-12.
    botón flotante está construido y **no se pinta** hasta que haya número.
 3. **El dominio** — recomendado `incoarqi.com`.
 
-### Una decisión pendiente
+### Dos decisiones pendientes
 
-La ficha está en **portada oscura** (`pagina.hero.fondo: "oscuro"`), que es la
-recomendación del estudio: el brochure del cliente es azul marino con
+**La portada oscura.** La ficha está en `pagina.hero.fondo: "oscuro"`, que es
+la recomendación del estudio: el brochure del cliente es azul marino con
 fotografía grande. Si prefieren la clara, se cambia esa línea a `"claro"` y se
 regenera.
+
+**La maqueta.** `pagina.plantilla` está en `"ficha"` porque no hay material
+todavía. Las otras dos (`"torre"`, `"revista"`) están construidas y
+generadas en `vista-previa/` — **abre `vista-previa/elige-plantilla.html`**
+para verlas las tres lado a lado. Con la foto de portada, `"torre"` es la que
+se parece al brochure. Cambiarla es una línea y regenerar.
 
 ### Para ver cómo queda
 
