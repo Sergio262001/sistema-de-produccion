@@ -25,6 +25,28 @@ const BASES = join(RAIZ, 'Sistema-de-Produccion', 'Sistema-de-Produccion', '02-b
 const INSUMOS = join(RAIZ, 'Sistema-de-Produccion', 'Sistema-de-Produccion', '09-que-necesito-de-ti');
 const DESTINO_RAIZ = join(RAIZ, 'Proyectos-Clientes');
 
+/** El archivo que distingue una prueba del generador de una entrega real. */
+export const MARCA_PRUEBA = 'ES-UNA-PRUEBA.md';
+
+/** ¿La carpeta de un proyecto es una prueba del generador? */
+export function esPrueba(dir) {
+  return existsSync(join(dir, MARCA_PRUEBA));
+}
+
+/** Campos que solo puede haber contestado un cliente real.
+ *  Un proyecto generado desde el `contexto.ejemplo.yml` de una base no trae
+ *  ninguno: son justo los que `limpiarIdentidad()` borra por ser identidad
+ *  de otro negocio, más los bloques de página que escribe una persona. */
+const SEÑAS_DE_CLIENTE = ['pagina', 'apis', 'entrega', 'base_de_datos'];
+
+export function tieneFichaDeCliente(ficha) {
+  if (!ficha || typeof ficha !== 'object') return false;
+  return SEÑAS_DE_CLIENTE.some((k) => {
+    const v = ficha[k];
+    return v && typeof v === 'object' && Object.keys(v).length > 0;
+  });
+}
+
 const C = { verde: '\x1b[32m', gris: '\x1b[90m', neg: '\x1b[1m', rojo: '\x1b[31m', off: '\x1b[0m' };
 
 // ── Utilidades ────────────────────────────────────────────────
@@ -716,6 +738,40 @@ export function crearProyecto(opciones) {
   writeFileSync(join(dirSalida, '.gitignore'),
     '.env\n.env.*\n!.env.example\nnode_modules/\ndist/\n', 'utf8');
   creados.push('.gitignore');
+
+  // 5c · MARCA DE PRUEBA.
+  //
+  // Sin ficha de cliente, esto salió del `contexto.ejemplo.yml` de la base:
+  // es una prueba del generador, no un entregable. Se acumularon NUEVE
+  // carpetas así en Proyectos-Clientes/, tres llegaron a git, y con el
+  // tiempo ya nadie sabía cuál era un cliente de verdad.
+  //
+  // El archivo no es decoración: `esPrueba()` lo busca, y el panel y el
+  // validador lo usan para no confundir una prueba con una entrega.
+  if (!tieneFichaDeCliente(fichaEntrada)) {
+    writeFileSync(join(dirSalida, MARCA_PRUEBA), [
+      '# Esto es una PRUEBA del generador, no un entregable',
+      '',
+      'Se creó sin ficha de cliente, así que el contenido salió del',
+      '`contexto.ejemplo.yml` de la base `' + base + '`: los textos, los',
+      'productos y los datos son de un negocio de ejemplo, no de nadie real.',
+      '',
+      '**Bórrala sin pensarlo.** Se vuelve a generar en un segundo.',
+      '',
+      'Para que la próxima no caiga aquí:',
+      '',
+      '```bash',
+      'node crear-proyecto.js --base ' + base + ' --cliente "..." \\',
+      '  --destino "$TEMP/prueba"',
+      '```',
+      '',
+      'Un proyecto de verdad se genera con `--ficha <ruta>` y la ficha del',
+      'cliente. Además hay que agregarlo a mano a la lista blanca del',
+      '`.gitignore` de la raíz, o no se sube.',
+      '',
+    ].join('\n'), 'utf8');
+    creados.push(MARCA_PRUEBA);
+  }
 
   // 6 · README con lo que hay que pedirle al cliente
   const insumo = readdirSync(existsSync(INSUMOS) ? INSUMOS : dirBase)

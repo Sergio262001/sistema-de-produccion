@@ -14,6 +14,8 @@ import { readFileSync, readdirSync, statSync, existsSync } from 'node:fs';
 import { join, extname, relative, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { REGLAS } from './lib/reglas.js';
+// El marcador que deja una prueba del generador.
+import { MARCA_PRUEBA } from './crear-proyecto.js';
 
 const AQUI = fileURLToPath(new URL('.', import.meta.url));
 const RAIZ = resolve(AQUI, '..');
@@ -30,7 +32,20 @@ function recorrer(dir, acc = []) {
     const ruta = join(dir, nombre);
     let st;
     try { st = statSync(ruta); } catch { continue; }
-    if (st.isDirectory()) recorrer(ruta, acc);
+    if (st.isDirectory()) {
+      // Una prueba del generador no es una entrega, y sus hallazgos son
+      // ruido: hablan de un negocio de ejemplo que nadie va a publicar.
+      // Se salta entera. (Apuntar el validador DIRECTAMENTE a la carpeta sí
+      // la revisa: ahí el que la nombró sabe lo que está pidiendo.)
+      if (existsSync(join(ruta, MARCA_PRUEBA))) continue;
+      recorrer(ruta, acc);
+    }
+    // Un archivo de pruebas está LLENO de código malo a propósito: es su
+    // trabajo. La prueba de la regla `provisional` referencia diez rutas de
+    // vista-previa/ para comprobar que se detectan, y el validador las
+    // contaba como diez errores del sistema. Ruido puro, y del que hace que
+    // se deje de mirar la salida.
+    else if (/\.test\.js$/.test(nombre)) continue;
     else if (EXTENSIONES.has(extname(nombre))) acc.push(ruta);
   }
   return acc;

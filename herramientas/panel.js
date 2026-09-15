@@ -16,7 +16,7 @@ import { join, resolve, extname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import { validar } from './validar.js';
-import { crearProyecto, listarBases } from './crear-proyecto.js';
+import { crearProyecto, listarBases, esPrueba } from './crear-proyecto.js';
 import { MODELOS, MODELO_POR_DEFECTO, estimarCosto, auditar } from './auditor-ia.js';
 import { PASOS, FAMILIAS, respuestasAFicha, validarFicha } from './lib/brief.js';
 import { extraerPorPatrones, extraerConIA } from './lib/extraer.js';
@@ -68,7 +68,10 @@ function listarProyectos() {
         base = (t.match(/^base:\s*(.+)$/m) || [])[1]?.trim()
             || (t.match(/^\s*-\s*(.+)$/m) || [])[1]?.trim() || '—';
       }
-      return { slug: n, estado, base, creado };
+      // Una prueba del generador no es un cliente. Se muestra igual —
+      // borrarla es más fácil si se ve— pero marcada, porque durante meses
+      // hubo nueve carpetas de prueba aquí y ninguna forma de distinguirlas.
+      return { slug: n, estado, base, creado, prueba: esPrueba(dir) };
     })
     .sort((a, b) => (b.creado || '').localeCompare(a.creado || ''));
 }
@@ -98,7 +101,8 @@ function objetivos() {
     out.push({ etiqueta: 'Página del estudio', ruta: 'Sistema-de-Produccion/Sistema-de-Produccion/08-pagina-del-estudio' });
   }
   for (const p of listarProyectos()) {
-    out.push({ etiqueta: '   cliente · ' + p.slug, ruta: 'Proyectos-Clientes/' + p.slug });
+    out.push({ etiqueta: (p.prueba ? '   PRUEBA · ' : '   cliente · ') + p.slug,
+               ruta: 'Proyectos-Clientes/' + p.slug });
   }
   return out;
 }

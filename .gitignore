@@ -44,17 +44,23 @@ ChangeLog.md
 *.log
 npm-debug.log*
 
-# Proyectos de prueba del generador
-Proyectos-Clientes/casa-tela/
-Proyectos-Clientes/clinica-sur/
-Proyectos-Clientes/cafe-raiz/
 
 # Acceso al panel: contiene el hash de la frase y el secreto de sesion
 herramientas/.acceso.json
-Proyectos-Clientes/panaderia-la-espiga/
-Proyectos-Clientes/floristeria-el-jardin/
-Proyectos-Clientes/taller-norte/
 
 # Historial local del panel (datos de tu operacion, no del sistema)
 herramientas/historial.db
 herramientas/historial.db-*
+
+# ─── Proyectos de clientes ────────────────────────────────────
+# LISTA BLANCA, no lista negra. Durante meses esto fue al revés: cada vez
+# que el generador dejaba una carpeta de prueba aquí, se agregaba una línea
+# nueva al .gitignore. Se acumularon nueve, tres se colaron a git de todos
+# modos, y ya nadie distinguía cuál era un cliente de verdad.
+#
+# Ahora no se sube NADA de aquí salvo lo que se nombre explícitamente
+# abajo. Agregar un cliente real es un acto deliberado, de una línea.
+Proyectos-Clientes/*
+!Proyectos-Clientes/README.md
+!Proyectos-Clientes/incoarqi/            # cliente real · cotización 001-2026
+!Proyectos-Clientes/prueba-ecommerce/    # prueba interna contra Supabase real

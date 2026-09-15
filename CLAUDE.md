@@ -13,7 +13,7 @@ sigue pendiente y las reglas de trabajo que salieron de equivocarse.
 Léelo antes de tocar código.
 
 **[`herramientas/`](herramientas/) es la fábrica operable.** `node panel.js`
-levanta el panel; `npm test` corre 373 pruebas. Cero dependencias en el modo
+levanta el panel; `npm test` corre 381 pruebas. Cero dependencias en el modo
 gratis. Su [`README`](herramientas/README.md) explica cada pieza.
 
 ---
@@ -74,14 +74,15 @@ enlaza arriba; esto es solo el resumen.
 
 - `herramientas/` — la fábrica operable: panel, formulario de brief,
   validador, generador, auditor con IA, agente de Claude e historial.
-  373 pruebas pasando.
+  381 pruebas pasando.
 - `Sistema-de-Produccion/` — las 10 bases. Fotos de producto en 4 de 9;
   logo y banner del cliente en 4 de 9; direcciones de arte en 5 de 9.
   **Plantillas** (`torre`/`revista`/`ficha` — la maqueta, no la piel):
   solo en `landing-modular`. Faltan en las bases de venta.
-- `Proyectos-Clientes/` — los entregables. **Los generados antes del
-  2026-09-01 están rotos** (les falta el arreglo de la página en blanco):
-  regenerarlos o borrarlos.
+- `Proyectos-Clientes/` — solo dos: `incoarqi` (cliente real) y
+  `prueba-ecommerce` (prueba interna). Las nueve carpetas de prueba del
+  generador se borraron el 2026-09-14; el `.gitignore` es ahora una LISTA
+  BLANCA y las generaciones sin ficha se marcan con `ES-UNA-PRUEBA.md`.
 
 ### Deuda que no hay que redescubrir
 

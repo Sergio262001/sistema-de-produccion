@@ -8,6 +8,14 @@ import { getDB } from './data/adapter.js';
 import { createCart, money } from './core/cart.js';
 import { checkout } from './core/checkout.js';
 
+/* Todo lo que llega de la base de datos o de un error pasa por aquí antes
+   de tocar innerHTML. Un nombre de producto lo escribe quien administra el
+   catálogo; un mensaje de error lo escribe el servidor. Ninguno de los dos
+   es HTML de confianza. Misma función que 03-componentes-ui/seguridad.js. */
+const esc = (v) => String(v ?? '')
+  .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+  .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+
 const CONTEXT = {
   cliente: 'Prueba Ecommerce',
   linea: 'pro',
@@ -73,9 +81,9 @@ function renderCatalogo() {
   cat.productos.forEach(p => {
     const agotado = p.stock <= 0;
     const el = document.createElement('div'); el.className = 'product' + (agotado ? ' agotado' : '');
-    el.innerHTML = `<div class="ph">${p.emoji || '🛍️'}</div><div class="b">
-      <h3>${p.nombre} ${p.badge ? '<span class="badge">' + p.badge + '</span>' : ''}</h3>
-      <div class="d">${p.desc || ''}</div>
+    el.innerHTML = `<div class="ph">${esc(p.emoji || '🛍️')}</div><div class="b">
+      <h3>${esc(p.nombre)} ${p.badge ? '<span class="badge">' + esc(p.badge) + '</span>' : ''}</h3>
+      <div class="d">${esc(p.desc || '')}</div>
       <div class="row"><span class="pr">${money(p.precio, M)}</span>
       <button type="button" class="add" ${agotado ? 'disabled' : ''}>${agotado ? 'Agotado' : 'Agregar'}</button></div>
       ${!agotado ? `<div class="badge stock-tag">stock: ${p.stock}</div>` : ''}
@@ -96,8 +104,8 @@ function renderLines(state) {
   c.innerHTML = '';
   state.items.forEach(i => {
     const row = document.createElement('div'); row.className = 'line';
-    row.innerHTML = `<div class="em">${i.emoji || '🛍️'}</div>
-      <div class="li"><div class="nm">${i.nombre}</div><div class="lp">${money(i.precio, M)} c/u</div></div>
+    row.innerHTML = `<div class="em">${esc(i.emoji || '🛍️')}</div>
+      <div class="li"><div class="nm">${esc(i.nombre)}</div><div class="lp">${money(i.precio, M)} c/u</div></div>
       <div class="qty"><button type="button" aria-label="menos">−</button><span>${i.qty}</span><button type="button" aria-label="más">+</button></div>`;
     const [minus, , plus] = row.querySelectorAll('.qty *');
     minus.onclick = () => cart.decrement(i.id);
@@ -123,11 +131,11 @@ function renderAdmin() {
   const list = document.getElementById('adminList'); list.innerHTML = '';
   DATA.categorias.forEach(c => {
     const box = document.createElement('div'); box.className = 'acat';
-    box.innerHTML = `<h3>${c.nombre}</h3>`;
+    box.innerHTML = `<h3>${esc(c.nombre)}</h3>`;
     c.productos.forEach(p => {
       const row = document.createElement('div'); row.className = 'arow';
       row.innerHTML = `
-        <input class="field" type="text" value="${p.nombre.replace(/"/g, '&quot;')}" data-cat="${c.id}" data-id="${p.id}" data-field="nombre">
+        <input class="field" type="text" value="${esc(p.nombre)}" data-cat="${c.id}" data-id="${p.id}" data-field="nombre">
         <input class="field" type="number" value="${p.precio}" step="500" data-cat="${c.id}" data-id="${p.id}" data-field="precio">
         <input class="field" type="number" value="${p.stock}" min="0" data-cat="${c.id}" data-id="${p.id}" data-field="stock">
         <button type="button" class="del" aria-label="Eliminar" data-cat="${c.id}" data-id="${p.id}">×</button>`;
@@ -201,7 +209,7 @@ function pulse() { const b = document.getElementById('count'); b.animate([{ tran
   try {
     DATA = await db.load();
   } catch (err) {
-    document.getElementById('grid').innerHTML = `<p class="empty-state error">No se pudo leer Supabase: ${err.message}. Revisa el README.md de esta carpeta.</p>`;
+    document.getElementById('grid').innerHTML = `<p class="empty-state error">No se pudo leer Supabase: ${esc(err.message)}. Revisa el README.md de esta carpeta.</p>`;
     return;
   }
   renderCatalogo();
