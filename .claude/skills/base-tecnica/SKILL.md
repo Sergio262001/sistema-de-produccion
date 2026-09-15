@@ -1,6 +1,6 @@
 ---
 name: base-tecnica
-description: Cómo está construida una base técnica del sistema de producción — el CONTEXT, applyTheme, los bloques de página, los adaptadores, qué nunca se toca y los marcadores de andamiaje de demo. Úsala antes de editar cualquier demo.html de 02-bases/ o de entender por qué un entregable salió con datos del ejemplo.
+description: Cómo está construida una base técnica del sistema de producción — el CONTEXT, applyTheme, los bloques de página, los adaptadores, qué nunca se toca, los marcadores de andamiaje de demo y los marcadores INMERSIVO que no se editan a mano. Úsala antes de editar cualquier demo.html de 02-bases/ o de entender por qué un entregable salió con datos del ejemplo.
 ---
 
 # Cómo funciona una base
@@ -116,6 +116,43 @@ explicativo: el borrado corta en la primera aparición.)*
 
 ---
 
+## Piezas copiadas: los marcadores `INMERSIVO`
+
+Las cuatro bases de venta (`ecommerce-completo`, `carrito-reutilizable`,
+`marketplace`, `menu-con-panel-admin`) llevan un bloque de CSS y otro de JS
+entre estos marcadores:
+
+```
+/* ══ INMERSIVO · copiado de 03-componentes-ui/inmersivo.css ══ */
+...
+/* ══ fin INMERSIVO ══ */
+```
+
+Es la franja, la sección partida, las texturas y la portada a sangre. **Lo de
+en medio NO se edita en la base.** La fuente de la verdad es
+`03-componentes-ui/inmersivo.css` y `inmersivo.js`, y se lleva a las bases con:
+
+```bash
+node herramientas/llevar-inmersivo.js            # aplica
+node herramientas/llevar-inmersivo.js --revisar  # solo dice qué base está atrasada
+```
+
+Correrlo otra vez reemplaza lo que hay entre marcadores. Así que un arreglo
+hecho a mano dentro de una base **se pierde en la próxima corrida**, sin
+aviso. Por eso hay un hook (`.claude/hooks/proteger-inmersivo.mjs`) que
+bloquea editar esa zona con Edit o Write: si te frena, el arreglo va en el
+componente.
+
+`landing-modular` no lleva marcadores: ahí nació la pieza y su versión es más
+avanzada (plantillas, galería, sectores). Se edita directo.
+
+Fuera de los marcadores, la herramienta toca tres cosas de cada base, y las
+tres se pueden editar normal: la llamada `pintarFranja();` al final de
+`pintarPagina()`, el hero (`heroInmersivo(hero, t, b)`) y el bloque "sobre"
+(`bloquePartido(...)`).
+
+---
+
 ## Los adaptadores de datos
 
 Misma interfaz (`load` / `save`) para Firebase, Supabase o local. Cambiar de
@@ -135,11 +172,16 @@ privada en incógnito — si devuelve datos, el RLS está mal.
 **Ecommerce es la línea principal del estudio.** El menú QR es secundaria: útil
 cuando aparezca ese cliente, pero **no es el ejemplo por defecto**.
 
-| De venta (vitrina) | Fotos · logo/banner · direcciones · bloques |
+| Base | Qué trae |
 |---|---|
-| `ecommerce-completo` · `menu-con-panel-admin` · `carrito-reutilizable` · `marketplace` | sí |
-| `landing-modular` | logo/banner · direcciones · secciones (sin catálogo: **servicios**) |
+| `ecommerce-completo` · `menu-con-panel-admin` · `carrito-reutilizable` · `marketplace` | Fotos · logo/banner · direcciones · bloques · **franja, partida, texturas, portada a sangre** (vía `INMERSIVO`) · panel con frase por proyecto |
+| `landing-modular` | Logo/banner · direcciones · secciones (sin catálogo: **servicios**) · lo inmersivo en versión propia · **plantillas** `torre`/`revista`/`ficha` (solo aquí) |
 | `auth` · `crm-simple` · `dashboard-analytics` · `suscripciones` · `backend-pro` | todavía no |
+
+El panel de las bases de venta **no es autenticación**: el generador pone una
+frase única por proyecto (en `.env` y `ACCESO.md`), pero una clave en el
+JavaScript del navegador la lee cualquiera con F12. La cerradura es Supabase
+Auth + RLS. Ver `entregable-cliente`.
 
 `backend-pro` son Edge Functions de Supabase (firma de integridad Wompi +
 webhook). **Nunca se probó contra Wompi real** — validarlo en sandbox antes de

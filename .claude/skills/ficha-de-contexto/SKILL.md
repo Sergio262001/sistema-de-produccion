@@ -1,6 +1,6 @@
 ---
 name: ficha-de-contexto
-description: El contrato del YAML que define un proyecto de cliente y la compuerta que decide si se puede construir — qué campos son obligatorios, qué significa POR DEFINIR y cómo llegan las respuestas del brief a la ficha. Úsala al leer, escribir o validar un contexto.yml.
+description: El contrato del YAML que define un proyecto de cliente y la compuerta que decide si se puede construir — qué campos son obligatorios, qué significa POR DEFINIR, cómo llegan las respuestas del brief a la ficha, y los campos de diseño (plantilla, portada a sangre, franja, textura) con qué base lee cada uno. Úsala al leer, escribir o validar un contexto.yml.
 ---
 
 # La ficha de contexto
@@ -25,8 +25,23 @@ marca:
   tono:       "cercano y de barrio"
 
 pagina:                            # los bloques. Vacío = no se pinta
-  hero:      { titular: "...", bajada: "..." }
-  sobre:     { titulo: "...", texto: "..." }
+  plantilla: ficha                 # torre | revista | ficha — SOLO landing-modular
+  hero:
+    titular: "..."
+    bajada:  "..."
+    fondo:   oscuro                # oscuro = portada a sangre; cualquier otra cosa = clara
+    foto:    ""                    # del cliente, o vacío. Nunca inventada
+    textura: plano                 # plano | concreto | trama — lo que se ve sin foto
+  franja:                          # banda a sangre con una frase. Sin frase, no existe
+    frase:   "..."
+    firma:   "Tacos Mauricio"
+    foto:    ""
+    textura: concreto
+  sobre:                           # media sección de foto, media de texto
+    titulo:  "..."
+    texto:   "..."
+    foto:    ""
+    textura: trama
   horarios:  ["Martes a domingo · 12:00 a 22:00"]
   ubicacion: { direccion: "..." }
   redes:     { instagram: "tacosmauricio" }
@@ -37,6 +52,36 @@ auth:   { motor: local, rol_requerido: admin }
 entrega:{ dominio: "tacosmauricio.co", soporte: plan_mensual }
 env:    [SUPABASE_URL, SUPABASE_ANON_KEY]   # SOLO NOMBRES, nunca valores
 ```
+
+---
+
+## Los campos de diseño, y qué base los lee
+
+No todas las bases leen todo. Un campo que la base no conoce **no rompe
+nada**: simplemente no se pinta. Pero escribirlo en la ficha de una base que
+no lo lee es prometerle al cliente algo que no va a ver.
+
+| Campo | Quién lo lee | Si falta o es inválido |
+|---|---|---|
+| `pagina.plantilla` | solo `landing-modular` | cae en `ficha`, la que funciona sin fotos |
+| `hero.fondo` · `hero.foto` · `hero.textura` | landing + las 4 de venta | portada clara, como antes |
+| `franja.*` | landing + las 4 de venta | sin `frase`, la sección no existe |
+| `sobre.foto` · `sobre.textura` | landing + las 4 de venta | sin foto ni textura, el texto toma el ancho |
+| `servicios` · `diferencial` · `proceso` · `galeria` · `sectores` · `secciones_oscuras` | solo `landing-modular` | la sección no se pinta |
+
+**La plantilla se elige por el material que HAY, no por gusto:** `torre` con
+una foto muy buena, `revista` con varias, `ficha` sin ninguna. `torre` sin
+foto es un rectángulo de color de una pantalla de alto. Ver
+`direccion-de-arte`.
+
+**Textura** solo acepta `plano`, `concreto` o `trama`. Un nombre inventado no
+pinta nada — no cae en una de respaldo.
+
+**Foto** acepta `https://`, `/ruta` o `./ruta`. Una foto de obra, de producto
+o del local **es un dato del cliente**: no se inventa, no se saca de un banco
+de imágenes y no se genera con IA. Mientras no llegue, el campo va vacío y la
+textura ocupa el espacio. Las imágenes de `vista-previa/` son marcadores y la
+regla `provisional` del validador impide que lleguen al entregable.
 
 ---
 

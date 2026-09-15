@@ -1,0 +1,32 @@
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Edit|Write|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "shell": "bash",
+            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/proteger-inmersivo.mjs\"",
+            "timeout": 15,
+            "statusMessage": "Revisando la zona INMERSIVO"
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "shell": "bash",
+            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/validar-tras-editar.mjs\"",
+            "timeout": 60,
+            "statusMessage": "Validando"
+          }
+        ]
+      }
+    ]
+  }
+}

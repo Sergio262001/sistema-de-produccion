@@ -34,6 +34,47 @@ no sirve de nada.
 Si una página remota sale en blanco, súbele `--espera 20000`: se estaba
 capturando a medio pintar.
 
+Si la página es larga y la captura se corta, súbele `--alto 2600`: la
+ventana por defecto es de 1400 px y lo de abajo no sale.
+
+---
+
+## La captura también es código: mide antes de acusar
+
+**Dos veces** en este sistema estuve a punto de reportar un defecto que no
+existía, y en las dos el que mentía era la herramienta, no la página.
+
+| Lo que parecía | Lo que era |
+|---|---|
+| En el móvil las imágenes salían cortadas | Chrome no baja de ~500 px de ventana, así que `--window-size=375` daba 500. Arreglado con `--movil`, que mete la página en un iframe del ancho real |
+| La franja "no llegaba" al borde derecho: quedaba una tira blanca de 16 px | El documento medía 1264 px y el lienzo de la captura 1280: la tira es el hueco de la barra de scroll. La franja iba de 0 a 1264, exacta |
+
+Reportar un defecto que no existe cuesta la credibilidad de todos los que sí
+existen. Así que **antes de escribir un hallazgo de geometría, mídelo en el
+navegador**: copia la página a una carpeta temporal, inyecta antes de
+`</body>` un script que escriba las medidas encima de la página, y captura
+esa copia.
+
+```html
+<script>
+addEventListener("load", () => {
+  const r = document.getElementById("franja").getBoundingClientRect();
+  const d = document.createElement("div");
+  d.style.cssText = "position:fixed;top:0;left:0;z-index:99999;"
+                  + "background:#000;color:#0f0;font:16px monospace;padding:8px";
+  d.textContent = "doc:" + document.documentElement.clientWidth
+    + " franja:" + Math.round(r.left) + "→" + Math.round(r.right)
+    + " scrollW:" + document.documentElement.scrollWidth;
+  document.body.appendChild(d);
+});
+</script>
+```
+
+`scrollWidth` mayor que `clientWidth` = hay scroll horizontal de verdad.
+Iguales = la página está bien y lo raro es la captura.
+
+**Nunca en el archivo real**: la sonda va en una copia temporal.
+
 ---
 
 ## Qué mirar, en este orden

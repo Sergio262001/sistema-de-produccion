@@ -13,7 +13,7 @@ sigue pendiente y las reglas de trabajo que salieron de equivocarse.
 Léelo antes de tocar código.
 
 **[`herramientas/`](herramientas/) es la fábrica operable.** `node panel.js`
-levanta el panel; `npm test` corre 438 pruebas. Cero dependencias en el modo
+levanta el panel; `npm test` corre 452 pruebas. Cero dependencias en el modo
 gratis. Su [`README`](herramientas/README.md) explica cada pieza.
 
 ---
@@ -74,7 +74,7 @@ enlaza arriba; esto es solo el resumen.
 
 - `herramientas/` — la fábrica operable: panel, formulario de brief,
   validador, generador, auditor con IA, agente de Claude e historial.
-  438 pruebas pasando.
+  452 pruebas pasando.
 - `Sistema-de-Produccion/` — las 10 bases. Fotos de producto en 4 de 9;
   logo y banner del cliente en 4 de 9; direcciones de arte en 5 de 9.
   **Franja, sección partida, texturas y portada a sangre en las 4 bases de
@@ -94,6 +94,21 @@ enlaza arriba; esto es solo el resumen.
 - Doble carpeta `Sistema-de-Produccion/Sistema-de-Produccion/`.
 - `08-pagina-del-estudio` tiene 4 copias de 2 archivos.
 - `panel.html` son 1.144 líneas en un archivo.
+
+## Skills y hooks (`.claude/`)
+
+- **5 skills** en `.claude/skills/`: `direccion-de-arte`, `revision-visual`,
+  `entregable-cliente`, `base-tecnica`, `ficha-de-contexto`. Son lo que lee el
+  agente de Claude del panel. **Si cambias cómo funciona algo del sistema,
+  actualiza la skill que lo explica en el mismo commit** — el 2026-09-15 cuatro
+  de las cinco estaban dos días atrasadas.
+- **2 hooks** en `.claude/settings.json` (scripts en `.claude/hooks/`):
+  - `validar-tras-editar` — después de editar un `demo.html` de una base o
+    cualquier archivo de un entregable, corre el validador sobre esa carpeta y
+    devuelve los **errores** a Claude. Los avisos no.
+  - `proteger-inmersivo` — niega editar a mano la zona entre marcadores
+    `INMERSIVO` de las bases de venta: `llevar-inmersivo.js` la sobrescribe.
+- Se revisan o apagan con `/hooks`. Sus pruebas: `herramientas/pruebas/hooks.test.js`.
 
 ## Cómo trabajar
 - Confirma a qué proyecto y a qué base pertenece la tarea antes de construir.
