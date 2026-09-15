@@ -41,9 +41,17 @@ const RETORNO_GOOGLE = ORIGEN + '/api/acceso/google/retorno';
 
 const SISTEMA = join(RAIZ, 'Sistema-de-Produccion', 'Sistema-de-Produccion');
 const CLIENTES = join(RAIZ, 'Proyectos-Clientes');
-const acceso = crearAcceso(AQUI);
+// DÓNDE VIVEN LOS DATOS DEL PANEL: la frase de acceso (.acceso.json) y el
+// historial (historial.db). Por defecto, junto a este archivo.
+//
+// Se puede mover con PANEL_DATOS. No es una opción de despliegue: existe
+// para que las pruebas del servidor no escriban en el historial real del
+// dueño ni le pisen la frase de acceso. Sin esto, probar panel.js
+// significaba tocar sus datos de operación, y por eso no se probaba.
+const DATOS = process.env.PANEL_DATOS || AQUI;
+const acceso = crearAcceso(DATOS);
 const google = configurarGoogle();
-const historial = abrirHistorial(AQUI);
+const historial = abrirHistorial(DATOS);
 
 // Estados de OAuth pendientes: viven en memoria y caducan a los 10 minutos.
 const estadosPendientes = new Map();
@@ -441,6 +449,12 @@ const servidor = createServer(async (req, res) => {
   }
 });
 
+// El servidor se EXPORTA y solo escucha cuando se ejecuta este archivo.
+// Importarlo desde una prueba no puede levantar un puerto ni imprimir el
+// cartel de arranque: era justo lo que impedía probar las ~20 rutas.
+export { servidor };
+
+if (process.argv[1] && process.argv[1].endsWith('panel.js'))
 servidor.listen(PUERTO, '127.0.0.1', () => {
   const g = '\x1b[90m', v = '\x1b[32m', n = '\x1b[1m', o = '\x1b[0m';
   console.log('');
