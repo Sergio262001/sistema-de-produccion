@@ -46,7 +46,7 @@ Sale con código 1 si hay errores — sirve como puerta antes de entregar.
 ## Capturas — los ojos del sistema
 
 Hasta ahora el ciclo estaba abierto: se construía una página y **nadie la
-miraba**. Las 381 pruebas comprueban que el HTML compila, que los `id` existen
+miraba**. Las 395 pruebas comprueban que el HTML compila, que los `id` existen
 y que el catálogo llegó. Ninguna lo ve.
 
 ```bash
@@ -340,7 +340,7 @@ validador gratis ya cubre — si no, pagarías por los mismos hallazgos dos vece
 ## Pruebas
 
 ```bash
-npm test              # 381 pruebas, ~12 segundos
+npm test              # 395 pruebas, ~12 segundos
 npm run test:ver      # con el detalle de cada una
 ```
 
@@ -374,7 +374,7 @@ Los casos marcados `regresión` son bugs que ya ocurrieron:
 herramientas/
 ├─ panel.js / panel.html   interfaz: acceso, asistente, clientes, calidad
 ├─ brief.html              formulario para el cliente (autocontenido)
-├─ pruebas/                381 pruebas con node:test
+├─ pruebas/                395 pruebas con node:test
 ├─ validar.js              modo gratis · control de calidad
 ├─ crear-proyecto.js       modo gratis · generador
 ├─ auditor-ia.js           modo con costo · criterio UX/UI

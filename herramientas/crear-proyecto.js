@@ -18,6 +18,7 @@ import { join, resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { leerYaml, escribirYaml } from './lib/yaml.js';
 import { ponerContenido } from './lib/contenido.js';
+import { CLAVES_DEMO, generarClave } from './lib/clave.js';
 
 const AQUI = fileURLToPath(new URL('.', import.meta.url));
 const RAIZ = resolve(AQUI, '..');
@@ -373,7 +374,7 @@ export function ponerEnContexto(html, marca = {}, cliente = '', ficha = {}) {
   return out.slice(0, i) + bloque + out.slice(fin + 3);
 }
 
-export function adaptarEntregable(html, marca, proyecto, fichaCompleta = {}) {
+export function adaptarEntregable(html, marca, proyecto, fichaCompleta = {}, clave = '') {
   let out = html;
 
   // 1 · Quitar la sysbar (andamiaje de demo, no va al cliente).
@@ -486,18 +487,35 @@ export function adaptarEntregable(html, marca, proyecto, fichaCompleta = {}) {
     );
   }
 
-  // 3e · El correo de demo del panel.
+  // 3e · EL ACCESO AL PANEL.
   //
-  // Las bases traen un usuario de prueba (admin@caferaiz.co) que se IMPRIME
-  // en la pantalla de login. Dejarlo así pone el negocio de otro delante del
-  // cliente. Se cambia al dominio del proyecto.
+  // Las bases traen un usuario de prueba (admin@caferaiz.co / admin123) que
+  // además se IMPRIME en la pantalla de login. Copiarlo tal cual al
+  // entregable tiene dos problemas, y el segundo es grave:
   //
-  // Ojo: esto NO arregla el fondo. Sigue siendo una contraseña escrita en el
-  // código, visible para cualquiera. Solo sirve mientras el proyecto usa el
-  // login local; antes de publicar hay que pasar a Supabase Auth.
+  //   1. Pone el negocio de OTRO delante del cliente.
+  //   2. TODOS los proyectos del estudio salen con la misma contraseña,
+  //      publicada en su propia pantalla de entrada. Un cliente que abra la
+  //      página de otro cliente entra a su panel. Eso no se puede cobrar.
+  //
+  // Aquí se cambian las dos cosas: el correo al dominio del proyecto y la
+  // contraseña a una frase única. Y se quita el cartel que las anunciaba.
   const slug = aSlug(proyecto);
   if (slug) {
     out = out.replace(/\badmin@[a-z0-9.-]+\b/gi, 'admin@' + slug + '.local');
+  }
+  if (clave) {
+    for (const demo of CLAVES_DEMO) {
+      out = out.split("password:'" + demo + "'").join("password:'" + clave + "'");
+      out = out.split("password: '" + demo + "'").join("password: '" + clave + "'");
+    }
+    // El cartel "Demo: correo / contraseña" de la caja de login. En una demo
+    // de la fábrica es útil; en un entregable es publicar la llave.
+    out = out.replace(
+      /(<div class="sub">)([\s\S]*?)<br>\s*Demo:[\s\S]*?(<\/div>)/gi,
+      '$1$2<br><span class="aviso-acceso">Acceso local: sirve para revisar, '
+      + '<b>no protege los datos</b>. Lo que los protege es Supabase Auth + '
+      + 'RLS — ver el README.$3');
   }
 
   return out;
@@ -608,6 +626,79 @@ export function viteConfig() {
  * El .env con los valores que la ficha SÍ conoce ya puestos, y los secretos
  * marcados. Así `npm run dev` arranca sin editar nada, y lo que falta se ve.
  */
+/**
+ * ACCESO.md — la frase del panel y, sobre todo, lo que falta para que el
+ * panel esté de verdad protegido.
+ *
+ * Existe porque la alternativa era peor de las dos formas posibles: o la
+ * contraseña de demo `admin123` viajaba a todos los entregables (misma clave
+ * en todos los clientes, impresa en su propia pantalla de login), o el panel
+ * quedaba sin acceso y el proyecto no se podía ni enseñar.
+ *
+ * Este archivo NO se sube: está en el .gitignore del proyecto.
+ */
+export function accesoMd(cliente, clave, ficha = {}) {
+  const slug = aSlug(cliente);
+  const motor = ficha?.auth?.motor || ficha?.base_de_datos?.motor || 'local';
+  return [
+    '# Acceso al panel — ' + cliente,
+    '',
+    '**Este archivo no se sube a git.** Está en el `.gitignore` del proyecto,',
+    'junto al `.env`.',
+    '',
+    '## La frase de este proyecto',
+    '',
+    '```',
+    'correo:  admin@' + slug + '.local',
+    'frase:   ' + clave,
+    '```',
+    '',
+    'Es única de ' + cliente + '. Antes, todos los proyectos del estudio salían',
+    'con `admin123` escrita en el código **y impresa en la pantalla de login**:',
+    'cualquiera que abriera la página de un cliente entraba al panel de',
+    'cualquier otro.',
+    '',
+    '## Lo que esto NO es',
+    '',
+    'No es autenticación. Una clave que vive en el JavaScript de la página la',
+    'lee cualquiera con F12, por rara que sea la frase. Es una **puerta**:',
+    'sirve para que el panel no esté abierto de par en par mientras se revisa',
+    'el proyecto.',
+    '',
+    '**Lo que protege los datos de verdad es la base, no la pantalla.**',
+    '',
+    '## Cómo se convierte en una cerradura: Supabase Auth',
+    '',
+    motor === 'supabase'
+      ? 'Este proyecto ya está en Supabase. Faltan los dos últimos pasos:'
+      : 'Son tres pasos, y el código para los tres ya está escrito:',
+    '',
+    '1. **Crear el usuario.** En Supabase → Authentication → Users → *Add*',
+    '   user. Con el correo real del dueño del negocio, no el `.local` de',
+    '   arriba.',
+    '2. **Correr `supabase.schema.sql`** (está en esta carpeta) en el SQL',
+    '   Editor. Trae la tabla `perfiles` y las políticas RLS. **El primer',
+    '   admin se marca a mano:** `update perfiles set rol = \'admin\' where',
+    '   email = \'...\';` — si no, nadie tiene permisos de escritura.',
+    '3. **Cambiar el motor.** En `.env`: `AUTH_MOTOR=supabase`, más',
+    '   `SUPABASE_URL` y `SUPABASE_ANON_KEY`. No hay que tocar código: el',
+    '   adaptador ya está.',
+    '',
+    'Después de eso, la frase de arriba deja de servir y deja de importar.',
+    '',
+    '## Antes de publicar',
+    '',
+    'Corre `npm run validar`. La regla `clave-demo` sale en rojo si alguna',
+    'contraseña de demostración volvió al entregable por una copia y pega.',
+    '',
+    'La prueba de dos minutos está en',
+    '`07-operacion-equipo/guia-de-seguridad.md`: pide una tabla privada en',
+    'una ventana de incógnito. Si devuelve datos, el RLS está mal y la',
+    'pantalla de login no te está salvando de nada.',
+    '',
+  ].join('\n');
+}
+
 export function envDelProyecto(ficha, ejemplo = '') {
   const motor = ficha?.base_de_datos?.motor || 'local';
   const wa = ficha?.apis?.whatsapp_num;
@@ -708,6 +799,15 @@ export function crearProyecto(opciones) {
     '# Sin secretos: los valores reales van en .env\n\n' + escribirYaml(ficha), 'utf8');
   creados.push('contexto.yml');
 
+  // 3b · LA CLAVE DEL PANEL, una por proyecto.
+  //
+  // Se genera aunque la base no tenga panel: cuesta nada, y así no hay que
+  // adivinar aquí qué bases lo traen. Si no hay ninguna contraseña de demo
+  // en el HTML, la sustitución no encuentra nada y no pasa nada.
+  //
+  // Nunca se escribe en contexto.yml: la ficha se sube a git.
+  const clave = generarClave();
+
   // 4 · entregable adaptado
   const rutaDemo = join(dirBase, 'demo.html');
   if (existsSync(rutaDemo)) {
@@ -715,7 +815,8 @@ export function crearProyecto(opciones) {
     // sería un bloque enorme dentro de la ficha, y su sitio es el entregable.
     // Por eso se adjunta aquí, solo para generar el HTML.
     const paraHtml = { ...ficha, _catalogo: fichaEntrada._catalogo };
-    const html = adaptarEntregable(readFileSync(rutaDemo, 'utf8'), ficha.marca || {}, cliente, paraHtml);
+    const html = adaptarEntregable(readFileSync(rutaDemo, 'utf8'), ficha.marca || {},
+                                   cliente, paraHtml, clave);
     writeFileSync(join(dirSalida, 'index.html'), html, 'utf8');
     creados.push('index.html');
   }
@@ -728,15 +829,27 @@ export function crearProyecto(opciones) {
     cpSync(rutaEnvEj, join(dirSalida, '.env.example'));
     creados.push('.env.example');
   }
-  writeFileSync(join(dirSalida, '.env'), envDelProyecto(ficha, ejemploEnv), 'utf8');
+  writeFileSync(join(dirSalida, '.env'),
+    envDelProyecto(ficha, ejemploEnv) + '\n'
+    + '# Frase de acceso al panel, única de este proyecto. NO es un secreto\n'
+    + '# fuerte (una clave en JavaScript de navegador la lee cualquiera con\n'
+    + '# F12): es la PUERTA mientras se revisa. La cerradura es Supabase\n'
+    + '# Auth + RLS — ver ACCESO.md.\n'
+    + 'PANEL_CLAVE=' + clave + '\n', 'utf8');
   creados.push('.env');
+
+  // ACCESO.md — lo que hay que decirle al cliente, y lo que falta para que
+  // esto deje de ser una puerta y sea una cerradura. Va junto al .env en el
+  // .gitignore del proyecto: la frase no se sube.
+  writeFileSync(join(dirSalida, 'ACCESO.md'), accesoMd(cliente, clave, ficha), 'utf8');
+  creados.push('ACCESO.md');
 
   // 5b · Lo que hace que ARRANQUE: servidor de desarrollo y dependencias
   writeFileSync(join(dirSalida, 'package.json'), packageJson(slug, ficha), 'utf8');
   writeFileSync(join(dirSalida, 'vite.config.js'), viteConfig(), 'utf8');
   creados.push('package.json', 'vite.config.js');
   writeFileSync(join(dirSalida, '.gitignore'),
-    '.env\n.env.*\n!.env.example\nnode_modules/\ndist/\n', 'utf8');
+    '.env\n.env.*\n!.env.example\nACCESO.md\nnode_modules/\ndist/\n', 'utf8');
   creados.push('.gitignore');
 
   // 5c · MARCA DE PRUEBA.
@@ -800,6 +913,18 @@ export function crearProyecto(opciones) {
     '> navegador. `vite.config.js` amplía `envPrefix` para que los adaptadores',
     '> copiados de la base funcionen sin reescribirlos.',
     '',
+    '## El panel',
+    '',
+    'La frase de acceso está en **`ACCESO.md`** (y en el `.env`, como',
+    '`PANEL_CLAVE`). Es única de este proyecto: antes todos los entregables',
+    'salían con `admin123` escrita en el código **y anunciada en la propia',
+    'pantalla de login**.',
+    '',
+    '**Sigue sin ser autenticación.** Una clave que vive en el JavaScript de',
+    'la página la lee cualquiera con F12. Es una puerta para revisar el',
+    'proyecto; la cerradura es Supabase Auth + RLS, y `ACCESO.md` tiene los',
+    'tres pasos para encenderla. **Eso hay que hacerlo antes de publicar.**',
+    '',
     '## Lo que falta para que funcione de verdad',
     '',
     faltantes.length
@@ -844,7 +969,7 @@ export function crearProyecto(opciones) {
   writeFileSync(join(dirSalida, 'README.md'), readme, 'utf8');
   creados.push('README.md');
 
-  return { ok: true, slug, destino: dirSalida, base, creados };
+  return { ok: true, slug, destino: dirSalida, base, creados, clave };
 }
 
 // ── CLI ───────────────────────────────────────────────────────
@@ -905,5 +1030,14 @@ if (process.argv[1] && process.argv[1].endsWith('crear-proyecto.js')) {
   console.log('  ' + C.neg + r.destino + C.off);
   console.log('  base: ' + r.base + '\n');
   for (const c of r.creados) console.log('    + ' + c);
+  // La frase del panel se imprime UNA vez, aquí. No está en contexto.yml ni
+  // en ningún archivo que se suba: si se pierde, se regenera el proyecto o
+  // se cambia a mano en el .env.
+  if (r.clave) {
+    console.log('\n  ' + C.neg + 'Panel:' + C.off + '  admin@' + aSlug(args.cliente || '')
+      + '.local  /  ' + C.verde + r.clave + C.off);
+    console.log('  ' + C.gris + 'Está en ACCESO.md (fuera de git). No protege los '
+      + 'datos: eso es Supabase Auth + RLS.' + C.off);
+  }
   console.log('\n  ' + C.gris + 'Siguiente: llena el .env y corre el validador.' + C.off + '\n');
 }

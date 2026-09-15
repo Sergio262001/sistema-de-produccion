@@ -9,6 +9,7 @@
 // ════════════════════════════════════════════════════════════
 
 import { evaluar } from './colores.js';
+import { CLAVES_DEMO } from './clave.js';
 
 const hallazgo = (ruta, linea, severidad, regla, mensaje, pista) =>
   ({ ruta, linea, severidad, regla, mensaje, pista });
@@ -319,7 +320,51 @@ export function reglaProvisional({ ruta, lineas }) {
   return out;
 }
 
+/**
+ * CLAVE DE DEMOSTRACIÓN EN UN ENTREGABLE.
+ *
+ * Las bases traen `admin123` escrita en el código y además impresa en la
+ * pantalla de login. En una demo de la fábrica eso está bien: es una demo.
+ *
+ * El problema era que viajaba tal cual a los entregables. Significaba que
+ * TODOS los proyectos que vende el estudio salían con la misma contraseña,
+ * publicada en su propia pantalla de entrada: un cliente que abriera la
+ * página de otro cliente entraba a su panel. Eso no se puede cobrar.
+ *
+ * `crear-proyecto.js` ya genera una frase única por proyecto. Esta regla es
+ * la barrera para que no vuelva por una copia y pega — que es exactamente
+ * como llegó la primera vez.
+ *
+ * Exento `02-bases/`: ahí la clave de demo es legítima y necesaria.
+ */
+export function reglaClaveDemo({ ruta, lineas }) {
+  const r = String(ruta).replace(/\\/g, '/');
+  if (/\/02-bases\//.test(r)) return [];
+
+  const out = [];
+  lineas.forEach((linea, i) => {
+    for (const clave of CLAVES_DEMO) {
+      // Tiene que ser el VALOR de un campo de contraseña, no la palabra
+      // suelta. `<input type="password" name="password">` no es una clave, y
+      // marcarlo sería el tipo de falso positivo que hace que se deje de
+      // mirar el informe.
+      const re = new RegExp(
+        '(password|clave|pass|contrase(?:n|ñ)a)\\s*[:=]\\s*["\'`]' + clave + '["\'`]', 'i');
+      if (!re.test(linea)) continue;
+      out.push(hallazgo(ruta, i + 1, 'error', 'clave-demo',
+        'Contraseña de demostración en el entregable: ' + clave,
+        'Es la misma en todas las bases. Si sale así, todos los proyectos del '
+        + 'estudio comparten clave y el panel de un cliente abre con la de '
+        + 'otro. Regenera con crear-proyecto.js (pone una frase única por '
+        + 'proyecto) y pasa el panel a Supabase Auth — ver ACCESO.md.'));
+      break;                                   // un aviso por línea, no cuatro
+    }
+  });
+  return out;
+}
+
 export const REGLAS = [
+  { id: 'clave-demo',   fn: reglaClaveDemo,    extensiones: ['.html', '.js'] },
   { id: 'provisional',  fn: reglaProvisional,  extensiones: ['.html', '.js', '.css'] },
   { id: 'xss',          fn: reglaXss,          extensiones: ['.html', '.js'] },
   { id: 'token-muerto', fn: reglaTokensMuertos, extensiones: ['.html', '.css'] },

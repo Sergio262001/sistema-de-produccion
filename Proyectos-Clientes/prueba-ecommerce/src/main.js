@@ -29,13 +29,22 @@ const db = getDB(CONTEXT.base_de_datos.motor);
 const M = CONTEXT.moneda;
 let DATA = { categorias: [] };
 
-/* ---- auth local solo para entrar al panel de esta demo ----
-   No protege la escritura en Supabase: eso lo hace RLS (ver README). */
-const ADMIN_USERS = [{ email: 'admin@prueba.co', password: 'admin123', rol: 'admin', nombre: 'Dueño' }];
+/* ---- PUERTA del panel, no cerradura ----
+   La frase sale del .env (PANEL_CLAVE), no del código: antes era 'admin123',
+   la misma que traen todas las bases y la misma que salía en todos los
+   entregables. Aun así esto NO protege nada — Vite la hornea en el bundle y
+   se lee con F12. Lo que protege la escritura en Supabase es RLS.
+   Sin PANEL_CLAVE el panel no abre, que es mejor que abrirse con una clave
+   que conoce todo el mundo. */
+const PANEL_CLAVE = import.meta.env?.PANEL_CLAVE || '';
+const ADMIN_USERS = PANEL_CLAVE
+  ? [{ email: 'admin@prueba.co', password: PANEL_CLAVE, rol: 'admin', nombre: 'Dueño' }]
+  : [];
 let authUser = null;
 const localAuth = {
   async login(email, password) {
     const u = ADMIN_USERS.find(u => u.email === email && u.password === password);
+    if (!ADMIN_USERS.length) throw new Error('Panel sin clave: pon PANEL_CLAVE en el .env');
     if (!u) throw new Error('Correo o contraseña incorrectos');
     authUser = { email: u.email, rol: u.rol, nombre: u.nombre };
     return { ok: true, user: authUser };
