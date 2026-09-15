@@ -291,6 +291,173 @@
   .flush-left{margin-left:0;}
 
   @media(max-width:600px){.arow{grid-template-columns:1fr 80px;grid-auto-flow:row;}.arow .field+.field{grid-column:2;}.del{grid-column:2;justify-self:end;}}
+/* ══ INMERSIVO · copiado de 03-componentes-ui/inmersivo.css ══ */
+/* ── 1 · TEXTURAS ───────────────────────────────────────────────
+   El cliente casi nunca tiene las fotos el día uno, y generar imágenes
+   cuesta dinero que no siempre hay. Un bloque de color liso donde iba una
+   foto se lee como una sección sin terminar; con textura se lee como una
+   decisión.
+
+   Cero imágenes, cero peticiones, cero costo: son degradados repetidos.
+   Se elige en la ficha:  pagina.<seccion>.textura: plano | concreto | trama
+   ─────────────────────────────────────────────────────────────── */
+
+/* PLANO — retícula técnica. Ingeniería, arquitectura, construcción. */
+.tex-plano{
+  background-image:
+    repeating-linear-gradient(to right,
+      color-mix(in srgb, #fff 10%, transparent) 0 1px, transparent 1px 64px),
+    repeating-linear-gradient(to bottom,
+      color-mix(in srgb, #fff 10%, transparent) 0 1px, transparent 1px 64px),
+    repeating-linear-gradient(to right,
+      color-mix(in srgb, #fff 4%, transparent) 0 1px, transparent 1px 16px),
+    repeating-linear-gradient(to bottom,
+      color-mix(in srgb, #fff 4%, transparent) 0 1px, transparent 1px 16px);}
+
+/* CONCRETO — bandas suaves en diagonal. Obra, industria, taller. */
+.tex-concreto{
+  background-image:
+    repeating-linear-gradient(115deg,
+      color-mix(in srgb, #fff 5%, transparent) 0 2px,
+      transparent 2px 9px),
+    radial-gradient(120% 90% at 78% 12%,
+      color-mix(in srgb, #fff 9%, transparent), transparent 62%);}
+
+/* TRAMA — puntos finos. Servicios, consultoría, salud: más neutra. */
+.tex-trama{
+  background-image:
+    radial-gradient(color-mix(in srgb, #fff 16%, transparent) 1px,
+                    transparent 1.4px);
+  background-size:18px 18px;}
+
+/* Sin `color-mix` la textura simplemente no se pinta y queda el color liso,
+   que es exactamente el estado anterior. Nada se rompe. */
+@supports not (background: color-mix(in srgb, red 50%, transparent)){
+  .tex-plano,.tex-concreto,.tex-trama{background-image:none;}
+}
+
+/* La textura vive DETRÁS de la foto: cuando el cliente la manda, deja de
+   verse sola. Y detrás del velo, para que el texto no pierda contraste. */
+.con-textura{position:relative;isolation:isolate;}
+.con-textura > .textura{position:absolute;inset:0;z-index:-3;opacity:.85;
+  pointer-events:none;}
+
+/* ── 1b · EL TRUCO DE SANGRE, Y SU PEAJE ────────────────────────
+   Todo lo de aquí abajo se sale de su contenedor con
+   `margin: calc(50% - 50vw)`. Es la forma de hacer una banda a todo el
+   ancho sin sacar el bloque del flujo ni saber cuánto mide el contenedor.
+
+   El peaje: `100vw` incluye la barra de scroll y el ancho útil no, así que
+   la banda sobresale unos 15 px y aparece un scroll horizontal. En una
+   página que se desplaza a los lados el diseño se rompe entero, así que
+   esto no es opcional — va con la pieza.
+
+   `overflow-x: clip` (y no `hidden`) porque `hidden` en <html> mata el
+   `position: sticky` de las barras, que es un bug que cuesta media hora
+   encontrar. Donde no haya `clip`, el `hidden` del respaldo hace el
+   trabajo y la barra pegada es el precio.
+   ─────────────────────────────────────────────────────────────── */
+html{overflow-x:clip;}
+@supports not (overflow-x: clip){ html{overflow-x:hidden;} }
+
+/* ── 2 · FRANJA ─────────────────────────────────────────────────
+   Banda de imagen a todo el ancho entre secciones, con una frase encima.
+   Es lo que más aire de sitio da por menos trabajo.
+
+   Sin foto queda la banda del color de marca con textura, que igual da el
+   corte de ritmo: el espacio se reserva en el diseño, no se deja un hueco.
+   ─────────────────────────────────────────────────────────────── */
+.franja{position:relative;isolation:isolate;overflow:hidden;
+  /* A sangre: se sale del contenedor por los dos lados, sea cual sea su
+     ancho. Por eso funciona igual en .app (1040px) y en .wrap. */
+  margin:calc(20px * var(--ritmo)) calc(50% - 50vw);
+  padding:calc(96px * var(--ritmo)) calc(50vw - 50%);
+  min-height:340px;display:grid;align-content:center;
+  background:var(--brand);color:#fff;}
+.franja[hidden]{display:none;}
+.franja img{position:absolute;inset:0;width:100%;height:100%;
+  object-fit:cover;z-index:-2;}
+.franja::before{content:"";position:absolute;inset:0;z-index:-1;
+  background:linear-gradient(75deg,
+    color-mix(in srgb, var(--brand) 90%, transparent),
+    color-mix(in srgb, var(--brand) 40%, transparent));}
+@supports not (background: color-mix(in srgb, red 50%, transparent)){
+  .franja::before{background:linear-gradient(75deg,
+    rgba(0,0,0,.74), rgba(0,0,0,.32));}
+}
+.franja blockquote{margin:0;max-width:34ch;font-family:var(--display);
+  font-size:clamp(22px,3.6vw,34px);line-height:1.2;
+  font-weight:var(--peso-titulo);letter-spacing:var(--tracking);}
+.franja .firma{display:block;margin-top:16px;font-family:var(--mono);
+  font-size:12px;letter-spacing:.09em;text-transform:uppercase;
+  color:var(--accent);}
+[data-dir="mercado"] .franja blockquote{text-transform:uppercase;}
+[data-dir="boutique"] .franja{padding-top:calc(120px * var(--ritmo));
+  padding-bottom:calc(120px * var(--ritmo));}
+
+/* ── 3 · SECCIÓN PARTIDA ────────────────────────────────────────
+   Media sección de foto, media de texto. La imagen se SALE del contenedor
+   por su lado: media pantalla de foto, no una foto metida en una columna.
+   ─────────────────────────────────────────────────────────────── */
+.partida{display:grid;grid-template-columns:1fr 1fr;gap:0;align-items:stretch;
+  margin-right:calc(50% - 50vw);}
+/* Las bases de venta meten sus bloques en una rejilla de tarjetas
+   (`.bloques`). Una sección partida metida en una columna de 240 px no es
+   una sección partida: es una tarjeta rota, con la imagen saliéndose por
+   encima de la tarjeta de al lado. Ocupa la fila entera. */
+.bloques > .partida{grid-column:1 / -1;}
+.partida .lado-txt{padding:calc(34px * var(--ritmo)) 48px
+  calc(34px * var(--ritmo)) 0;align-self:center;}
+.partida .lado-img{position:relative;min-height:380px;overflow:hidden;
+  background:var(--brand);border-radius:var(--radius) 0 0 var(--radius);}
+.partida .lado-img img{position:absolute;inset:0;width:100%;height:100%;
+  object-fit:cover;}
+[data-dir="mercado"] .partida .lado-img{border-radius:0;}
+/* Sin foto Y sin textura: el texto toma el ancho completo y NO queda un
+   hueco gris. Reservar espacio en el diseño no es dejar huecos en la
+   entrega — es la mitad de la regla que más fácil se olvida. */
+.partida.sin-img{grid-template-columns:1fr;margin-right:0;}
+.partida.sin-img .lado-txt{padding-right:0;}
+@media(max-width:820px){
+  .partida{grid-template-columns:1fr;margin-right:0;}
+  .partida .lado-txt{padding:0 0 26px;}
+  .partida .lado-img{min-height:260px;border-radius:var(--radius);}
+}
+
+/* ── 4 · HERO A SANGRE ──────────────────────────────────────────
+   Imagen ocupando la ventana con velo para que el texto se lea. NO una
+   página blanca con texto encima.
+
+   `pagina.hero.fondo: "oscuro"` lo enciende. Con la cabecera clara encima
+   queda una franja blanca sobre el hero oscuro que se lee como un error de
+   maquetación, así que la cabecera también va oscura: eso lo resuelve
+   `data-portada="oscura"` en <html>, que pone `inmersivo.js`.
+   ─────────────────────────────────────────────────────────────── */
+.hero.oscuro{position:relative;isolation:isolate;overflow:hidden;
+  margin:0 calc(50% - 50vw) calc(24px * var(--ritmo));
+  padding:calc(64px * var(--ritmo)) calc(50vw - 50%) calc(56px * var(--ritmo));
+  background:var(--brand);color:#fff;
+  /* Las bases de venta le ponen `max-width:58ch` al hero para que el texto
+     no cruce toda la pantalla. Con portada a sangre eso deja la banda
+     cortada a media página: el límite pasa al TEXTO, no a la banda. */
+  max-width:none;}
+.hero.oscuro > h2{max-width:20ch;}
+.hero.oscuro > p{max-width:46ch;}
+.hero.oscuro .hero-foto{position:absolute;inset:0;width:100%;height:100%;
+  object-fit:cover;z-index:-2;}
+.hero.oscuro::before{content:"";position:absolute;inset:0;z-index:-1;
+  background:linear-gradient(100deg,
+    color-mix(in srgb, var(--brand) 92%, transparent),
+    color-mix(in srgb, var(--brand) 46%, transparent));}
+@supports not (background: color-mix(in srgb, red 50%, transparent)){
+  .hero.oscuro::before{background:linear-gradient(100deg,
+    rgba(0,0,0,.76), rgba(0,0,0,.34));}
+}
+.hero.oscuro h2{color:#fff;}
+.hero.oscuro p{color:rgba(255,255,255,.82);}
+
+/* ══ fin INMERSIVO ══ */
+
 </style>
 </head>
 <body>
@@ -331,6 +498,13 @@
 
   <div class="nav-pills" id="cats"></div>
   <div class="grid" id="grid"></div>
+
+  <!-- FRANJA a sangre con una frase. Nace oculta:
+
+       sin `pagina.franja.frase` en la ficha, no existe. -->
+
+  <section class="franja" id="franja" hidden></section>
+
 
   <!-- BLOQUES DE PÁGINA (sobre el negocio, horarios, dónde estamos).
        Cada uno se pinta SOLO si la ficha lo trae. Vacío = no existe. -->
@@ -417,9 +591,19 @@ const CONTEXT = {
      catálogo, no un sitio. Cada bloque se pinta SOLO si trae contenido.
      Vacío = no existe; nunca se rellena con texto de ejemplo. */
   pagina: {
+    // PORTADA A SANGRE. "oscuro" la enciende; sin `foto` queda el color de
+    // marca con textura, que es el estado normal el día uno del cliente.
     hero: { titular: "Ropa de algodón orgánico, hecha en Colombia",
-            bajada: "Cortes que duran. Envío a todo el país en 2 a 4 días." },
-    sobre: { titulo: "Sobre nosotros",
+            bajada: "Cortes que duran. Envío a todo el país en 2 a 4 días.",
+            fondo: "oscuro", foto: "", textura: "trama" },
+    // FRANJA: el corte de ritmo entre el catálogo y quién es el negocio.
+    // Sin `frase` no existe — no se rellena con nada.
+    franja: { frase: "Algodón certificado, confeccionado en Medellín, pagado por prenda terminada.",
+              firma: "Casa Tela", foto: "", textura: "concreto" },
+    // El espacio de la foto es la MITAD de la sección, no una columna al
+    // lado del párrafo. Sin foto, la textura mantiene las dos mitades.
+    sobre: { foto: "", textura: "plano",
+             titulo: "Sobre nosotros",
              texto: "Casa Tela empezó en un taller de dos máquinas en 2020. "
                   + "Trabajamos con algodón certificado y confeccionamos en "
                   + "Medellín, con dos talleres a los que les pagamos por "
@@ -694,6 +878,91 @@ const M = CONTEXT.moneda;
    banco. Un hueco honesto se ve mejor que un relleno inventado, y además
    le dice al dueño qué le falta mandar.
    ==================================================================== */
+/* ══ INMERSIVO · copiado de 03-componentes-ui/inmersivo.js ══ */
+/* Las tres únicas texturas. Un nombre inventado devuelve cadena vacía, no
+   una textura de respaldo: una que no corresponde al negocio miente. */
+const TEXTURAS = ['plano', 'concreto', 'trama'];
+
+function textura(nombre, porDefecto){
+  const n = String(nombre || porDefecto || '').trim().toLowerCase();
+  if(!TEXTURAS.includes(n)) return '';
+  return '<span class="textura tex-'+n+'" aria-hidden="true"></span>';
+}
+
+/* FRANJA — banda a sangre con una frase encima.
+   Sin frase no existe: una banda de color sin nada dentro es un bloque de
+   relleno, y el sistema no rellena. */
+function pintarFranja(){
+  const el = document.getElementById('franja');
+  if(!el) return;
+  const f = (CONTEXT.pagina && CONTEXT.pagina.franja) || {};
+  const frase = String(f.frase||'').trim();
+  if(!frase){ el.hidden = true; return; }
+  const foto = urlSegura(f.foto);
+  const firma = String(f.firma||'').trim();
+  // Con foto, la foto. Sin foto, la textura — y el corte de ritmo se
+  // mantiene igual, que es para lo que está la franja.
+  el.classList.add('con-textura');
+  el.innerHTML = (foto
+      ? '<img src="'+esc(foto)+'" alt="" loading="lazy" decoding="async">'
+      : textura(f.textura, 'concreto'))
+    + '<blockquote>'+esc(frase)
+    + (firma ? '<span class="firma">'+esc(firma)+'</span>' : '')
+    + '</blockquote>';
+  el.hidden = false;
+}
+
+/* SECCIÓN PARTIDA — devuelve el MARCADO, no lo pinta.
+   Las bases de venta meten sus bloques dentro de un contenedor común
+   (`#bloques`), así que esto compone y quien llame decide dónde va.
+
+   El espacio de la foto es la MITAD de la sección: la imagen es
+   estructura, no un adorno al lado del párrafo. */
+function bloquePartido(titulo, texto, foto, nombreTextura){
+  const t = String(texto||'').trim();
+  if(!t) return '';
+  const img = urlSegura(foto);
+  // Sin foto pero con textura, la sección conserva sus dos mitades.
+  // Sin ninguna de las dos, el texto toma el ancho completo.
+  const tex = img ? '' : textura(nombreTextura, 'plano');
+  return '<div class="partida'+((img || tex) ? '' : ' sin-img')+'">'
+    + '<div class="lado-txt">'
+    +   '<h2>'+esc(String(titulo||'Sobre nosotros').trim())+'</h2>'
+    +   '<p class="prosa">'+esc(t)+'</p>'
+    + '</div>'
+    + (img
+        ? '<div class="lado-img"><img src="'+esc(img)+'" alt="" '
+          + 'loading="lazy" decoding="async"></div>'
+        : (tex ? '<div class="lado-img con-textura">'+tex+'</div>' : ''))
+    + '</div>';
+}
+
+/* HERO A SANGRE — devuelve el marcado interior del hero y deja la clase
+   puesta. Quien llama decide si lo muestra.
+
+   Con portada oscura, la CABECERA también va oscura: si no, queda una
+   franja clara con el logo encima del hero oscuro y se lee como un error
+   de maquetación, no como una decisión. */
+function heroInmersivo(el, titular, bajada){
+  const h = (CONTEXT.pagina && CONTEXT.pagina.hero) || {};
+  const oscuro = /^oscuro$/i.test(String(h.fondo||'').trim());
+  const foto = oscuro ? urlSegura(h.foto) : '';
+
+  document.documentElement.setAttribute('data-portada', oscuro ? 'oscura' : 'clara');
+  el.className = 'hero' + (oscuro ? ' oscuro con-textura' : '');
+
+  return (oscuro
+      ? (foto
+          ? '<img class="hero-foto" src="'+esc(foto)+'" alt="" '
+            + 'decoding="async" fetchpriority="high">'
+          : textura(h.textura, 'plano'))
+      : '')
+    + (titular ? '<h2>'+esc(titular)+'</h2>' : '')
+    + (bajada ? '<p>'+esc(bajada)+'</p>' : '');
+}
+
+/* ══ fin INMERSIVO ══ */
+
 function pintarPagina(){
   const p = (CONTEXT.pagina) || {};
 
@@ -703,8 +972,10 @@ function pintarPagina(){
     const t = String(p.hero && p.hero.titular || '').trim();
     const b = String(p.hero && p.hero.bajada || '').trim();
     if(t || b){
-      hero.innerHTML = (t ? '<h2>'+esc(t)+'</h2>' : '')
-                     + (b ? '<p>'+esc(b)+'</p>' : '');
+      // El hero a sangre: con `pagina.hero.fondo: "oscuro"` la portada
+      // ocupa el ancho completo con foto o textura detrás. Sin eso,
+      // queda exactamente como antes.
+      hero.innerHTML = heroInmersivo(hero, t, b);
       hero.hidden = false;
     } else { hero.hidden = true; }
   }
@@ -717,8 +988,8 @@ function pintarPagina(){
     const texto = String(p.sobre && p.sobre.texto || '').trim();
     if(texto){
       const titulo = String(p.sobre.titulo || 'Sobre nosotros').trim();
-      partes.push('<div class="bloque"><h2>'+esc(titulo)+'</h2>'
-        + '<p>'+esc(texto)+'</p></div>');
+      partes.push(bloquePartido(titulo, texto,
+        p.sobre && p.sobre.foto, p.sobre && p.sobre.textura));
     }
 
     const horarios = Array.isArray(p.horarios) ? p.horarios.filter(Boolean) : [];
@@ -761,6 +1032,9 @@ function pintarPagina(){
       pie.hidden = false;
     } else { pie.hidden = true; }
   }
+
+  // La franja se pinta sola desde la ficha. Sin frase, no existe.
+  pintarFranja();
 }
 
 /** Las tres direcciones válidas. Cualquier otra cosa cae en "taller". */

@@ -63,6 +63,20 @@ añadido —una galería de miniaturas al final— en vez de ser el esqueleto.
 | **Collage** | Galería escalonada: una grande, otras chicas. **Nunca** una grilla de miniaturas iguales |
 | **Bloques alternados** | Secciones sobre el color de marca, con diagonales entre medio. No todo sobre el mismo fondo |
 
+### Dónde vive la pieza
+
+Los cinco recursos están construidos **una vez** en
+`03-componentes-ui/inmersivo.css` y `inmersivo.js`, y se llevan a las bases
+con `node herramientas/llevar-inmersivo.js`. Se copian entre marcadores, no
+se importan: cada base es autocontenida y su `demo.html` abre con doble clic.
+
+**Si arreglas algo, arréglalo en el componente y vuelve a correr el
+comando** — correrlo dos veces no duplica nada. Tocar el `demo.html` de una
+base a mano es perder el arreglo la próxima vez.
+
+`landing-modular` queda fuera a propósito: ahí nació la pieza y su versión
+es más avanzada (plantillas, galería, sectores).
+
 ### Cuando no hay foto y no hay presupuesto
 
 Es el caso normal, no la excepción: el cliente casi nunca tiene las fotos el
